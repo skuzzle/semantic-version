@@ -1,7 +1,7 @@
 semantic-version
 ================
 
-This is a single-class semantic version implementation for java. It requires no further dependencies and is thereby easy to use within your own projects. You may simply copy the single class to your source folder and apply any modifications which suit your needs (as long as you preserve the license header).
+This is a single-class _semantic version_ implementation for java 7. It requires no further dependencies and is thereby easy to use within your own projects. You may simply copy the single class to your source folder and apply any modifications which suit your needs (as long as you preserve the license header).
 
 Go to [implementation](https://github.com/skuzzle/semantic-version/blob/master/src/main/java/de/skuzzle/Version.java)
 
