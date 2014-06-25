@@ -8,7 +8,7 @@ import de.skuzzle.Version.VersionFormatException;
 public class VersionTest {
 
     public VersionTest() {}
-    
+
     @Test
     public void testSimpleVersion() {
         final Version v = Version.of("1.2.3");
@@ -18,92 +18,120 @@ public class VersionTest {
         Assert.assertEquals("", v.getPreRelease());
         Assert.assertEquals("", v.getBuildMetaData());
     }
-    
+
     @Test
     public void testVersionWithBuildMD() {
         final Version v = Version.of("1.2.3+some.id.foo");
         Assert.assertEquals("some.id.foo", v.getBuildMetaData());
     }
-    
+
     @Test
     public void testVersionWithBuildMD2() {
         final Version v = Version.of(1, 2, 3, "", "some.id.foo");
         Assert.assertEquals("some.id.foo", v.getBuildMetaData());
     }
-    
+
+    @Test(expected = VersionFormatException.class)
+    public void testVersionWithBuildMDEmptyLastPart() {
+        Version.of(1, 2, 3, "", "some.id.");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testVersionWithBuildMDEmptyMiddlePart() {
+        Version.of(1, 2, 3, "", "some..id");
+    }
+
     @Test
     public void testVersionWithPreRelease() {
         final Version v = Version.of("1.2.3-pre.release-foo.1");
         Assert.assertEquals("pre.release-foo.1", v.getPreRelease());
-        final String[] expected = {"pre", "release-foo", "1" };
+        final String[] expected = { "pre", "release-foo", "1" };
         Assert.assertArrayEquals(expected, v.getPreReleaseParts());
     }
 
     @Test
     public void testVersionWithPreReleaseAndBuildMD() {
-        final Version v = Version.of("1.2.3-pre.release-foo.1+some.id");
+        final Version v = Version.of("1.2.3-pre.release-foo.1+some.id-with-hyphen");
         Assert.assertEquals("pre.release-foo.1", v.getPreRelease());
-        Assert.assertEquals("some.id", v.getBuildMetaData());
+        Assert.assertEquals("some.id-with-hyphen", v.getBuildMetaData());
     }
-    
+
     @Test(expected = VersionFormatException.class)
     public void testPreReleaseWithLeadingZeroes() {
         Version.of("1.2.3-pre.001");
     }
-    
+
     @Test(expected = VersionFormatException.class)
     public void testPreReleaseWithLeadingZeroes2() {
         Version.of(1, 2, 3, "pre.001");
     }
-    
+
     @Test(expected = VersionFormatException.class)
     public void testPreReleaseWithLeadingZero() {
         Version.of("1.2.3-pre.01");
     }
-    
+
     @Test(expected = VersionFormatException.class)
     public void testPreReleaseWithLeadingZero2() {
         Version.of(1, 2, 3, "pre.01");
     }
-    
+
     @Test(expected = VersionFormatException.class)
-    public void testPreReleaseWithEmptyIdentifier() {
+    public void testPreReleaseMiddleEmptyIdentifier() {
         Version.of("1.2.3-pre..foo");
     }
+
+    @Test(expected = VersionFormatException.class)
+    public void testPreReleaseLastEmptyIdentifier() {
+        Version.of("1.2.3-pre.foo.");
+    }
     
+    @Test(expected = IllegalArgumentException.class)
+    public void testVersionAll0() {
+        Version.of("0.0.0");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testVersionAll02() {
+        Version.of(0, 0, 0);
+    }
+
     @Test
     public void testPreReleaseWithLeadingZeroesIdentifier() {
         // leading zeroes allowed in string identifiers
         final Version v = Version.of("1.2.3-001abc");
         Assert.assertEquals("001abc", v.getPreRelease());
     }
-    
+
     @Test
     public void testPreReleaseWithLeadingZeroesIdentifier2() {
         // leading zeroes allowed in string identifiers
         final Version v = Version.of(1, 2, 3, "001abc");
         Assert.assertEquals("001abc", v.getPreRelease());
     }
-    
+
     @Test
     public void testNoPrecedenceChangeByBuildMD() {
         final Version v1 = Version.of("1.2.3+1.0");
         final Version v2 = Version.of("1.2.3+2.0");
         Assert.assertEquals(0, v1.compareTo(v2));
     }
-    
+
     @Test
     public void testSimplePrecedence() {
         final Version v1 = Version.of("1.0.0");
         final Version v2 = Version.of("1.0.1");
         final Version v3 = Version.of("1.1.0");
         final Version v4 = Version.of("2.0.0");
-        
+
         Assert.assertTrue(v1.compareTo(v2) < 0);
         Assert.assertTrue(v2.compareTo(v3) < 0);
         Assert.assertTrue(v3.compareTo(v4) < 0);
+        Assert.assertTrue(v2.compareTo(v1) > 0);
+        Assert.assertTrue(v3.compareTo(v2) > 0);
+        Assert.assertTrue(v4.compareTo(v3) > 0);
     }
-    
+
     @Test
     public void testPrecedencePreRelease() {
         final Version v1 = Version.of("1.0.0");
@@ -111,14 +139,14 @@ public class VersionTest {
         Assert.assertTrue(v1.compareTo(v2) > 0);
         Assert.assertTrue(v2.compareTo(v1) < 0);
     }
-    
+
     @Test
     public void testPrecedencePreRelease2() {
         final Version v1 = Version.of("1.0.0-rc1");
         final Version v2 = Version.of("1.0.0-rc1");
         Assert.assertTrue(v1.compareTo(v2) == 0);
     }
-    
+
     @Test
     public void testPrecedencePreRelease3() {
         final Version v1 = Version.of("1.0.0-rc1");
@@ -127,7 +155,7 @@ public class VersionTest {
         Assert.assertTrue(v1.compareTo(v2) < 0);
         Assert.assertTrue(v2.compareTo(v1) > 0);
     }
-    
+
     @Test
     public void testPrecedencePreRelease4() {
         final Version v1 = Version.of("1.0.0-a");
@@ -135,7 +163,7 @@ public class VersionTest {
         Assert.assertTrue(v1.compareTo(v2) < 0);
         Assert.assertTrue(v2.compareTo(v1) > 0);
     }
-    
+
     @Test
     public void testPrecedencePreRelease5() {
         final Version v1 = Version.of("1.0.0-1");
@@ -143,7 +171,15 @@ public class VersionTest {
         Assert.assertTrue(v1.compareTo(v2) < 0);
         Assert.assertTrue(v2.compareTo(v1) > 0);
     }
-    
+
+    @Test
+    public void testPrecedencePreRelease6() {
+        final Version v1 = Version.of("1.0.0-1.some.id-with-hyphen.a");
+        final Version v2 = Version.of("1.0.0-1.some.id-with-hyphen.b");
+        Assert.assertTrue(v1.compareTo(v2) < 0);
+        Assert.assertTrue(v2.compareTo(v1) > 0);
+    }
+
     @Test
     public void testInitialDevelopment() {
         final Version v1 = Version.of(0, 1, 0);

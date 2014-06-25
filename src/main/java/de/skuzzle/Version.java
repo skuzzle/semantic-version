@@ -64,7 +64,7 @@ public final class Version implements Comparable<Version> {
     private final static String PRE_RELEASE = "(".concat(PRE_RELEASE_PART).concat("(\\.")
             .concat(PRE_RELEASE_PART).concat(")*").concat(")");
 
-    private final static String BUILD_MD_PART = "([a-zA-Z0-9]+)";
+    private final static String BUILD_MD_PART = "([a-zA-Z0-9-]+)";
     private final static String BUILD_MD = "(".concat(BUILD_MD_PART).concat("(\\.(")
             .concat(BUILD_MD_PART).concat("))*").concat(")");
 
@@ -73,6 +73,7 @@ public final class Version implements Comparable<Version> {
 
     private final static Pattern VERSION_PATTERN = Pattern.compile(FULL);
 
+    // Match result group indices
     private final static int MAJOR_GROUP = 1;
     private final static int MINOR_GROUP = 2;
     private final static int PATCH_GROUP = 3;
@@ -196,6 +197,8 @@ public final class Version implements Comparable<Version> {
         final int minor = Integer.parseInt(m.group(MINOR_GROUP));
         final int patch = Integer.parseInt(m.group(PATCH_GROUP));
 
+        checkParams(major, minor, patch);
+        
         final String preRelease;
         if (m.group(PRE_RELEASE_GROUP) != null) {
             preRelease = m.group(PRE_RELEASE_GROUP);
