@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/skuzzle/semantic-version.svg?branch=master)](https://travis-ci.org/skuzzle/semantic-version)
+
 semantic-version
 ================
 
