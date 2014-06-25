@@ -462,10 +462,10 @@ public final class Version implements Comparable<Version> {
             return Integer.compare(num1, num2);
         } else if (num1 >= 0) {
             // only part1 is numerical -> p2 is greater
-            return 1;
+            return -1;
         } else if (num2 >= 0) {
             // only part2 is numerical -> p1 is greater
-            return -1;
+            return 1;
         } else {
             throw new IllegalStateException();
         }

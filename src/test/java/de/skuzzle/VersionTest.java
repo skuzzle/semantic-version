@@ -18,7 +18,36 @@ public class VersionTest {
         Assert.assertEquals("", v.getPreRelease());
         Assert.assertEquals("", v.getBuildMetaData());
     }
+    
+    @Test
+    public void testSemVerOrgPreReleaseSamples() {
+        final Version v1 = Version.of("1.0.0-alpha");
+        Assert.assertEquals("alpha", v1.getPreRelease());
+        
+        final Version v2 = Version.of("1.0.0-alpha.1");
+        Assert.assertEquals("alpha.1", v2.getPreRelease());
+        
+        final Version v3 = Version.of("1.0.0-0.3.7");
+        Assert.assertEquals("0.3.7", v3.getPreRelease());
+        
+        final Version v4 = Version.of("1.0.0-x.7.z.92");
+        Assert.assertEquals("x.7.z.92", v4.getPreRelease());
+    }
 
+    @Test
+    public void testSemVerOrgBuildMDSamples() {
+        final Version v1 = Version.of("1.0.0-alpha+001");
+        Assert.assertEquals("alpha", v1.getPreRelease());
+        Assert.assertEquals("001", v1.getBuildMetaData());
+        
+        final Version v2 = Version.of("1.0.0+20130313144700");
+        Assert.assertEquals("20130313144700", v2.getBuildMetaData());
+        
+        final Version v3 = Version.of("1.0.0-beta+exp.sha.5114f85");
+        Assert.assertEquals("beta", v3.getPreRelease());
+        Assert.assertEquals("exp.sha.5114f85", v3.getBuildMetaData());
+    }
+    
     @Test
     public void testVersionWithBuildMD() {
         final Version v = Version.of("1.2.3+some.id.foo");
@@ -186,5 +215,29 @@ public class VersionTest {
         final Version v2 = Version.of(1, 1, 0);
         Assert.assertTrue(v1.isInitialDevelopment());
         Assert.assertFalse(v2.isInitialDevelopment());
+    }
+    
+    @Test
+    public void testSemVerOrgPrecedenceSample() {
+        final Version[] versions = {
+                Version.of("1.0.0-alpha"),
+                Version.of("1.0.0-alpha.1"),
+                Version.of("1.0.0-alpha.beta"),
+                Version.of("1.0.0-beta"),
+                Version.of("1.0.0-beta.2"),
+                Version.of("1.0.0-beta.11"),
+                Version.of("1.0.0-rc.1"),
+                Version.of("1.0.0"),
+                Version.of("2.0.0"),
+                Version.of("2.1.0"),
+                Version.of("2.1.1")
+        };
+        
+        for (int i = 1; i < versions.length; ++i) {
+            final Version v1 = versions[i - 1];
+            final Version v2 = versions[i];
+            final int c = v1.compareTo(v2);
+            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+        }
     }
 }
