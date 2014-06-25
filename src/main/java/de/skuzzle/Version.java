@@ -1,0 +1,462 @@
+package de.skuzzle;
+
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * This class is an implementation of the full <em>semantic version</em> <a
+ * href="http://semver.org/">specification</a>. Instances can be obtained using
+ * the static overloads of the <em>of</em> method. This class implements
+ * {@link Comparable} to compare two versions by following the specifications
+ * linked to above. The {@link #equals(Object)} method conforms to the result of
+ * {@link #compareTo(Version)}, so does {@link #hashCode()}. Neither method
+ * considers the {@link #getBuildMetaData() build meta data} field.
+ * 
+ * @author Simon Taddiken
+ */
+public final class Version implements Comparable<Version> {
+
+    /**
+     * This exception indicates that a version- or a part of a version string
+     * could not be parsed according to the semantic versioning specification.
+     * 
+     * @author Simon Taddiken
+     */
+    public static class VersionFormatException extends RuntimeException {
+
+        private static final long serialVersionUID = 1L;
+
+        public VersionFormatException(String message) {
+            super(message);
+        }
+    }
+
+    private final static String MAIN_VERSION_PART = "(0|[1-9]\\d*)";
+    private final static String MAIN_PART = MAIN_VERSION_PART.concat("\\.")
+            .concat(MAIN_VERSION_PART).concat("\\.").concat(MAIN_VERSION_PART);
+
+    /** Either a number w/o leading zeroes OR an alpha numeric identifier */
+    private final static String PRE_RELEASE_PART = "(([0-9]+[a-zA-Z-][a-zA-Z0-9-]*)|([a-zA-Z][a-zA-Z0-9-]*)|([1-9][0-9]*)|0)";
+    private final static String PRE_RELEASE = "(".concat(PRE_RELEASE_PART).concat("(\\.")
+            .concat(PRE_RELEASE_PART).concat(")*").concat(")");
+
+    private final static String BUILD_MD_PART = "([a-zA-Z0-9]+)";
+    private final static String BUILD_MD = "(".concat(BUILD_MD_PART).concat("(\\.(")
+            .concat(BUILD_MD_PART).concat("))*").concat(")");
+
+    private final static String FULL = MAIN_PART.concat("(-").concat(PRE_RELEASE)
+            .concat(")?").concat("(\\+").concat(BUILD_MD).concat(")?");
+
+    private final static Pattern VERSION_PATTERN = Pattern.compile(FULL);
+
+    private final static int MAJOR_GROUP = 1;
+    private final static int MINOR_GROUP = 2;
+    private final static int PATCH_GROUP = 3;
+    private final static int PRE_RELEASE_GROUP = 5;
+    private final static int BUILD_MD_GROUP = 16;
+
+    /**
+     * Creates a new Version from the provided components. Neither value of
+     * <tt>major, minor</tt> or <tt>patch</tt> must be lower than 0 and at least
+     * one must be greater than zero. <tt>preRelease</tt> or
+     * <tt>buildMetaData</tt> may be the empty String. In this case, the created
+     * <tt>Version</tt> will have no pre release resp. build meta data field. If
+     * those parameters are not empty, they must conform to the semantic
+     * versioning specification.
+     * 
+     * @param major The major version.
+     * @param minor The minor version.
+     * @param patch The patch version.
+     * @param preRelease The pre release version or the empty string.
+     * @param buildMetaData
+     * @return The version instance.
+     * @throws VersionFormatException If <tt>preRelease</tt> or
+     *             <tt>buildMetaData</tt> does not conform to the semantic
+     *             versioning specification.
+     */
+    public final static Version of(int major, int minor, int patch, String preRelease,
+            String buildMetaData) {
+        checkParams(major, minor, patch);
+        if (preRelease == null) {
+            throw new IllegalArgumentException("preRelease is null");
+        } else if (buildMetaData == null) {
+            throw new IllegalArgumentException("buildMetaData is null");
+        }
+        final Pattern p = Pattern.compile(PRE_RELEASE);
+        if (!preRelease.isEmpty() && !p.matcher(preRelease).matches()) {
+            throw new VersionFormatException(preRelease);
+        }
+        final Pattern md = Pattern.compile(BUILD_MD);
+        if (!buildMetaData.isEmpty() && !md.matcher(buildMetaData).matches()) {
+            throw new VersionFormatException(buildMetaData);
+        }
+        return new Version(major, minor, patch, preRelease, buildMetaData);
+    }
+
+    /**
+     * Creates a new Version from the provided components. The version's build
+     * meta data field will be empty. Neither value of <tt>major, minor</tt> or
+     * <tt>patch</tt> must be lower than 0 and at least one must be greater than
+     * zero. <tt>preRelease</tt> may be the empty String. In this case, the
+     * created version will have no pre release field. If it is not empty, it
+     * must conform to the specifications of the semantic versioning.
+     * 
+     * @param major The major version.
+     * @param minor The minor version.
+     * @param patch The patch version.
+     * @param preRelease The pre release version or the empty string.
+     * @return The version instance.
+     * @throws VersionFormatException If <tt>preRelease</tt> is not empty and
+     *             does not conform to the semantic versioning specification
+     */
+    public final static Version of(int major, int minor, int patch, String preRelease) {
+        checkParams(major, minor, patch);
+        if (preRelease == null) {
+            throw new IllegalArgumentException("preRelease is null");
+        }
+        final Pattern p = Pattern.compile(PRE_RELEASE);
+        if (!p.matcher(preRelease).matches()) {
+            throw new VersionFormatException(preRelease);
+        }
+        return new Version(major, minor, patch, preRelease, "");
+    }
+
+    /**
+     * Creates a new Version from the three provided components. The version's
+     * pre release and build meta data fields will be empty. Neither value must
+     * be lower than 0 and at least one must be greater than zero
+     * 
+     * @param major The major version.
+     * @param minor The minor version.
+     * @param patch The patch version.
+     * @return The version instance.
+     */
+    public final static Version of(int major, int minor, int patch) {
+        checkParams(major, minor, patch);
+        return new Version(major, minor, patch, "", "");
+    }
+
+    private static void checkParams(int major, int minor, int patch) {
+        if (major < 0) {
+            throw new IllegalArgumentException("major < 0");
+        } else if (minor < 0) {
+            throw new IllegalArgumentException("minor < 0");
+        } else if (patch < 0) {
+            throw new IllegalArgumentException("patch < 0");
+        } else if (major == 0 && minor == 0 && patch == 0) {
+            throw new IllegalArgumentException("all parts are 0");
+        }
+    }
+
+    /**
+     * Tries to parse the provided String as a semantic version. If the string
+     * does not conform to the semantic versioning specification, a
+     * {@link VersionFormatException} will be thrown.
+     * 
+     * @param versionString The String to parse.
+     * @return The parsed version.
+     * @throws VersionFormatException If the String is no valid version
+     * @throws IllegalArgumentException If <tt>versionString</tt> is
+     *             <code>null</code>.
+     */
+    public final static Version of(String versionString) {
+        if (versionString == null) {
+            throw new IllegalArgumentException("versionString is null");
+        }
+        final Matcher m = VERSION_PATTERN.matcher(versionString);
+        if (!m.matches()) {
+            throw new VersionFormatException(versionString);
+        }
+
+        final int major = Integer.parseInt(m.group(MAJOR_GROUP));
+        final int minor = Integer.parseInt(m.group(MINOR_GROUP));
+        final int patch = Integer.parseInt(m.group(PATCH_GROUP));
+
+        final String preRelease;
+        if (m.group(PRE_RELEASE_GROUP) != null) {
+            preRelease = m.group(PRE_RELEASE_GROUP);
+        } else {
+            preRelease = "";
+        }
+
+        final String buildMD;
+        if (m.group(BUILD_MD_GROUP) != null) {
+            buildMD = m.group(BUILD_MD_GROUP);
+        } else {
+            buildMD = "";
+        }
+
+        return new Version(major, minor, patch, preRelease, buildMD);
+    }
+
+    private final int major;
+    private final int minor;
+    private final int patch;
+    private final String preRelease;
+    private final String buildMetaData;
+
+    private Version(int major, int minor, int patch, String preRelease, String buildMd) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.preRelease = preRelease;
+        this.buildMetaData = buildMd;
+    }
+
+    /**
+     * Gets this version's major number.
+     * 
+     * @return The major version.
+     */
+    public int getMajor() {
+        return this.major;
+    }
+
+    /**
+     * Gets this version's minor number.
+     * 
+     * @return The minor version.
+     */
+    public int getMinor() {
+        return this.minor;
+    }
+
+    /**
+     * Gets this version's path number.
+     * 
+     * @return The patch number.
+     */
+    public int getPatch() {
+        return this.patch;
+    }
+
+    /**
+     * Gets the pre release parts of this version as array by splitting the pre
+     * result version string at the dots.
+     * 
+     * @return Pre release version as array. Array is empty if this version has
+     *         no pre release part.
+     */
+    public String[] getPreReleaseParts() {
+        return this.preRelease.split("\\.");
+    }
+
+    /**
+     * Gets the pre release identifier of this version. If this version has no
+     * such identifier, an empty string is returned.
+     * 
+     * @return This version's pre release identifier or an empty String if this
+     *         version has no such identifier.
+     */
+    public String getPreRelease() {
+        return this.preRelease;
+    }
+
+    /**
+     * Gets this version's build meta data. If this version has no build meta
+     * data, the returned string is empty.
+     * 
+     * @return The build meta data or an empty String if this version has no
+     *         build meta data.
+     */
+    public String getBuildMetaData() {
+        return this.buildMetaData;
+    }
+
+    /**
+     * Gets this version's build meta data as array by splitting the meta data
+     * at dots. If this version has no build meta data, the result is an empty
+     * array.
+     * 
+     * @return The build meta data as array.
+     */
+    public String[] getBuildMetaDataParts() {
+        return this.buildMetaData.split("\\.");
+    }
+
+    /**
+     * Determines whether this version is still under initial development.
+     * 
+     * @return <code>true</code> iff this version's major part is zero.
+     */
+    public boolean isInitialDevelopment() {
+        return this.major > 0;
+    }
+
+    /**
+     * Determines whether this is a pre release version.
+     * 
+     * @return <code>true</code> iff {@link #getPreRelease()} is not empty.
+     */
+    public boolean isPreRelease() {
+        return !this.preRelease.isEmpty();
+    }
+
+    /**
+     * Creates a String representation of this version by joining its parts
+     * together as by the semantic version specification.
+     * 
+     * @return The version as a String.
+     */
+    @Override
+    public String toString() {
+        final StringBuilder b = new StringBuilder(this.preRelease.length()
+                + this.buildMetaData.length() + 24);
+        b.append(this.major).append(".").append(this.minor).append(".")
+                .append(this.patch);
+        if (!this.preRelease.isEmpty()) {
+            b.append("-").append(this.preRelease);
+        }
+        if (!this.buildMetaData.isEmpty()) {
+            b.append("+").append(this.buildMetaData);
+        }
+        return b.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.major, this.minor, this.patch, this.preRelease);
+    }
+
+    /**
+     * Determines whether this version is equal to the passed object. This is
+     * the case if the passed object is an instance of Version and this version
+     * {@link #compareTo(Version) compared} to the provided one yields 0. Thus,
+     * this method ignores the {@link #getBuildMetaData()} field.
+     * 
+     * @param obj the object to compare to.
+     * @return <code>true</code> iff <tt>obj</tt> is an instance of
+     *         <tt>Version</tt> and <tt>this.compareTo((Version) obj) == 0</tt>
+     * @see #compareTo(Version)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this || obj != null && obj instanceof Version
+                && compareTo((Version) obj) == 0;
+    }
+
+    /**
+     * Compares this version to the provided one, following the
+     * <em>semantic versioning</em> specification. Here is a quote from <a
+     * href="http://semver.org/">http://semver.org</a>:
+     * 
+     * <p>
+     * <em> Precedence refers to how versions are compared to each other when
+     * ordered. Precedence MUST be calculated by separating the version into
+     * major, minor, patch and pre-release identifiers in that order (Build
+     * metadata does not figure into precedence). Precedence is determined by
+     * the first difference when comparing each of these identifiers from left
+     * to right as follows: Major, minor, and patch versions are always compared
+     * numerically. Example: 1.0.0 &lt; 2.0.0 &lt; 2.1.0 &lt; 2.1.1. When major, minor,
+     * and patch are equal, a pre-release version has lower precedence than a
+     * normal version. Example: 1.0.0-alpha < 1.0.0. Precedence for two
+     * pre-release versions with the same major, minor, and patch version MUST
+     * be determined by comparing each dot separated identifier from left to
+     * right until a difference is found as follows: identifiers consisting of
+     * only digits are compared numerically and identifiers with letters or
+     * hyphens are compared lexically in ASCII sort order. Numeric identifiers
+     * always have lower precedence than non-numeric identifiers. A larger set
+     * of pre-release fields has a higher precedence than a smaller set, if all
+     * of the preceding identifiers are equal. Example: 1.0.0-alpha &lt;
+     * 1.0.0-alpha.1 &lt; 1.0.0-alpha.beta &lt; 1.0.0-beta &lt; 1.0.0-beta.2 &lt;
+     * 1.0.0-beta.11 &lt; 1.0.0-rc.1 &lt; 1.0.0. 
+     * </em>
+     * </p>
+     * 
+     * @param other The version to compare to.
+     * @return A value lower than 0 if this &lt; other, a value greater than 0
+     *         if this &gt; other and 0 if this == other. The absolute value of
+     *         the result has no semantical interpretation.
+     */
+    @Override
+    public int compareTo(Version other) {
+        if (other == this) {
+            return 0;
+        }
+
+        int mc, mm, mp;
+        if ((mc = Integer.compare(this.major, other.major)) == 0) {
+            if ((mm = Integer.compare(this.minor, other.minor)) == 0) {
+                if ((mp = Integer.compare(this.patch, other.patch)) == 0) {
+
+                    if (!isPreRelease() && !other.isPreRelease()) {
+                        // both are no pre releases
+                        return 0;
+                    } else if (this.isPreRelease() && other.isPreRelease()) {
+                        final String[] thisParts = getPreReleaseParts();
+                        final String[] otherParts = other.getPreReleaseParts();
+
+                        int min = Math.min(thisParts.length, otherParts.length);
+                        for (int i = 0; i < min; ++i) {
+                            final int r = comparePreReleaseParts(thisParts[i],
+                                    otherParts[i]);
+                            if (r != 0) {
+                                // versions differ in pre release part i
+                                return r;
+                            }
+                        }
+
+                        // all pre release id's are equal, so compare amount of
+                        // pre release id's
+                        return Integer.compare(thisParts.length, otherParts.length);
+
+                    } else if (this.isPreRelease()) {
+                        // other is greater, because it is no pre release
+                        return -1;
+                    } else if (other.isPreRelease()) {
+                        // this is greater because it is no pre release
+                        return 1;
+                    }
+
+                } else {
+                    // versions differ in patch
+                    return mp;
+                }
+            } else {
+                // versions differ in minor
+                return mm;
+            }
+        } else {
+            // versions differ in major
+            return mc;
+        }
+        return 0;
+    }
+
+    private int comparePreReleaseParts(String p1, String p2) {
+        final int num1 = isNumeric(p1);
+        final int num2 = isNumeric(p2);
+
+        if (num1 < 0 && num2 < 0) {
+            // both are not numerical -> compare lexically
+            return p1.compareTo(p2);
+        } else if (num1 >= 0 && num2 >= 0) {
+            // both are numerical
+            return Integer.compare(num1, num2);
+        } else if (num1 >= 0) {
+            // only part1 is numerical -> p2 is greater
+            return 1;
+        } else if (num2 >= 0) {
+            // only part2 is numerical -> p1 is greater
+            return -1;
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Determines whether s is a positive number. If it is, the number is
+     * returned, otherwise the result is -1.
+     * 
+     * @param s The String to check.
+     * @return The positive number (incl. 0) if s a number, or -1 if it is not.
+     */
+    private int isNumeric(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+}
