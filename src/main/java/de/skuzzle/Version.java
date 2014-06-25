@@ -304,7 +304,7 @@ public final class Version implements Comparable<Version> {
      * @return <code>true</code> iff this version's major part is zero.
      */
     public boolean isInitialDevelopment() {
-        return this.major > 0;
+        return this.major == 0;
     }
 
     /**

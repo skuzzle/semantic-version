@@ -143,4 +143,12 @@ public class VersionTest {
         Assert.assertTrue(v1.compareTo(v2) < 0);
         Assert.assertTrue(v2.compareTo(v1) > 0);
     }
+    
+    @Test
+    public void testInitialDevelopment() {
+        final Version v1 = Version.of(0, 1, 0);
+        final Version v2 = Version.of(1, 1, 0);
+        Assert.assertTrue(v1.isInitialDevelopment());
+        Assert.assertFalse(v2.isInitialDevelopment());
+    }
 }
