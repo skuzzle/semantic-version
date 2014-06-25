@@ -4,7 +4,7 @@
  
     <groupId>de.skuzzle</groupId>
     <artifactId>semantic-version</artifactId>
-    <version>0.9.0</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <name>semantic-versiont</name>
