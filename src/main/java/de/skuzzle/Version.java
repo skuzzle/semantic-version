@@ -98,7 +98,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param minor The minor version.
      * @param patch The patch version.
      * @param preRelease The pre release version or the empty string.
-     * @param buildMetaData
+     * @param buildMetaData The build meta data field or the empty string.
      * @return The version instance.
      * @throws VersionFormatException If <tt>preRelease</tt> or
      *             <tt>buildMetaData</tt> does not conform to the semantic
@@ -381,7 +381,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * to right as follows: Major, minor, and patch versions are always compared
      * numerically. Example: 1.0.0 &lt; 2.0.0 &lt; 2.1.0 &lt; 2.1.1. When major, minor,
      * and patch are equal, a pre-release version has lower precedence than a
-     * normal version. Example: 1.0.0-alpha < 1.0.0. Precedence for two
+     * normal version. Example: 1.0.0-alpha &lt; 1.0.0. Precedence for two
      * pre-release versions with the same major, minor, and patch version MUST
      * be determined by comparing each dot separated identifier from left to
      * right until a difference is found as follows: identifiers consisting of
