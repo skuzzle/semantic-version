@@ -23,27 +23,32 @@
 */
 package de.skuzzle;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is an implementation of the full <em>semantic version</em> <a
+ * This class is an implementation of the full <em>semantic version 2.0.0</em> <a
  * href="http://semver.org/">specification</a>. Instances can be obtained using
  * the static overloads of the <em>of</em> method. This class implements
  * {@link Comparable} to compare two versions by following the specifications
  * linked to above. The {@link #equals(Object)} method conforms to the result of
  * {@link #compareTo(Version)}, so does {@link #hashCode()}. Neither method
  * considers the {@link #getBuildMetaData() build meta data} field.
- * 
+ *
  * @author Simon Taddiken
  */
-public final class Version implements Comparable<Version> {
+public final class Version implements Comparable<Version>, Serializable {
+
+
+    /** Conforms to Version implementation 0.1.0 */
+    private static final long serialVersionUID = -7080189911455871050L;
 
     /**
      * This exception indicates that a version- or a part of a version string
      * could not be parsed according to the semantic versioning specification.
-     * 
+     *
      * @author Simon Taddiken
      */
     public static class VersionFormatException extends RuntimeException {
@@ -88,7 +93,7 @@ public final class Version implements Comparable<Version> {
      * <tt>Version</tt> will have no pre release resp. build meta data field. If
      * those parameters are not empty, they must conform to the semantic
      * versioning specification.
-     * 
+     *
      * @param major The major version.
      * @param minor The minor version.
      * @param patch The patch version.
@@ -125,7 +130,7 @@ public final class Version implements Comparable<Version> {
      * zero. <tt>preRelease</tt> may be the empty String. In this case, the
      * created version will have no pre release field. If it is not empty, it
      * must conform to the specifications of the semantic versioning.
-     * 
+     *
      * @param major The major version.
      * @param minor The minor version.
      * @param patch The patch version.
@@ -150,7 +155,7 @@ public final class Version implements Comparable<Version> {
      * Creates a new Version from the three provided components. The version's
      * pre release and build meta data fields will be empty. Neither value must
      * be lower than 0 and at least one must be greater than zero
-     * 
+     *
      * @param major The major version.
      * @param minor The minor version.
      * @param patch The patch version.
@@ -177,7 +182,7 @@ public final class Version implements Comparable<Version> {
      * Tries to parse the provided String as a semantic version. If the string
      * does not conform to the semantic versioning specification, a
      * {@link VersionFormatException} will be thrown.
-     * 
+     *
      * @param versionString The String to parse.
      * @return The parsed version.
      * @throws VersionFormatException If the String is no valid version
@@ -198,7 +203,7 @@ public final class Version implements Comparable<Version> {
         final int patch = Integer.parseInt(m.group(PATCH_GROUP));
 
         checkParams(major, minor, patch);
-        
+
         final String preRelease;
         if (m.group(PRE_RELEASE_GROUP) != null) {
             preRelease = m.group(PRE_RELEASE_GROUP);
@@ -232,7 +237,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Gets this version's major number.
-     * 
+     *
      * @return The major version.
      */
     public int getMajor() {
@@ -241,7 +246,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Gets this version's minor number.
-     * 
+     *
      * @return The minor version.
      */
     public int getMinor() {
@@ -250,7 +255,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Gets this version's path number.
-     * 
+     *
      * @return The patch number.
      */
     public int getPatch() {
@@ -260,7 +265,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Gets the pre release parts of this version as array by splitting the pre
      * result version string at the dots.
-     * 
+     *
      * @return Pre release version as array. Array is empty if this version has
      *         no pre release part.
      */
@@ -271,7 +276,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Gets the pre release identifier of this version. If this version has no
      * such identifier, an empty string is returned.
-     * 
+     *
      * @return This version's pre release identifier or an empty String if this
      *         version has no such identifier.
      */
@@ -282,7 +287,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Gets this version's build meta data. If this version has no build meta
      * data, the returned string is empty.
-     * 
+     *
      * @return The build meta data or an empty String if this version has no
      *         build meta data.
      */
@@ -294,7 +299,7 @@ public final class Version implements Comparable<Version> {
      * Gets this version's build meta data as array by splitting the meta data
      * at dots. If this version has no build meta data, the result is an empty
      * array.
-     * 
+     *
      * @return The build meta data as array.
      */
     public String[] getBuildMetaDataParts() {
@@ -303,7 +308,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Determines whether this version is still under initial development.
-     * 
+     *
      * @return <code>true</code> iff this version's major part is zero.
      */
     public boolean isInitialDevelopment() {
@@ -312,7 +317,7 @@ public final class Version implements Comparable<Version> {
 
     /**
      * Determines whether this is a pre release version.
-     * 
+     *
      * @return <code>true</code> iff {@link #getPreRelease()} is not empty.
      */
     public boolean isPreRelease() {
@@ -322,7 +327,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Creates a String representation of this version by joining its parts
      * together as by the semantic version specification.
-     * 
+     *
      * @return The version as a String.
      */
     @Override
@@ -350,7 +355,7 @@ public final class Version implements Comparable<Version> {
      * the case if the passed object is an instance of Version and this version
      * {@link #compareTo(Version) compared} to the provided one yields 0. Thus,
      * this method ignores the {@link #getBuildMetaData()} field.
-     * 
+     *
      * @param obj the object to compare to.
      * @return <code>true</code> iff <tt>obj</tt> is an instance of
      *         <tt>Version</tt> and <tt>this.compareTo((Version) obj) == 0</tt>
@@ -366,7 +371,7 @@ public final class Version implements Comparable<Version> {
      * Compares this version to the provided one, following the
      * <em>semantic versioning</em> specification. Here is a quote from <a
      * href="http://semver.org/">http://semver.org</a>:
-     * 
+     *
      * <p>
      * <em> Precedence refers to how versions are compared to each other when
      * ordered. Precedence MUST be calculated by separating the version into
@@ -386,10 +391,10 @@ public final class Version implements Comparable<Version> {
      * of pre-release fields has a higher precedence than a smaller set, if all
      * of the preceding identifiers are equal. Example: 1.0.0-alpha &lt;
      * 1.0.0-alpha.1 &lt; 1.0.0-alpha.beta &lt; 1.0.0-beta &lt; 1.0.0-beta.2 &lt;
-     * 1.0.0-beta.11 &lt; 1.0.0-rc.1 &lt; 1.0.0. 
+     * 1.0.0-beta.11 &lt; 1.0.0-rc.1 &lt; 1.0.0.
      * </em>
      * </p>
-     * 
+     *
      * @param other The version to compare to.
      * @return A value lower than 0 if this &lt; other, a value greater than 0
      *         if this &gt; other and 0 if this == other. The absolute value of
@@ -409,7 +414,7 @@ public final class Version implements Comparable<Version> {
                     if (!isPreRelease() && !other.isPreRelease()) {
                         // both are no pre releases
                         return 0;
-                    } else if (this.isPreRelease() && other.isPreRelease()) {
+                    } else if (isPreRelease() && other.isPreRelease()) {
                         final String[] thisParts = getPreReleaseParts();
                         final String[] otherParts = other.getPreReleaseParts();
 
@@ -427,7 +432,7 @@ public final class Version implements Comparable<Version> {
                         // pre release id's
                         return Integer.compare(thisParts.length, otherParts.length);
 
-                    } else if (this.isPreRelease()) {
+                    } else if (isPreRelease()) {
                         // other is greater, because it is no pre release
                         return -1;
                     } else if (other.isPreRelease()) {
@@ -474,7 +479,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Determines whether s is a positive number. If it is, the number is
      * returned, otherwise the result is -1.
-     * 
+     *
      * @param s The String to check.
      * @return The positive number (incl. 0) if s a number, or -1 if it is not.
      */
