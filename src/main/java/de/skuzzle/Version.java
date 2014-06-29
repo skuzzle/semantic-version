@@ -1,26 +1,26 @@
 /*
-* The MIT License (MIT)
-*
-* Copyright (c) 2014 Simon Taddiken
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Simon Taddiken
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package de.skuzzle;
 
 import java.io.Serializable;
@@ -29,9 +29,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class is an implementation of the full <em>semantic version 2.0.0</em> <a
- * href="http://semver.org/">specification</a>. Instances can be obtained using
- * the static overloads of the <em>of</em> method. This class implements
+ * This class is an implementation of the full <em>semantic version 2.0.0</em>
+ * <a href="http://semver.org/">specification</a>. Instances can be obtained
+ * using the static overloads of the <em>of</em> method. This class implements
  * {@link Comparable} to compare two versions by following the specifications
  * linked to above. The {@link #equals(Object)} method conforms to the result of
  * {@link #compareTo(Version)}, so does {@link #hashCode()}. Neither method
@@ -40,7 +40,6 @@ import java.util.regex.Pattern;
  * @author Simon Taddiken
  */
 public final class Version implements Comparable<Version>, Serializable {
-
 
     /** Conforms to Version implementation 0.1.0 */
     private static final long serialVersionUID = -7080189911455871050L;
@@ -60,30 +59,18 @@ public final class Version implements Comparable<Version>, Serializable {
         }
     }
 
-    private final static String MAIN_VERSION_PART = "(0|[1-9]\\d*)";
-    private final static String MAIN_PART = MAIN_VERSION_PART.concat("\\.")
-            .concat(MAIN_VERSION_PART).concat("\\.").concat(MAIN_VERSION_PART);
-
-    /** Either a number w/o leading zeroes OR an alpha numeric identifier */
-    private final static String PRE_RELEASE_PART = "(([0-9]+[a-zA-Z-][a-zA-Z0-9-]*)|([a-zA-Z][a-zA-Z0-9-]*)|([1-9][0-9]*)|0)";
-    private final static String PRE_RELEASE = "(".concat(PRE_RELEASE_PART).concat("(\\.")
-            .concat(PRE_RELEASE_PART).concat(")*").concat(")");
-
-    private final static String BUILD_MD_PART = "([a-zA-Z0-9-]+)";
-    private final static String BUILD_MD = "(".concat(BUILD_MD_PART).concat("(\\.(")
-            .concat(BUILD_MD_PART).concat("))*").concat(")");
-
-    private final static String FULL = MAIN_PART.concat("(-").concat(PRE_RELEASE)
-            .concat(")?").concat("(\\+").concat(BUILD_MD).concat(")?");
-
-    private final static Pattern VERSION_PATTERN = Pattern.compile(FULL);
+    private final static Pattern PRE_RELEASE = Pattern.compile(
+            "(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*");
+    private final static Pattern BUILD_MD = Pattern.compile("[\\w-]+(\\.[\\w-]+)*");
+    private final static Pattern VERSION_PATTERN = Pattern.compile(
+            "(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*))?(?:\\+([\\w-]+(\\.[\\w-]+)*))?");
 
     // Match result group indices
     private final static int MAJOR_GROUP = 1;
     private final static int MINOR_GROUP = 2;
     private final static int PATCH_GROUP = 3;
-    private final static int PRE_RELEASE_GROUP = 5;
-    private final static int BUILD_MD_GROUP = 16;
+    private final static int PRE_RELEASE_GROUP = 4;
+    private final static int BUILD_MD_GROUP = 5;
 
     /**
      * Creates a new Version from the provided components. Neither value of
@@ -112,12 +99,10 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (buildMetaData == null) {
             throw new IllegalArgumentException("buildMetaData is null");
         }
-        final Pattern p = Pattern.compile(PRE_RELEASE);
-        if (!preRelease.isEmpty() && !p.matcher(preRelease).matches()) {
+        if (!preRelease.isEmpty() && !PRE_RELEASE.matcher(preRelease).matches()) {
             throw new VersionFormatException(preRelease);
         }
-        final Pattern md = Pattern.compile(BUILD_MD);
-        if (!buildMetaData.isEmpty() && !md.matcher(buildMetaData).matches()) {
+        if (!buildMetaData.isEmpty() && !BUILD_MD.matcher(buildMetaData).matches()) {
             throw new VersionFormatException(buildMetaData);
         }
         return new Version(major, minor, patch, preRelease, buildMetaData);
@@ -144,8 +129,7 @@ public final class Version implements Comparable<Version>, Serializable {
         if (preRelease == null) {
             throw new IllegalArgumentException("preRelease is null");
         }
-        final Pattern p = Pattern.compile(PRE_RELEASE);
-        if (!p.matcher(preRelease).matches()) {
+        if (!PRE_RELEASE.matcher(preRelease).matches()) {
             throw new VersionFormatException(preRelease);
         }
         return new Version(major, minor, patch, preRelease, "");
