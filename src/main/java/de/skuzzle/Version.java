@@ -480,6 +480,13 @@ public final class Version implements Comparable<Version>, Serializable {
         return b.toString();
     }
 
+    /**
+     * The hash code for a version instance is computed from the fields
+     * {@link #getMajor() major}, {@link #getMinor() minor}, {@link #getPatch()
+     * patch} and {@link #getPreRelease() pre-release}.
+     *
+     * @return A hash code for this object.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.major, this.minor, this.patch, this.preRelease);
@@ -491,15 +498,34 @@ public final class Version implements Comparable<Version>, Serializable {
      * {@link #compareTo(Version) compared} to the provided one yields 0. Thus,
      * this method ignores the {@link #getBuildMetaData()} field.
      *
-     * @param obj the object to compare to.
+     * @param obj the object to compare with.
      * @return <code>true</code> iff <tt>obj</tt> is an instance of
      *         <tt>Version</tt> and <tt>this.compareTo((Version) obj) == 0</tt>
      * @see #compareTo(Version)
      */
     @Override
     public boolean equals(Object obj) {
+        return equals(obj, false);
+    }
+
+    /**
+     * Determines whether this version is equal to the passed object (as
+     * determined by {@link #equals(Object)} and additionally considers the
+     * build meta data part of both versions for equality.
+     *
+     * @param obj The object to compare with.
+     * @return <code>true</code> iff <tt>this.equals(obj)</tt> and
+     *         <tt>this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())</tt>
+     */
+    public boolean equalsIncludeBuildMetaData(Object obj) {
+        return equals(obj, true);
+    }
+
+    private boolean equals(Object obj, boolean includeBuildMd) {
+        final Version v;
         return obj == this || obj != null && obj instanceof Version
-                && compareTo((Version) obj) == 0;
+                && compareTo(v = (Version) obj) == 0 &&
+                (!includeBuildMd || this.buildMetaData.equals(v.buildMetaData));
     }
 
     /**

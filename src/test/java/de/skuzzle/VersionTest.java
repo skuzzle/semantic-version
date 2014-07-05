@@ -245,4 +245,11 @@ public class VersionTest {
             Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
         }
     }
+
+    @Test
+    public void testBuildMetaDataEquality() {
+        final Version v1 = Version.create(0, 0, 1, "", "some.build-meta.data");
+        final Version v2 = Version.create(0, 0, 1, "", "some.different.build-meta.data");
+        Assert.assertFalse(v1.equalsIncludeBuildMetaData(v2));
+    }
 }
