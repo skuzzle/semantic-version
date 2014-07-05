@@ -47,9 +47,12 @@ public final class Version implements Comparable<Version>, Serializable {
     /** Conforms to Version implementation 0.1.0 */
     private static final long serialVersionUID = -7080189911455871050L;
 
+    /** Semantic Version Specification to which this class complies */
+    public static Version COMPLIANCE = Version.create(2, 0, 0);
+
     /**
      * This exception indicates that a version- or a part of a version string
-     * could not be parsed according to the semantic versioning specification.
+     * could not be parsed according to the semantic version specification.
      *
      * @author Simon Taddiken
      */
