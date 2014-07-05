@@ -41,13 +41,18 @@ import java.util.regex.Pattern;
  * meta data} field for comparison.
  *
  * @author Simon Taddiken
+ * @version 0.2.0
  */
 public final class Version implements Comparable<Version>, Serializable {
 
-    /** Conforms to Version implementation 0.1.0 */
+    /** Conforms to all Version implementations since 0.1.0 */
     private static final long serialVersionUID = -7080189911455871050L;
 
-    /** Semantic Version Specification to which this class complies */
+    /**
+     * Semantic Version Specification to which this class complies
+     *
+     * @since 0.2.0
+     */
     public static Version COMPLIANCE = Version.create(2, 0, 0);
 
     /**
@@ -81,6 +86,8 @@ public final class Version implements Comparable<Version>, Serializable {
     /**
      * Comparator for natural version ordering. See
      * {@link #compare(Version, Version)} for more information.
+     *
+     * @since 0.2.0
      */
     public final static Comparator<Version> NATURAL_ORDER = new Comparator<Version>() {
         @Override
@@ -90,7 +97,7 @@ public final class Version implements Comparable<Version>, Serializable {
     };
 
     /**
-     * Compares two versions, following the <em>semantic versioning</em>
+     * Compares two versions, following the <em>semantic version</em>
      * specification. Here is a quote from <a href="http://semver.org/">semantic
      * version 2.0.0 specification</a>:
      *
@@ -127,6 +134,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return A value below 0 iff <tt>v1 &lt; v2</tt>, a value above 0 iff
      *         <tt>v1 &gt; v2</tt> and 0 iff <tt>v1 = v2</tt>.
      * @throws NullPointerException If either parameter is null.
+     * @since 0.2.0
      */
     public static int compare(Version v1, Version v2) {
         if (v1 == null) {
@@ -228,8 +236,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * one must be greater than zero. <tt>preRelease</tt> or
      * <tt>buildMetaData</tt> may be the empty String. In this case, the created
      * <tt>Version</tt> will have no pre release resp. build meta data field. If
-     * those parameters are not empty, they must conform to the semantic
-     * versioning specification.
+     * those parameters are not empty, they must conform to the semantic version
+     * specification.
      *
      * @param major The major version.
      * @param minor The minor version.
@@ -239,7 +247,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return The version instance.
      * @throws VersionFormatException If <tt>preRelease</tt> or
      *             <tt>buildMetaData</tt> does not conform to the semantic
-     *             versioning specification.
+     *             version specification.
      */
     public final static Version create(int major, int minor, int patch,
             String preRelease,
@@ -265,7 +273,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <tt>patch</tt> must be lower than 0 and at least one must be greater than
      * zero. <tt>preRelease</tt> may be the empty String. In this case, the
      * created version will have no pre release field. If it is not empty, it
-     * must conform to the specifications of the semantic versioning.
+     * must conform to the specifications of the semantic version.
      *
      * @param major The major version.
      * @param minor The minor version.
@@ -315,7 +323,7 @@ public final class Version implements Comparable<Version>, Serializable {
 
     /**
      * Tries to parse the provided String as a semantic version. If the string
-     * does not conform to the semantic versioning specification, a
+     * does not conform to the semantic version specification, a
      * {@link VersionFormatException} will be thrown.
      *
      * @param versionString The String to parse.
@@ -516,6 +524,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param obj The object to compare with.
      * @return <code>true</code> iff <tt>this.equals(obj)</tt> and
      *         <tt>this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())</tt>
+     * @since 0.2.0
      */
     public boolean equalsIncludeBuildMetaData(Object obj) {
         return equals(obj, true);
