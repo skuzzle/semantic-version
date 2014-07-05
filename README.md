@@ -22,7 +22,7 @@ Usage of the `Version` class is simple. You can obtain instances using the stati
 ```java
 Version v1 = Version.parseVersion("1.0.2-rc1.2+build-20142402");
 
-Version v2 = Version.create("1.0.2");
+Version v2 = Version.parseVersion("1.0.2");
 
 Version v3 = Version.create(1, 0, 2);
 ```
