@@ -3,7 +3,7 @@
 semantic-version
 ================
 
-This is a single-class _semantic version_ implementation for java 7. It requires no further dependencies and is thereby easy to use within your own projects. You may simply copy the single class to your source folder and apply any modifications which suit your needs (as long as you preserve the license header).
+This is a single-class _semantic version 2.0.0_ implementation for java 7. It requires no further dependencies and is thereby easy to use within your own projects. You may simply copy the single class to your source folder and apply any modifications which suit your needs (as long as you preserve the license header).
 
 Go to [implementation](https://github.com/skuzzle/semantic-version/blob/master/src/main/java/de/skuzzle/Version.java)
 
@@ -20,11 +20,11 @@ This implementation is currently in its initial phase and thereby versioned *0.1
 Usage of the `Version` class is simple. You can obtain instances using the static factory methods:
 
 ```java
-Version v1 = Version.of("1.0.2-rc1.2+build-20142402");
+Version v1 = Version.parseVersion("1.0.2-rc1.2+build-20142402");
 
-Version v2 = Version.of("1.0.2");
+Version v2 = Version.create("1.0.2");
 
-Version v3 = Version.of(1, 0, 2);
+Version v3 = Version.create(1, 0, 2);
 ```
 
 Versions can be compared as they implement `Comparable`:
