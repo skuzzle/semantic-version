@@ -24,6 +24,7 @@
 package de.skuzzle;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -73,6 +74,150 @@ public final class Version implements Comparable<Version>, Serializable {
     private final static int PATCH_GROUP = 3;
     private final static int PRE_RELEASE_GROUP = 4;
     private final static int BUILD_MD_GROUP = 5;
+
+    /**
+     * Comparator for natural version ordering. See
+     * {@link #compare(Version, Version)} for more information.
+     */
+    public final static Comparator<Version> NATURAL_ORDER = new Comparator<Version>() {
+        @Override
+        public int compare(Version o1, Version o2) {
+            return Version.compare(o1, o2);
+        }
+    };
+
+    /**
+     * Compares two versions, following the <em>semantic versioning</em>
+     * specification. Here is a quote from <a href="http://semver.org/">semantic
+     * version 2.0.0 specification</a>:
+     *
+     * <p>
+     * <em> Precedence refers to how versions are compared to each other when
+     * ordered. Precedence MUST be calculated by separating the version into
+     * major, minor, patch and pre-release identifiers in that order (Build
+     * metadata does not figure into precedence). Precedence is determined by
+     * the first difference when comparing each of these identifiers from left
+     * to right as follows: Major, minor, and patch versions are always compared
+     * numerically. Example: 1.0.0 &lt; 2.0.0 &lt; 2.1.0 &lt; 2.1.1. When major, minor,
+     * and patch are equal, a pre-release version has lower precedence than a
+     * normal version. Example: 1.0.0-alpha &lt; 1.0.0. Precedence for two
+     * pre-release versions with the same major, minor, and patch version MUST
+     * be determined by comparing each dot separated identifier from left to
+     * right until a difference is found as follows: identifiers consisting of
+     * only digits are compared numerically and identifiers with letters or
+     * hyphens are compared lexically in ASCII sort order. Numeric identifiers
+     * always have lower precedence than non-numeric identifiers. A larger set
+     * of pre-release fields has a higher precedence than a smaller set, if all
+     * of the preceding identifiers are equal. Example: 1.0.0-alpha &lt;
+     * 1.0.0-alpha.1 &lt; 1.0.0-alpha.beta &lt; 1.0.0-beta &lt; 1.0.0-beta.2 &lt;
+     * 1.0.0-beta.11 &lt; 1.0.0-rc.1 &lt; 1.0.0.
+     * </em>
+     * </p>
+     *
+     * <p>
+     * This method fulfills the general contract for Java's {@link Comparator
+     * Comparators} and {@link Comparable Comparables}.
+     * </p>
+     *
+     * @param v1 The first version for comparison.
+     * @param v2 The second version for comparison.
+     * @return A value below 0 iff <tt>v1 &lt; v2</tt>, a value above 0 iff
+     *         <tt>v1 &gt; v2</tt> and 0 iff <tt>v1 = v2</tt>.
+     * @throws NullPointerException If either parameter is null.
+     */
+    public static int compare(Version v1, Version v2) {
+        if (v1 == null) {
+            throw new NullPointerException("v1 is null");
+        } else if (v2 == null) {
+            throw new NullPointerException("v2 is null");
+        } else if (v1 == v2) {
+            return 0;
+        }
+
+        int mc, mm, mp;
+        if ((mc = Integer.compare(v1.major, v2.major)) == 0) {
+            if ((mm = Integer.compare(v1.minor, v2.minor)) == 0) {
+                if ((mp = Integer.compare(v1.patch, v2.patch)) == 0) {
+
+                    if (!v1.isPreRelease() && !v2.isPreRelease()) {
+                        // both are no pre releases
+                        return 0;
+                    } else if (v1.isPreRelease() && v2.isPreRelease()) {
+                        final String[] thisParts = v1.getPreReleaseParts();
+                        final String[] otherParts = v2.getPreReleaseParts();
+
+                        int min = Math.min(thisParts.length, otherParts.length);
+                        for (int i = 0; i < min; ++i) {
+                            final int r = comparePreReleaseParts(thisParts[i],
+                                    otherParts[i]);
+                            if (r != 0) {
+                                // versions differ in pre release part i
+                                return r;
+                            }
+                        }
+
+                        // all pre release id's are equal, so compare amount of
+                        // pre release id's
+                        return Integer.compare(thisParts.length, otherParts.length);
+
+                    } else if (v1.isPreRelease()) {
+                        // other is greater, because it is no pre release
+                        return -1;
+                    } else if (v2.isPreRelease()) {
+                        // this is greater because it is no pre release
+                        return 1;
+                    }
+
+                } else {
+                    // versions differ in patch
+                    return mp;
+                }
+            } else {
+                // versions differ in minor
+                return mm;
+            }
+        } else {
+            // versions differ in major
+            return mc;
+        }
+        return 0;
+    }
+
+    private static int comparePreReleaseParts(String p1, String p2) {
+        final int num1 = isNumeric(p1);
+        final int num2 = isNumeric(p2);
+
+        if (num1 < 0 && num2 < 0) {
+            // both are not numerical -> compare lexically
+            return p1.compareTo(p2);
+        } else if (num1 >= 0 && num2 >= 0) {
+            // both are numerical
+            return Integer.compare(num1, num2);
+        } else if (num1 >= 0) {
+            // only part1 is numerical -> p2 is greater
+            return -1;
+        } else if (num2 >= 0) {
+            // only part2 is numerical -> p1 is greater
+            return 1;
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    /**
+     * Determines whether s is a positive number. If it is, the number is
+     * returned, otherwise the result is -1.
+     *
+     * @param s The String to check.
+     * @return The positive number (incl. 0) if s a number, or -1 if it is not.
+     */
+    private static int isNumeric(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
 
     /**
      * Creates a new Version from the provided components. Neither value of
@@ -356,8 +501,9 @@ public final class Version implements Comparable<Version>, Serializable {
 
     /**
      * Compares this version to the provided one, following the
-     * <em>semantic versioning</em> specification. Here is a quote from <a
-     * href="http://semver.org/">http://semver.org</a>:
+     * <em>semantic versioning</em> specification. See
+     * {@link #compare(Version, Version)} for more information. Here is a quote
+     * from <a href="http://semver.org/">http://semver.org</a>:
      *
      * <p>
      * <em> Precedence refers to how versions are compared to each other when
@@ -389,92 +535,6 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     @Override
     public int compareTo(Version other) {
-        if (other == this) {
-            return 0;
-        }
-
-        int mc, mm, mp;
-        if ((mc = Integer.compare(this.major, other.major)) == 0) {
-            if ((mm = Integer.compare(this.minor, other.minor)) == 0) {
-                if ((mp = Integer.compare(this.patch, other.patch)) == 0) {
-
-                    if (!isPreRelease() && !other.isPreRelease()) {
-                        // both are no pre releases
-                        return 0;
-                    } else if (isPreRelease() && other.isPreRelease()) {
-                        final String[] thisParts = getPreReleaseParts();
-                        final String[] otherParts = other.getPreReleaseParts();
-
-                        int min = Math.min(thisParts.length, otherParts.length);
-                        for (int i = 0; i < min; ++i) {
-                            final int r = comparePreReleaseParts(thisParts[i],
-                                    otherParts[i]);
-                            if (r != 0) {
-                                // versions differ in pre release part i
-                                return r;
-                            }
-                        }
-
-                        // all pre release id's are equal, so compare amount of
-                        // pre release id's
-                        return Integer.compare(thisParts.length, otherParts.length);
-
-                    } else if (isPreRelease()) {
-                        // other is greater, because it is no pre release
-                        return -1;
-                    } else if (other.isPreRelease()) {
-                        // this is greater because it is no pre release
-                        return 1;
-                    }
-
-                } else {
-                    // versions differ in patch
-                    return mp;
-                }
-            } else {
-                // versions differ in minor
-                return mm;
-            }
-        } else {
-            // versions differ in major
-            return mc;
-        }
-        return 0;
-    }
-
-    private int comparePreReleaseParts(String p1, String p2) {
-        final int num1 = isNumeric(p1);
-        final int num2 = isNumeric(p2);
-
-        if (num1 < 0 && num2 < 0) {
-            // both are not numerical -> compare lexically
-            return p1.compareTo(p2);
-        } else if (num1 >= 0 && num2 >= 0) {
-            // both are numerical
-            return Integer.compare(num1, num2);
-        } else if (num1 >= 0) {
-            // only part1 is numerical -> p2 is greater
-            return -1;
-        } else if (num2 >= 0) {
-            // only part2 is numerical -> p1 is greater
-            return 1;
-        } else {
-            throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Determines whether s is a positive number. If it is, the number is
-     * returned, otherwise the result is -1.
-     *
-     * @param s The String to check.
-     * @return The positive number (incl. 0) if s a number, or -1 if it is not.
-     */
-    private int isNumeric(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+        return compare(this, other);
     }
 }
