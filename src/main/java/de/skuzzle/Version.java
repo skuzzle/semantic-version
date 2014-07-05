@@ -31,11 +31,13 @@ import java.util.regex.Pattern;
 /**
  * This class is an implementation of the full <em>semantic version 2.0.0</em>
  * <a href="http://semver.org/">specification</a>. Instances can be obtained
- * using the static overloads of the <em>of</em> method. This class implements
+ * using the static overloads of the <em>create</em> method or by
+ * {@link #parseVersion(String) parsing} a String. This class implements
  * {@link Comparable} to compare two versions by following the specifications
  * linked to above. The {@link #equals(Object)} method conforms to the result of
- * {@link #compareTo(Version)}, so does {@link #hashCode()}. Neither method
- * considers the {@link #getBuildMetaData() build meta data} field.
+ * {@link #compareTo(Version)}, {@link #hashCode()} is implemented
+ * appropriately. Neither method considers the {@link #getBuildMetaData() build
+ * meta data} field for comparison.
  *
  * @author Simon Taddiken
  */
@@ -91,7 +93,8 @@ public final class Version implements Comparable<Version>, Serializable {
      *             <tt>buildMetaData</tt> does not conform to the semantic
      *             versioning specification.
      */
-    public final static Version of(int major, int minor, int patch, String preRelease,
+    public final static Version create(int major, int minor, int patch,
+            String preRelease,
             String buildMetaData) {
         checkParams(major, minor, patch);
         if (preRelease == null) {
@@ -124,7 +127,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @throws VersionFormatException If <tt>preRelease</tt> is not empty and
      *             does not conform to the semantic versioning specification
      */
-    public final static Version of(int major, int minor, int patch, String preRelease) {
+    public final static Version create(int major, int minor, int patch, String preRelease) {
         checkParams(major, minor, patch);
         if (preRelease == null) {
             throw new IllegalArgumentException("preRelease is null");
@@ -145,7 +148,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param patch The patch version.
      * @return The version instance.
      */
-    public final static Version of(int major, int minor, int patch) {
+    public final static Version create(int major, int minor, int patch) {
         checkParams(major, minor, patch);
         return new Version(major, minor, patch, "", "");
     }
@@ -173,7 +176,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @throws IllegalArgumentException If <tt>versionString</tt> is
      *             <code>null</code>.
      */
-    public final static Version of(String versionString) {
+    public final static Version parseVersion(String versionString) {
         if (versionString == null) {
             throw new IllegalArgumentException("versionString is null");
         }
