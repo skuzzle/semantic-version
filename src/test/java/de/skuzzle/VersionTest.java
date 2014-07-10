@@ -252,4 +252,30 @@ public class VersionTest {
         final Version v2 = Version.create(0, 0, 1, "", "some.different.build-meta.data");
         Assert.assertFalse(v1.equalsIncludeBuildMetaData(v2));
     }
+
+    @Test
+    public void testBuildMDPrecedence() {
+        // same test as #testSemVerOrgPrecedenceSample but exchanged pre release
+        // part with build meta data part
+        final Version[] versions = {
+                Version.parseVersion("1.0.0+alpha"),
+                Version.parseVersion("1.0.0+alpha.1"),
+                Version.parseVersion("1.0.0+alpha.beta"),
+                Version.parseVersion("1.0.0+beta"),
+                Version.parseVersion("1.0.0+beta.2"),
+                Version.parseVersion("1.0.0+beta.11"),
+                Version.parseVersion("1.0.0+rc.1"),
+                Version.parseVersion("1.0.0"),
+                Version.parseVersion("2.0.0"),
+                Version.parseVersion("2.1.0"),
+                Version.parseVersion("2.1.1")
+        };
+
+        for (int i = 1; i < versions.length; ++i) {
+            final Version v1 = versions[i - 1];
+            final Version v2 = versions[i];
+            final int c = v1.compareToWithBuildMetaData(v2);
+            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+        }
+    }
 }

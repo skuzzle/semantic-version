@@ -97,6 +97,20 @@ public final class Version implements Comparable<Version>, Serializable {
     };
 
     /**
+     * Comparator for ordering versions with additionally considering the build
+     * meta data field when comparing versions.
+     *
+     * @since 0.3.0
+     */
+    public static Comparator<Version> WITH_BUILD_META_DATA_ORDER = new Comparator<Version>() {
+
+        @Override
+        public int compare(Version o1, Version o2) {
+            return compareWithBuildMetaData(o1, o2);
+        }
+    };
+
+    /**
      * Compares two versions, following the <em>semantic version</em>
      * specification. Here is a quote from <a href="http://semver.org/">semantic
      * version 2.0.0 specification</a>:
@@ -140,11 +154,34 @@ public final class Version implements Comparable<Version>, Serializable {
         return compare(v1, v2, false);
     }
 
+    /**
+     * Compares two Versions with additionally considering the build meta data
+     * field if all other parts are equal. Note: This is <em>not</em> part of
+     * the semantic version specification.
+     *
+     * <p>
+     * Comparison of the build meta data parts happens exactly as for pre
+     * release identifiers. Considering of build meta data first kicks in if
+     * both versions are equal when using their natural order.
+     * </p>
+     *
+     * <p>
+     * This method fulfills the general contract for Java's {@link Comparator
+     * Comparators} and {@link Comparable Comparables}.
+     * </p>
+     *
+     * @param v1 The first version for comparison.
+     * @param v2 The second version for comparison.
+     * @return A value below 0 iff <tt>v1 &lt; v2</tt>, a value above 0 iff
+     *         <tt>v1 &gt; v2</tt> and 0 iff <tt>v1 = v2</tt>.
+     * @throws NullPointerException If either parameter is null.
+     * @since 0.3.0
+     */
     public static int compareWithBuildMetaData(Version v1, Version v2) {
         return compare(v1, v2, true);
     }
 
-    public static int compare(Version v1, Version v2, boolean withBuildMetaData) {
+    private static int compare(Version v1, Version v2, boolean withBuildMetaData) {
         if (v1 == null) {
             throw new NullPointerException("v1 is null");
         } else if (v2 == null) {
@@ -154,58 +191,55 @@ public final class Version implements Comparable<Version>, Serializable {
         }
 
         int mc, mm, mp;
+        final int result;
         if ((mc = Integer.compare(v1.major, v2.major)) == 0) {
             if ((mm = Integer.compare(v1.minor, v2.minor)) == 0) {
                 if ((mp = Integer.compare(v1.patch, v2.patch)) == 0) {
 
-                    if (!v1.isPreRelease() && !v2.isPreRelease()) {
-                        // both are no pre releases
-                        return 0;
-                    } else if (v1.isPreRelease() && v2.isPreRelease()) {
+                    if (v1.isPreRelease() && v2.isPreRelease()) {
                         // compare pre release parts
-                        final int c = compareIdentifiers(v1.getPreReleaseParts(),
+                        result = compareIdentifiers(v1.getPreReleaseParts(),
                                 v2.getPreReleaseParts());
-
-                        if (withBuildMetaData && c == 0) {
-                            // compare build meta data if necessary. Apply same
-                            // logic as for pre release parts
-
-                            if (v1.hasBuildMetaData() && v2.hasBuildMetaData()) {
-                                return compareIdentifiers(v1.getBuildMetaDataParts(),
-                                        v2.getBuildMetaDataParts());
-                            } else if (v1.hasBuildMetaData()) {
-                                // other is greater because it has no build data
-                                return -1;
-                            } else if (v2.hasBuildMetaData()) {
-                                // this is greater because other has no build
-                                // data
-                                return 1;
-                            }
-                        }
-
-                        return c;
-
                     } else if (v1.isPreRelease()) {
                         // other is greater, because it is no pre release
-                        return -1;
+                        result = -1;
                     } else if (v2.isPreRelease()) {
                         // this is greater because other is no pre release
-                        return 1;
+                        result = 1;
+                    } else {
+                        // both are no pre releases
+                        result = 0;
                     }
-
                 } else {
                     // versions differ in patch
-                    return mp;
+                    result = mp;
                 }
             } else {
                 // versions differ in minor
-                return mm;
+                result = mm;
             }
         } else {
             // versions differ in major
-            return mc;
+            result = mc;
         }
-        return 0;
+
+        if (withBuildMetaData && result == 0) {
+            // compare build meta data if necessary. Apply same
+            // logic as for pre release parts
+
+            if (v1.hasBuildMetaData() && v2.hasBuildMetaData()) {
+                return compareIdentifiers(v1.getBuildMetaDataParts(),
+                        v2.getBuildMetaDataParts());
+            } else if (v1.hasBuildMetaData()) {
+                // other is greater because it has no build data
+                return -1;
+            } else if (v2.hasBuildMetaData()) {
+                // this is greater because other has no build
+                // data
+                return 1;
+            }
+        }
+        return result;
     }
 
 
@@ -571,10 +605,8 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private boolean equals(Object obj, boolean includeBuildMd) {
-        final Version v;
         return obj == this || obj != null && obj instanceof Version
-                && compareTo(v = (Version) obj) == 0 &&
-                (!includeBuildMd || this.buildMetaData.equals(v.buildMetaData));
+                && compare(this, (Version) obj, includeBuildMd) == 0;
     }
 
     /**
@@ -582,7 +614,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <em>semantic versioning</em> specification. See
      * {@link #compare(Version, Version)} for more information. Here is a quote
      * from <a href="http://semver.org/">http://semver.org</a>:
-     * 
+     *
      * @param other The version to compare to.
      * @return A value lower than 0 if this &lt; other, a value greater than 0
      *         if this &gt; other and 0 if this == other. The absolute value of
@@ -591,5 +623,27 @@ public final class Version implements Comparable<Version>, Serializable {
     @Override
     public int compareTo(Version other) {
         return compare(this, other);
+    }
+
+    /**
+     * Compares this version to the provided one. Unlike the
+     * {@link #compareTo(Version)} method, this one additionally considers the
+     * build meta data field of both versions, if all other parts are equal.
+     * Note: This is <em>not</em> part of the semantic version specification.
+     *
+     * <p>
+     * Comparison of the build meta data parts happens exactly as for pre
+     * release identifiers. Considering of build meta data first kicks in if
+     * both versions are equal when using their natural order.
+     * </p>
+     *
+     * @param other The version to compare to.
+     * @return A value lower than 0 if this &lt; other, a value greater than 0
+     *         if this &gt; other and 0 if this == other. The absolute value of
+     *         the result has no semantical interpretation.
+     * @since 0.3.0
+     */
+    public int compareToWithBuildMetaData(Version other) {
+        return compareWithBuildMetaData(this, other);
     }
 }
