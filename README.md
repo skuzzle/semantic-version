@@ -12,7 +12,7 @@ See http://semver.org/ for the specification of semantic versioning
 This repository contains JUnit tests of the provided implementation against the semantic versioning specification.
 
 ## Versioning and Feedback
-This implementation is currently in its initial phase and thereby versioned *0.2.0* in terms of semantic versioning. Please feel free to provide feedback by filing an issue to improve the implementation.
+This implementation is currently in its initial phase and thereby versioned *0.3.0* in terms of semantic versioning. Please feel free to provide feedback by filing an issue to improve the implementation.
 
 
 ## Usage
