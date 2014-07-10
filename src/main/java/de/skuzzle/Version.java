@@ -242,7 +242,6 @@ public final class Version implements Comparable<Version>, Serializable {
         return result;
     }
 
-
     private static int compareIdentifiers(String[] parts1, String[] parts2) {
         int min = Math.min(parts1.length, parts2.length);
         for (int i = 0; i < min; ++i) {
