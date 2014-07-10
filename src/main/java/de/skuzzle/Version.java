@@ -137,6 +137,14 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.2.0
      */
     public static int compare(Version v1, Version v2) {
+        return compare(v1, v2, false);
+    }
+
+    public static int compareWithBuildMetaData(Version v1, Version v2) {
+        return compare(v1, v2, true);
+    }
+
+    public static int compare(Version v1, Version v2, boolean withBuildMetaData) {
         if (v1 == null) {
             throw new NullPointerException("v1 is null");
         } else if (v2 == null) {
@@ -154,28 +162,34 @@ public final class Version implements Comparable<Version>, Serializable {
                         // both are no pre releases
                         return 0;
                     } else if (v1.isPreRelease() && v2.isPreRelease()) {
-                        final String[] thisParts = v1.getPreReleaseParts();
-                        final String[] otherParts = v2.getPreReleaseParts();
+                        // compare pre release parts
+                        final int c = compareIdentifiers(v1.getPreReleaseParts(),
+                                v2.getPreReleaseParts());
 
-                        int min = Math.min(thisParts.length, otherParts.length);
-                        for (int i = 0; i < min; ++i) {
-                            final int r = comparePreReleaseParts(thisParts[i],
-                                    otherParts[i]);
-                            if (r != 0) {
-                                // versions differ in pre release part i
-                                return r;
+                        if (withBuildMetaData && c == 0) {
+                            // compare build meta data if necessary. Apply same
+                            // logic as for pre release parts
+
+                            if (v1.hasBuildMetaData() && v2.hasBuildMetaData()) {
+                                return compareIdentifiers(v1.getBuildMetaDataParts(),
+                                        v2.getBuildMetaDataParts());
+                            } else if (v1.hasBuildMetaData()) {
+                                // other is greater because it has no build data
+                                return -1;
+                            } else if (v2.hasBuildMetaData()) {
+                                // this is greater because other has no build
+                                // data
+                                return 1;
                             }
                         }
 
-                        // all pre release id's are equal, so compare amount of
-                        // pre release id's
-                        return Integer.compare(thisParts.length, otherParts.length);
+                        return c;
 
                     } else if (v1.isPreRelease()) {
                         // other is greater, because it is no pre release
                         return -1;
                     } else if (v2.isPreRelease()) {
-                        // this is greater because it is no pre release
+                        // this is greater because other is no pre release
                         return 1;
                     }
 
@@ -192,6 +206,23 @@ public final class Version implements Comparable<Version>, Serializable {
             return mc;
         }
         return 0;
+    }
+
+
+    private static int compareIdentifiers(String[] parts1, String[] parts2) {
+        int min = Math.min(parts1.length, parts2.length);
+        for (int i = 0; i < min; ++i) {
+            final int r = comparePreReleaseParts(parts1[i],
+                    parts2[i]);
+            if (r != 0) {
+                // versions differ in pre release part i
+                return r;
+            }
+        }
+
+        // all pre release id's are equal, so compare amount of
+        // pre release id's
+        return Integer.compare(parts1.length, parts2.length);
     }
 
     private static int comparePreReleaseParts(String p1, String p2) {
@@ -465,6 +496,15 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public boolean isPreRelease() {
         return !this.preRelease.isEmpty();
+    }
+
+    /**
+     * Determines whether this version has a build meta data field.
+     *
+     * @return <code>true</code> iff {@link #getBuildMetaData()} is not empty.
+     */
+    public boolean hasBuildMetaData() {
+        return !this.buildMetaData.isEmpty();
     }
 
     /**
