@@ -41,7 +41,7 @@ import java.util.regex.Pattern;
  * meta data} field for comparison.
  *
  * @author Simon Taddiken
- * @version 0.2.0
+ * @version 0.3.0
  */
 public final class Version implements Comparable<Version>, Serializable {
 
