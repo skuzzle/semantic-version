@@ -102,7 +102,8 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * @since 0.3.0
      */
-    public static Comparator<Version> WITH_BUILD_META_DATA_ORDER = new Comparator<Version>() {
+    public static final Comparator<Version> WITH_BUILD_META_DATA_ORDER =
+            new Comparator<Version>() {
 
         @Override
         public int compare(Version o1, Version o2) {
