@@ -191,7 +191,7 @@ public final class Version implements Comparable<Version>, Serializable {
             return 0;
         }
 
-        int mc, mm, mp;
+        final int mc, mm, mp;
         final int result;
         if ((mc = Integer.compare(v1.major, v2.major)) == 0) {
             if ((mm = Integer.compare(v1.minor, v2.minor)) == 0) {
