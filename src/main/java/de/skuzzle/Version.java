@@ -53,7 +53,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * @since 0.2.0
      */
-    public static Version COMPLIANCE = Version.create(2, 0, 0);
+    public static final Version COMPLIANCE = Version.create(2, 0, 0);
 
     /**
      * This exception indicates that a version- or a part of a version string
