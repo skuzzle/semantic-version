@@ -246,8 +246,7 @@ public final class Version implements Comparable<Version>, Serializable {
     private static int compareIdentifiers(String[] parts1, String[] parts2) {
         int min = Math.min(parts1.length, parts2.length);
         for (int i = 0; i < min; ++i) {
-            final int r = comparePreReleaseParts(parts1[i],
-                    parts2[i]);
+            final int r = comparePreReleaseParts(parts1[i], parts2[i]);
             if (r != 0) {
                 // versions differ in pre release part i
                 return r;
