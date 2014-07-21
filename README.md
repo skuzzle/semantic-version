@@ -3,10 +3,10 @@
 semantic-version
 ================
 
-This is a single-class _semantic version 2.0.0_ implementation for java 7. It 
-requires no further dependencies and is thereby easy to use within your own 
-projects. You may simply copy the single class to your source folder and apply 
-any modifications which suit your needs (as long as you preserve the 
+This is a single-class _semantic version 2.0.0_ implementation for java 7. It
+requires no further dependencies and is thereby easy to use within your own
+projects. You may simply copy the single class to your source folder and apply
+any modifications which suit your needs (as long as you preserve the
 license header).
 
 Go to [implementation](https://github.com/skuzzle/semantic-version/blob/master/src/main/java/de/skuzzle/Version.java)
@@ -17,14 +17,24 @@ This repository contains JUnit tests of the provided implementation against the
  semantic versioning specification.
 
 ## Versioning and Feedback
-This implementation is currently in its initial phase and thereby versioned 
-*0.3.0* in terms of semantic versioning. Please feel free to provide feedback 
+This implementation is currently in its initial phase and thereby versioned
+*0.3.0* in terms of semantic versioning. Please feel free to provide feedback
 by filing an issue to improve the implementation.
 
+## Maven Dependency
+semantic-version is available through the Maven Central Repository. Just add
+the following dependency to your pom:
+```
+<dependency>
+    <groupId>de.skuzzle</groupId>
+    <artifactId>semantic-version</artifactId>
+    <version>0.3.0</version>
+</dependency>
+```
 
 ## Usage
 
-Usage of the `Version` class is simple. You can obtain instances using the 
+Usage of the `Version` class is simple. You can obtain instances using the
 static factory methods:
 
 ```java
