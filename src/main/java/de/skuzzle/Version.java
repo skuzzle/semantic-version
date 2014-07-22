@@ -599,7 +599,22 @@ public final class Version implements Comparable<Version>, Serializable {
      *         <tt>this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())</tt>
      * @since 0.2.0
      */
+    @Deprecated
     public boolean equalsIncludeBuildMetaData(Object obj) {
+        return equals(obj, true);
+    }
+
+    /**
+     * Determines whether this version is equal to the passed object (as
+     * determined by {@link #equals(Object)} and additionally considers the
+     * build meta data part of both versions for equality.
+     *
+     * @param obj The object to compare with.
+     * @return <code>true</code> iff <tt>this.equals(obj)</tt> and
+     *         <tt>this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())</tt>
+     * @since 0.4.0
+     */
+    public boolean equalsWithBuildMetaData(Object obj) {
         return equals(obj, true);
     }
 
