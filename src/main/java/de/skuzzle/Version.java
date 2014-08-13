@@ -146,8 +146,8 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * @param v1 The first version for comparison.
      * @param v2 The second version for comparison.
-     * @return A value below 0 iff <tt>v1 &lt; v2</tt>, a value above 0 iff
-     *         <tt>v1 &gt; v2</tt> and 0 iff <tt>v1 = v2</tt>.
+     * @return A value below 0 iff {@code v1 &lt; v2}, a value above 0 iff
+     *         {@code v1 &gt; v2</tt> and 0 iff <tt>v1 = v2}.
      * @throws NullPointerException If either parameter is null.
      * @since 0.2.0
      */
@@ -173,8 +173,8 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * @param v1 The first version for comparison.
      * @param v2 The second version for comparison.
-     * @return A value below 0 iff <tt>v1 &lt; v2</tt>, a value above 0 iff
-     *         <tt>v1 &gt; v2</tt> and 0 iff <tt>v1 = v2</tt>.
+     * @return A value below 0 iff {@code v1 &lt; v2}, a value above 0 iff
+     *         {@code v1 &gt; v2</tt> and 0 iff <tt>v1 = v2}.
      * @throws NullPointerException If either parameter is null.
      * @since 0.3.0
      */
@@ -296,10 +296,10 @@ public final class Version implements Comparable<Version>, Serializable {
 
     /**
      * Creates a new Version from the provided components. Neither value of
-     * <tt>major, minor</tt> or <tt>patch</tt> must be lower than 0 and at least
-     * one must be greater than zero. <tt>preRelease</tt> or
-     * <tt>buildMetaData</tt> may be the empty String. In this case, the created
-     * <tt>Version</tt> will have no pre release resp. build meta data field. If
+     * {@code major, minor} or {@code patch} must be lower than 0 and at least
+     * one must be greater than zero. {@code preRelease} or
+     * {@code buildMetaData} may be the empty String. In this case, the created
+     * {@code Version} will have no pre release resp. build meta data field. If
      * those parameters are not empty, they must conform to the semantic version
      * specification.
      *
@@ -309,8 +309,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param preRelease The pre release version or the empty string.
      * @param buildMetaData The build meta data field or the empty string.
      * @return The version instance.
-     * @throws VersionFormatException If <tt>preRelease</tt> or
-     *             <tt>buildMetaData</tt> does not conform to the semantic
+     * @throws VersionFormatException If {@code preRelease} or
+     *             {@code buildMetaData} does not conform to the semantic
      *             version specification.
      */
     public final static Version create(int major, int minor, int patch,
@@ -333,9 +333,9 @@ public final class Version implements Comparable<Version>, Serializable {
 
     /**
      * Creates a new Version from the provided components. The version's build
-     * meta data field will be empty. Neither value of <tt>major, minor</tt> or
-     * <tt>patch</tt> must be lower than 0 and at least one must be greater than
-     * zero. <tt>preRelease</tt> may be the empty String. In this case, the
+     * meta data field will be empty. Neither value of {@code major, minor} or
+     * {@code patch} must be lower than 0 and at least one must be greater than
+     * zero. {@code preRelease} may be the empty String. In this case, the
      * created version will have no pre release field. If it is not empty, it
      * must conform to the specifications of the semantic version.
      *
@@ -344,7 +344,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param patch The patch version.
      * @param preRelease The pre release version or the empty string.
      * @return The version instance.
-     * @throws VersionFormatException If <tt>preRelease</tt> is not empty and
+     * @throws VersionFormatException If {@code preRelease} is not empty and
      *             does not conform to the semantic versioning specification
      */
     public final static Version create(int major, int minor, int patch, String preRelease) {
@@ -393,7 +393,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param versionString The String to parse.
      * @return The parsed version.
      * @throws VersionFormatException If the String is no valid version
-     * @throws IllegalArgumentException If <tt>versionString</tt> is
+     * @throws IllegalArgumentException If {@code versionString} is
      *             <code>null</code>.
      */
     public final static Version parseVersion(String versionString) {
@@ -580,8 +580,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * this method ignores the {@link #getBuildMetaData()} field.
      *
      * @param obj the object to compare with.
-     * @return <code>true</code> iff <tt>obj</tt> is an instance of
-     *         <tt>Version</tt> and <tt>this.compareTo((Version) obj) == 0</tt>
+     * @return <code>true</code> iff {@code obj} is an instance of
+     *         {@code Version} and {@code this.compareTo((Version) obj) == 0}
      * @see #compareTo(Version)
      */
     @Override
@@ -595,8 +595,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * build meta data part of both versions for equality.
      *
      * @param obj The object to compare with.
-     * @return <code>true</code> iff <tt>this.equals(obj)</tt> and
-     *         <tt>this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())</tt>
+     * @return <code>true</code> iff {@code this.equals(obj)} and
+     *         {@code this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())}
      * @since 0.2.0
      */
     @Deprecated
@@ -610,8 +610,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * build meta data part of both versions for equality.
      *
      * @param obj The object to compare with.
-     * @return <code>true</code> iff <tt>this.equals(obj)</tt> and
-     *         <tt>this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())</tt>
+     * @return <code>true</code> iff {@code this.equals(obj)} and
+     *         {@code this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())}
      * @since 0.4.0
      */
     public boolean equalsWithBuildMetaData(Object obj) {
