@@ -65,6 +65,11 @@ public final class Version implements Comparable<Version>, Serializable {
 
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Creates a new VersionFormatException with the given message.
+         *
+         * @param message The exception message.
+         */
         public VersionFormatException(String message) {
             super(message);
         }
@@ -271,11 +276,9 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (num1 >= 0) {
             // only part1 is numerical -> p2 is greater
             return -1;
-        } else if (num2 >= 0) {
+        } else { // ^= if (num2 >= 0) {
             // only part2 is numerical -> p1 is greater
             return 1;
-        } else {
-            throw new IllegalStateException();
         }
     }
 

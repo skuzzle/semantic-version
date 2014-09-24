@@ -7,7 +7,64 @@ import de.skuzzle.Version.VersionFormatException;
 
 public class VersionTest {
 
-    public VersionTest() {}
+    private static final Version[] SEMVER_ORG_VERSIONS = new Version[] {
+            Version.parseVersion("1.0.0-alpha"),
+            Version.parseVersion("1.0.0-alpha.1"),
+            Version.parseVersion("1.0.0-alpha.beta"),
+            Version.parseVersion("1.0.0-beta"),
+            Version.parseVersion("1.0.0-beta.2"),
+            Version.parseVersion("1.0.0-beta.11"),
+            Version.parseVersion("1.0.0-rc.1"),
+            Version.parseVersion("1.0.0"),
+            Version.parseVersion("2.0.0"),
+            Version.parseVersion("2.1.0"),
+            Version.parseVersion("2.1.1")
+    };
+
+    // same as above, but exchanged pre release and build meta data
+    private static final Version[] SEMVER_ORG_BMD_VERSIONS = new Version[] {
+            Version.parseVersion("1.0.0+alpha"),
+            Version.parseVersion("1.0.0+alpha.1"),
+            Version.parseVersion("1.0.0+alpha.beta"),
+            Version.parseVersion("1.0.0+beta"),
+            Version.parseVersion("1.0.0+beta.2"),
+            Version.parseVersion("1.0.0+beta.11"),
+            Version.parseVersion("1.0.0+rc.1"),
+            Version.parseVersion("1.0.0"),
+            Version.parseVersion("2.0.0"),
+            Version.parseVersion("2.1.0"),
+            Version.parseVersion("2.1.1")
+    };
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPreReleaseNull() {
+        Version.create(1, 1, 1, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuildMDNull() {
+        Version.create(1, 1, 1, "", null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNegativePatch() {
+        Version.create(1, 1, -1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNegativeMinor() {
+        Version.create(1, -1, 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNegativeMajor() {
+        Version.create(-1, 1, 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void parseVersionNull() {
+        Version.parseVersion(null);
+    }
 
     @Test
     public void testSimpleVersion() {
@@ -130,6 +187,21 @@ public class VersionTest {
         Version.create(0, 0, 0);
     }
 
+    @Test(expected = VersionFormatException.class)
+    public void testPreReleaseInvalid() {
+        Version.create(1, 2, 3, "pre.", "build");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPreReleaseNullAndBuildMDGiven() {
+        Version.create(1, 2, 3, null, "build");
+    }
+
+    @Test
+    public void testOnlyBuildMdEmpty() {
+        Version.create(1, 2, 3, "pre", "");
+    }
+
     @Test
     public void testPreReleaseWithLeadingZeroesIdentifier() {
         // leading zeroes allowed in string identifiers
@@ -224,24 +296,20 @@ public class VersionTest {
 
     @Test
     public void testSemVerOrgPrecedenceSample() {
-        final Version[] versions = {
-                Version.parseVersion("1.0.0-alpha"),
-                Version.parseVersion("1.0.0-alpha.1"),
-                Version.parseVersion("1.0.0-alpha.beta"),
-                Version.parseVersion("1.0.0-beta"),
-                Version.parseVersion("1.0.0-beta.2"),
-                Version.parseVersion("1.0.0-beta.11"),
-                Version.parseVersion("1.0.0-rc.1"),
-                Version.parseVersion("1.0.0"),
-                Version.parseVersion("2.0.0"),
-                Version.parseVersion("2.1.0"),
-                Version.parseVersion("2.1.1")
-        };
-
-        for (int i = 1; i < versions.length; ++i) {
-            final Version v1 = versions[i - 1];
-            final Version v2 = versions[i];
+        for (int i = 1; i < SEMVER_ORG_VERSIONS.length; ++i) {
+            final Version v1 = SEMVER_ORG_VERSIONS[i - 1];
+            final Version v2 = SEMVER_ORG_VERSIONS[i];
             final int c = v1.compareTo(v2);
+            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+        }
+    }
+
+    @Test
+    public void testSemVerOrgPrecedenceSampleComparator() {
+        for (int i = 1; i < SEMVER_ORG_VERSIONS.length; ++i) {
+            final Version v1 = SEMVER_ORG_VERSIONS[i - 1];
+            final Version v2 = SEMVER_ORG_VERSIONS[i];
+            final int c = Version.NATURAL_ORDER.compare(v1, v2);
             Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
         }
     }
@@ -255,27 +323,89 @@ public class VersionTest {
 
     @Test
     public void testBuildMDPrecedence() {
-        // same test as #testSemVerOrgPrecedenceSample but exchanged pre release
-        // part with build meta data part
-        final Version[] versions = {
-                Version.parseVersion("1.0.0+alpha"),
-                Version.parseVersion("1.0.0+alpha.1"),
-                Version.parseVersion("1.0.0+alpha.beta"),
-                Version.parseVersion("1.0.0+beta"),
-                Version.parseVersion("1.0.0+beta.2"),
-                Version.parseVersion("1.0.0+beta.11"),
-                Version.parseVersion("1.0.0+rc.1"),
-                Version.parseVersion("1.0.0"),
-                Version.parseVersion("2.0.0"),
-                Version.parseVersion("2.1.0"),
-                Version.parseVersion("2.1.1")
-        };
-
-        for (int i = 1; i < versions.length; ++i) {
-            final Version v1 = versions[i - 1];
-            final Version v2 = versions[i];
+        for (int i = 1; i < SEMVER_ORG_BMD_VERSIONS.length; ++i) {
+            final Version v1 = SEMVER_ORG_BMD_VERSIONS[i - 1];
+            final Version v2 = SEMVER_ORG_BMD_VERSIONS[i];
             final int c = v1.compareToWithBuildMetaData(v2);
             Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+        }
+    }
+
+    @Test
+    public void testBuildMDPrecedenceComparator() {
+        for (int i = 1; i < SEMVER_ORG_BMD_VERSIONS.length; ++i) {
+            final Version v1 = SEMVER_ORG_BMD_VERSIONS[i - 1];
+            final Version v2 = SEMVER_ORG_BMD_VERSIONS[i];
+            final int c = Version.WITH_BUILD_META_DATA_ORDER.compare(v1, v2);
+            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+        }
+    }
+
+    @Test
+    public void testBuildMDPrecedenceReverse() {
+        for (int i = 1; i < SEMVER_ORG_BMD_VERSIONS.length; ++i) {
+            final Version v1 = SEMVER_ORG_BMD_VERSIONS[i - 1];
+            final Version v2 = SEMVER_ORG_BMD_VERSIONS[i];
+            final int c = v2.compareToWithBuildMetaData(v1);
+            Assert.assertTrue(v2 + " is not greater than " + v1, c > 0);
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testCompareNull1() {
+        Version.compare(null, Version.create(1, 1, 1));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testCompareNull2() {
+        Version.compare(Version.create(1, 1, 1), null);
+    }
+
+    @Test
+    public void testCompareIdentical() {
+        final Version v = Version.create(1, 1, 1);
+        Assert.assertEquals(0, Version.compare(v, v));
+    }
+
+    @Test
+    public void testNotEqualsNull() {
+        final Version v = Version.create(1, 1, 1);
+        Assert.assertFalse(v.equals(null));
+    }
+
+    @Test
+    public void testNotEqualsForeign() {
+        final Version v = Version.create(1, 1, 1);
+        Assert.assertFalse(v.equals(new Object()));
+    }
+
+    @Test
+    public void testEqualsIdentity() {
+        final Version v = Version.create(1, 2, 3);
+        Assert.assertEquals(v, v);
+    }
+
+    @Test
+    public void testNotEqualsTrivial() {
+        final Version v1 = Version.create(1, 1, 1);
+        final Version v2 = Version.create(1, 1, 2);
+        Assert.assertFalse(v1.equals(v2));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testEqualsIncludeBuildMetaData() {
+        final Version v1 = Version.create(1, 2, 3, "", "build");
+        final Version v2 = Version.create(1, 2, 3, "", "build");
+        Assert.assertTrue(v1.equalsIncludeBuildMetaData(v2));
+    }
+
+    @Test
+    public void testParseToString() {
+        for (final Version v1 : SEMVER_ORG_VERSIONS) {
+            final Version v2 = Version.parseVersion(v1.toString());
+            Assert.assertEquals(v1, v2);
+            Assert.assertEquals(v1.hashCode(), v2.hashCode());
         }
     }
 }
