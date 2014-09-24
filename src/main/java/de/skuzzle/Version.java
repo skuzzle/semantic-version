@@ -239,7 +239,7 @@ public final class Version implements Comparable<Version>, Serializable {
             } else if (v1.hasBuildMetaData()) {
                 // other is greater because it has no build data
                 return -1;
-            } else if (v2.hasBuildMetaData()) {
+            } else { // if (v2.hasBuildMetaData()) {
                 // this is greater because other has no build
                 // data
                 return 1;
