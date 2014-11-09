@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <groupId>de.skuzzle</groupId>
+        <artifactId>skuzzle-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../skuzzle-parent/pom.xml</relativePath>
     </parent>
 
     <groupId>de.skuzzle</groupId>
@@ -14,7 +14,6 @@
     <packaging>jar</packaging>
 
     <name>semantic-version</name>
-    <url>https://github.com/skuzzle/semantic-version</url>
     <description>Single-class semantic version implementation for java</description>
 
     <licenses>
@@ -25,133 +24,50 @@
         </license>
     </licenses>
 
-    <developers>
-        <developer>
-            <id>simon</id>
-            <name>Simon Taddiken</name>
-            <email>semver@skuzzle.de</email>
-        </developer>
-    </developers>
-
-    <scm>
-        <connection>scm:git:https://github.com/skuzzle/semantic-version</connection>
-        <developerConnection>scm:git://github.com/skuzzle/semantic-version</developerConnection>
-        <url>https://github.com/skuzzle/semantic-version</url>
-        <tag>HEAD</tag>
-    </scm>
-
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sonar.jacoco.itReportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.itReportPath>
-        <sonar.skipPackageDesign>true</sonar.skipPackageDesign>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
+
+        <site.name>jeve</site.name>
+        <github.name>jeve</github.name>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            
+        <plugins>            
             <!-- package java doc into jar file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <!-- package sources into jar file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            
-            <!-- Code coverage -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.1.201405082137</version>
-                <executions>
-                    <execution>
-                        <id>default-prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>default-report</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
-    
+
     <profiles>
         <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
+            <id>release</id>
             <build>
                 <plugins>
+                    <!-- Enable signing and sonatype deploy -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.1</version>
-                        <configuration>
-                            <gpgArguments>
-                                <arg>--no-random-seed-file</arg>
-                                <arg>--no-permission-warning</arg>
-                                <arg>--no-tty</arg>
-                            </gpgArguments>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
