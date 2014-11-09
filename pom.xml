@@ -30,6 +30,8 @@
 
         <site.name>jeve</site.name>
         <github.name>jeve</github.name>
+        
+        <sonar.jacoco.itReportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.itReportPath>
     </properties>
 
     <dependencies>
