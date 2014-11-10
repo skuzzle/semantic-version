@@ -88,6 +88,20 @@ public final class Version implements Comparable<Version>, Serializable {
     private static final int PRE_RELEASE_GROUP = 4;
     private static final int BUILD_MD_GROUP = 5;
 
+    private final int major;
+    private final int minor;
+    private final int patch;
+    private final String preRelease;
+    private final String buildMetaData;
+
+    private Version(int major, int minor, int patch, String preRelease, String buildMd) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.preRelease = preRelease;
+        this.buildMetaData = buildMd;
+    }
+
     /**
      * Comparator for natural version ordering. See
      * {@link #compare(Version, Version)} for more information.
@@ -429,20 +443,6 @@ public final class Version implements Comparable<Version>, Serializable {
         }
 
         return new Version(major, minor, patch, preRelease, buildMD);
-    }
-
-    private final int major;
-    private final int minor;
-    private final int patch;
-    private final String preRelease;
-    private final String buildMetaData;
-
-    private Version(int major, int minor, int patch, String preRelease, String buildMd) {
-        this.major = major;
-        this.minor = minor;
-        this.patch = patch;
-        this.preRelease = preRelease;
-        this.buildMetaData = buildMd;
     }
 
     /**
