@@ -75,35 +75,6 @@ public final class Version implements Comparable<Version>, Serializable {
         }
     }
 
-    private static final Pattern PRE_RELEASE = Pattern.compile(
-            "(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*");
-    private static final Pattern BUILD_MD = Pattern.compile("[\\w-]+(\\.[\\w-]+)*");
-    private static final Pattern VERSION_PATTERN = Pattern.compile(
-            "(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*))?(?:\\+([\\w-]+(\\.[\\w-]+)*))?");
-
-    // Match result group indices
-    private static final int MAJOR_GROUP = 1;
-    private static final int MINOR_GROUP = 2;
-    private static final int PATCH_GROUP = 3;
-    private static final int PRE_RELEASE_GROUP = 4;
-    private static final int BUILD_MD_GROUP = 5;
-    
-    private static final int TO_STRING_ESTIMATE = 24;
-
-    private final int major;
-    private final int minor;
-    private final int patch;
-    private final String preRelease;
-    private final String buildMetaData;
-
-    private Version(int major, int minor, int patch, String preRelease, String buildMd) {
-        this.major = major;
-        this.minor = minor;
-        this.patch = patch;
-        this.preRelease = preRelease;
-        this.buildMetaData = buildMd;
-    }
-
     /**
      * Comparator for natural version ordering. See
      * {@link #compare(Version, Version)} for more information.
@@ -126,11 +97,40 @@ public final class Version implements Comparable<Version>, Serializable {
     public static final Comparator<Version> WITH_BUILD_META_DATA_ORDER =
             new Comparator<Version>() {
 
-        @Override
-        public int compare(Version o1, Version o2) {
-            return compareWithBuildMetaData(o1, o2);
-        }
-    };
+                @Override
+                public int compare(Version o1, Version o2) {
+                    return compareWithBuildMetaData(o1, o2);
+                }
+            };
+
+    private static final Pattern PRE_RELEASE = Pattern.compile(
+            "(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*");
+    private static final Pattern BUILD_MD = Pattern.compile("[\\w-]+(\\.[\\w-]+)*");
+    private static final Pattern VERSION_PATTERN = Pattern.compile(
+            "(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*))?(?:\\+([\\w-]+(\\.[\\w-]+)*))?");
+
+    // Match result group indices
+    private static final int MAJOR_GROUP = 1;
+    private static final int MINOR_GROUP = 2;
+    private static final int PATCH_GROUP = 3;
+    private static final int PRE_RELEASE_GROUP = 4;
+    private static final int BUILD_MD_GROUP = 5;
+
+    private static final int TO_STRING_ESTIMATE = 24;
+
+    private final int major;
+    private final int minor;
+    private final int patch;
+    private final String preRelease;
+    private final String buildMetaData;
+
+    private Version(int major, int minor, int patch, String preRelease, String buildMd) {
+        this.major = major;
+        this.minor = minor;
+        this.patch = patch;
+        this.preRelease = preRelease;
+        this.buildMetaData = buildMd;
+    }
 
     /**
      * Compares two versions, following the <em>semantic version</em>
