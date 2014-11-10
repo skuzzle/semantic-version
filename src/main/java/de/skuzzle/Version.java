@@ -253,7 +253,7 @@ public final class Version implements Comparable<Version>, Serializable {
             } else if (v1.hasBuildMetaData()) {
                 // other is greater because it has no build data
                 return -1;
-            } else { // if (v2.hasBuildMetaData()) {
+            } else {
                 // this is greater because other has no build
                 // data
                 return 1;
@@ -290,7 +290,7 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (num1 >= 0) {
             // only part1 is numerical -> p2 is greater
             return -1;
-        } else { // ^= if (num2 >= 0) {
+        } else {
             // only part2 is numerical -> p1 is greater
             return 1;
         }
