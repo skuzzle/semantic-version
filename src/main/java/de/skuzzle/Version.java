@@ -591,7 +591,7 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        return equals(obj, false);
+        return testEquality(obj, false);
     }
 
     /**
@@ -603,10 +603,12 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return <code>true</code> iff {@code this.equals(obj)} and
      *         {@code this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())}
      * @since 0.2.0
+     * @deprecated Since 0.4.0 - use {@link #equalsWithBuildMetaData(Object)}
+     *             instead.
      */
     @Deprecated
     public boolean equalsIncludeBuildMetaData(Object obj) {
-        return equals(obj, true);
+        return testEquality(obj, true);
     }
 
     /**
@@ -620,10 +622,10 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.4.0
      */
     public boolean equalsWithBuildMetaData(Object obj) {
-        return equals(obj, true);
+        return testEquality(obj, true);
     }
 
-    private boolean equals(Object obj, boolean includeBuildMd) {
+    private boolean testEquality(Object obj, boolean includeBuildMd) {
         return obj == this || obj != null && obj instanceof Version
                 && compare(this, (Version) obj, includeBuildMd) == 0;
     }
