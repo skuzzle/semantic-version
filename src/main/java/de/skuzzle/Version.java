@@ -75,18 +75,18 @@ public final class Version implements Comparable<Version>, Serializable {
         }
     }
 
-    private final static Pattern PRE_RELEASE = Pattern.compile(
+    private static final Pattern PRE_RELEASE = Pattern.compile(
             "(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*");
-    private final static Pattern BUILD_MD = Pattern.compile("[\\w-]+(\\.[\\w-]+)*");
-    private final static Pattern VERSION_PATTERN = Pattern.compile(
+    private static final Pattern BUILD_MD = Pattern.compile("[\\w-]+(\\.[\\w-]+)*");
+    private static final Pattern VERSION_PATTERN = Pattern.compile(
             "(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*))?(?:\\+([\\w-]+(\\.[\\w-]+)*))?");
 
     // Match result group indices
-    private final static int MAJOR_GROUP = 1;
-    private final static int MINOR_GROUP = 2;
-    private final static int PATCH_GROUP = 3;
-    private final static int PRE_RELEASE_GROUP = 4;
-    private final static int BUILD_MD_GROUP = 5;
+    private static final int MAJOR_GROUP = 1;
+    private static final int MINOR_GROUP = 2;
+    private static final int PATCH_GROUP = 3;
+    private static final int PRE_RELEASE_GROUP = 4;
+    private static final int BUILD_MD_GROUP = 5;
 
     /**
      * Comparator for natural version ordering. See
@@ -94,7 +94,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * @since 0.2.0
      */
-    public final static Comparator<Version> NATURAL_ORDER = new Comparator<Version>() {
+    public static final Comparator<Version> NATURAL_ORDER = new Comparator<Version>() {
         @Override
         public int compare(Version o1, Version o2) {
             return Version.compare(o1, o2);
@@ -316,7 +316,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *             {@code buildMetaData} does not conform to the semantic
      *             version specification.
      */
-    public final static Version create(int major, int minor, int patch,
+    public static final Version create(int major, int minor, int patch,
             String preRelease,
             String buildMetaData) {
         checkParams(major, minor, patch);
@@ -350,7 +350,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @throws VersionFormatException If {@code preRelease} is not empty and
      *             does not conform to the semantic versioning specification
      */
-    public final static Version create(int major, int minor, int patch, String preRelease) {
+    public static final Version create(int major, int minor, int patch, String preRelease) {
         checkParams(major, minor, patch);
         if (preRelease == null) {
             throw new IllegalArgumentException("preRelease is null");
@@ -371,7 +371,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param patch The patch version.
      * @return The version instance.
      */
-    public final static Version create(int major, int minor, int patch) {
+    public static final Version create(int major, int minor, int patch) {
         checkParams(major, minor, patch);
         return new Version(major, minor, patch, "", "");
     }
@@ -399,7 +399,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @throws IllegalArgumentException If {@code versionString} is
      *             <code>null</code>.
      */
-    public final static Version parseVersion(String versionString) {
+    public static final Version parseVersion(String versionString) {
         if (versionString == null) {
             throw new IllegalArgumentException("versionString is null");
         }
