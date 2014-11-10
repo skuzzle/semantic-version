@@ -87,6 +87,8 @@ public final class Version implements Comparable<Version>, Serializable {
     private static final int PATCH_GROUP = 3;
     private static final int PRE_RELEASE_GROUP = 4;
     private static final int BUILD_MD_GROUP = 5;
+    
+    private static final int TO_STRING_ESTIMATE = 24;
 
     private final int major;
     private final int minor;
@@ -552,7 +554,7 @@ public final class Version implements Comparable<Version>, Serializable {
     @Override
     public String toString() {
         final StringBuilder b = new StringBuilder(this.preRelease.length()
-                + this.buildMetaData.length() + 24);
+                + this.buildMetaData.length() + TO_STRING_ESTIMATE);
         b.append(this.major).append(".").append(this.minor).append(".")
                 .append(this.patch);
         if (!this.preRelease.isEmpty()) {
