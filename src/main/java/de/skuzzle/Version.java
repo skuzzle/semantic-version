@@ -633,8 +633,7 @@ public final class Version implements Comparable<Version>, Serializable {
     /**
      * Compares this version to the provided one, following the
      * <em>semantic versioning</em> specification. See
-     * {@link #compare(Version, Version)} for more information. Here is a quote
-     * from <a href="http://semver.org/">http://semver.org</a>:
+     * {@link #compare(Version, Version)} for more information.
      *
      * @param other The version to compare to.
      * @return A value lower than 0 if this &lt; other, a value greater than 0
