@@ -448,6 +448,29 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     /**
+     * Tries to parse the provided String as a semantic version. If
+     * {@code allowPreRelease} is <code>false</code>, the String must have
+     * neither a pre-release nor a build meta data part. Thus the given String
+     * must have the format {@code X.Y.Z} where at least one part must be
+     * greater than zero.
+     *
+     * <p>
+     * If {@code allowPreRelease} is <code>true</code>, the String is parsed
+     * accoring to the normal semantic version specification.
+     * </p>
+     *
+     * @param versionString The String to parse.
+     * @param allowPreRelease Whether pre-release and build meta data field are
+     *            allowed.
+     * @return The parsed version.
+     * @throws VersionFormatException If the String is no valid version
+     * @since 0.4.0
+     */
+    public static Version parseVersion(String versionString, boolean allowPreRelease) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * Gets this version's major number.
      *
      * @return The major version.
