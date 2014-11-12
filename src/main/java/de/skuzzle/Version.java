@@ -631,8 +631,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return <code>true</code> iff {@code this.equals(obj)} and
      *         {@code this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())}
      * @since 0.2.0
-     * @deprecated Since 0.4.0 - use {@link #equalsWithBuildMetaData(Object)}
-     *             instead.
+     * @deprecated Since 0.4.0 - will be removed in 0.5.0. Use 
+     *             {@link #equalsWithBuildMetaData(Object)} instead.
      */
     @Deprecated
     public boolean equalsIncludeBuildMetaData(Object obj) {
