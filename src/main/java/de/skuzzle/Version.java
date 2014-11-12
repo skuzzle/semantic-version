@@ -467,7 +467,12 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.4.0
      */
     public static Version parseVersion(String versionString, boolean allowPreRelease) {
-        throw new UnsupportedOperationException();
+        final Version version = parseVersion(versionString);
+        if (!allowPreRelease && (version.isPreRelease() || version.hasBuildMetaData())) {
+            throw new VersionFormatException(String.format(
+                    "Version is expected to have no pre-release or build meta data part"));
+        }
+        return version;
     }
 
     /**

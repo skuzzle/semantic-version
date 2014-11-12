@@ -173,6 +173,33 @@ public class VersionTest {
     }
 
     @Test(expected = VersionFormatException.class)
+    public void testParseExpectNoPrelease() {
+        Version.parseVersion("1.2.3-foo", false);
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseExpectNoBuildMetaData() {
+        Version.parseVersion("1.2.3+foo", false);
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseExpectNoPreReleaseAndBuildMetaData() {
+        Version.parseVersion("1.2.3-foo+foo", false);
+    }
+
+    @Test
+    public void testParseVersionSuccessExpectNoPreRelease() {
+        Version.parseVersion("1.2.3", false);
+    }
+
+    @Test
+    public void testParseVersionSuccess() {
+        final Version version = Version.parseVersion("1.2.3-foo+bar", true);
+        Assert.assertEquals("foo", version.getPreRelease());
+        Assert.assertEquals("bar", version.getBuildMetaData());
+    }
+
+    @Test(expected = VersionFormatException.class)
     public void testPreReleaseLastEmptyIdentifier2() {
         Version.create(1, 2, 3, "pre.foo.");
     }
