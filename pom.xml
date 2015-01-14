@@ -1,10 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>de.skuzzle</groupId>
         <artifactId>skuzzle-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
         <relativePath>../skuzzle-parent/pom.xml</relativePath>
     </parent>
 
@@ -25,13 +26,13 @@
     </licenses>
 
     <properties>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
 
         <site.name>jeve</site.name>
         <github.name>jeve</github.name>
-        
-        <sonar.jacoco.itReportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.itReportPath>
+
+        <skipIT>true</skipIT>
     </properties>
 
     <dependencies>
@@ -41,39 +42,27 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>            
-            <!-- package java doc into jar file -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-
-            <!-- package sources into jar file -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-
     <profiles>
         <profile>
             <id>release</id>
+            <activation>
+                <!-- Run for release -->
+                <property>
+                    <name>skuzzle.release</name>
+                </property>
+            </activation>
             <build>
                 <plugins>
-                    <!-- Enable signing and sonatype deploy -->
+                    <!-- package java doc into jar file -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
                     </plugin>
+
+                    <!-- package sources into jar file -->
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
