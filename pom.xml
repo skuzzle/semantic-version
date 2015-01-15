@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.skuzzle</groupId>
         <artifactId>skuzzle-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
         <relativePath>../skuzzle-parent/pom.xml</relativePath>
     </parent>
 
