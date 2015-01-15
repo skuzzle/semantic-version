@@ -133,6 +133,48 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     /**
+     * Returns the greater of the 2 given Versions. If both versions are equal,
+     * then the first argument is returned.
+     *
+     * @param v1 The first version.
+     * @param v2 The second version.
+     * @return The greater version.
+     * @throws IllegalArgumentException If either argument is <code>null</code>.
+     * @since 0.4.0
+     */
+    public static Version max(Version v1, Version v2) {
+        if (v1 == null) {
+            throw new IllegalArgumentException("v1 is null");
+        } else if (v2 == null) {
+            throw new IllegalArgumentException("v2 is null");
+        }
+        return v1.compareTo(v2) < 0
+                ? v2
+                : v1;
+    }
+
+    /**
+     * Returns the lower of the 2 given Versions. If both versions are equal,
+     * then the first argument is returned.
+     *
+     * @param v1 The first version.
+     * @param v2 The second version.
+     * @return The lower version.
+     * @throws IllegalArgumentException If either argument is <code>null</code>.
+     * @since 0.4.0
+     */
+    public static Version min(Version v1, Version v2) {
+        if (v1 == null) {
+            throw new IllegalArgumentException("v1 is null");
+        } else if (v2 == null) {
+            throw new IllegalArgumentException("v2 is null");
+        }
+        return v1.compareTo(v2) <= 0
+                ? v1
+                : v2;
+    }
+
+    /**
      * Compares two versions, following the <em>semantic version</em>
      * specification. Here is a quote from <a href="http://semver.org/">semantic
      * version 2.0.0 specification</a>:

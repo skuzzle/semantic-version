@@ -435,4 +435,60 @@ public class VersionTest {
             Assert.assertEquals(v1.hashCode(), v2.hashCode());
         }
     }
+
+    @Test
+    public void testMin() throws Exception {
+        final Version v1 = Version.create(1, 0, 0);
+        final Version v2 = Version.create(0, 1, 0);
+
+        Assert.assertSame(Version.min(v1, v2), Version.min(v2, v1));
+        Assert.assertSame(v2, Version.min(v1, v2));
+    }
+
+    @Test
+    public void testMinEquals() throws Exception {
+        final Version v1 = Version.create(1, 0, 0);
+        final Version v2 = Version.create(1, 0, 0);
+
+        final Version min = Version.min(v1, v2);
+        Assert.assertSame(v1, min);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMinNullV1() throws Exception {
+        Version.min(null, Version.create(1, 0, 0));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMinNullV2() throws Exception {
+        Version.min(Version.create(1, 0, 0), null);
+    }
+
+    @Test
+    public void testMax() throws Exception {
+        final Version v1 = Version.create(1, 0, 0);
+        final Version v2 = Version.create(0, 1, 0);
+
+        Assert.assertSame(Version.max(v1, v2), Version.max(v2, v1));
+        Assert.assertSame(v1, Version.max(v1, v2));
+    }
+
+    @Test
+    public void testMaxEquals() throws Exception {
+        final Version v1 = Version.create(1, 0, 0);
+        final Version v2 = Version.create(1, 0, 0);
+
+        final Version max = Version.max(v1, v2);
+        Assert.assertSame(v1, max);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMaxNullV1() throws Exception {
+        Version.max(null, Version.create(1, 0, 0));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testMaxNullV2() throws Exception {
+        Version.max(Version.create(1, 0, 0), null);
+    }
 }
