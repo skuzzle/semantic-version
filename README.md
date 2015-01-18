@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/skuzzle/semantic-version.svg?branch=master)](https://travis-ci.org/skuzzle/semantic-version)
+[SonarQube](https://www.serverd.de/sonar/dashboard/index/359)
 
 semantic-version
 ================
@@ -17,7 +18,7 @@ semantic versioning specification.
 
 ## Versioning and Feedback
 This implementation is currently in its initial phase and thereby versioned
-*0.3.0* in terms of semantic versioning. Please feel free to provide feedback
+*0.4.0* in terms of semantic versioning. Please feel free to provide feedback
 by filing an issue to improve the implementation.
 
 ## Maven Dependency
@@ -28,7 +29,7 @@ the following dependency to your pom:
 <dependency>
     <groupId>de.skuzzle</groupId>
     <artifactId>semantic-version</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
