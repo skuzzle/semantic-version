@@ -11,7 +11,7 @@ your source folder and apply any modifications which suit your needs (as long
 as you preserve the license header).
 
 Go to the [implementation](https://github.com/skuzzle/semantic-version/blob/master/src/main/java/de/skuzzle/Version.java)
-or have a look at the [JavaDoc](http://www.semantic-version.skuzzle.de/0.3.0/doc).
+or have a look at the [JavaDoc](http://www.semantic-version.skuzzle.de/0.4.0/doc).
 
 This repository contains JUnit tests of the provided implementation against the
 semantic versioning specification.
