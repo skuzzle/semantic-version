@@ -40,6 +40,14 @@ import java.util.regex.Pattern;
  * appropriately. Neither method considers the {@link #getBuildMetaData() build
  * meta data} field for comparison.
  *
+ * <p>
+ * Note that none of the public methods of this class accept <code>null</code>
+ * values. Most methods will throw an {@link IllegalArgumentException} when
+ * encountering a <code>null</code> argument. However, to comply with the
+ * {@link Comparable} contract, the comparison methods will throw a
+ * {@link NullPointerException} instead.
+ * </p>
+ *
  * @author Simon Taddiken
  * @version 0.4.0-SNAPSHOT
  */
@@ -124,6 +132,9 @@ public final class Version implements Comparable<Version>, Serializable {
     private final String preRelease;
     private final String buildMetaData;
 
+    // store hash code once it has been calculated
+    private int hash;
+
     private Version(int major, int minor, int patch, String preRelease, String buildMd) {
         this.major = major;
         this.minor = minor;
@@ -133,8 +144,9 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     /**
-     * Returns the greater of the 2 given Versions. If both versions are equal,
-     * then the first argument is returned.
+     * Returns the greater of the two given versions by comparing them using
+     * their natural ordering. If both versions are equal, then the first
+     * argument is returned.
      *
      * @param v1 The first version.
      * @param v2 The second version.
@@ -148,14 +160,15 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (v2 == null) {
             throw new IllegalArgumentException("v2 is null");
         }
-        return v1.compareTo(v2) < 0
+        return compare(v1, v2, false) < 0
                 ? v2
                 : v1;
     }
 
     /**
-     * Returns the lower of the 2 given Versions. If both versions are equal,
-     * then the first argument is returned.
+     * Returns the lower of the two given versions by comparing them using their
+     * natural ordering. If both versions are equal, then the first argument is
+     * returned.
      *
      * @param v1 The first version.
      * @param v2 The second version.
@@ -169,7 +182,7 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (v2 == null) {
             throw new IllegalArgumentException("v2 is null");
         }
-        return v1.compareTo(v2) <= 0
+        return compare(v1, v2, false) <= 0
                 ? v1
                 : v2;
     }
@@ -215,6 +228,12 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.2.0
      */
     public static int compare(Version v1, Version v2) {
+        // throw NPE to comply with Comparable specification
+        if (v1 == null) {
+            throw new NullPointerException("v1 is null");
+        } else if (v2 == null) {
+            throw new NullPointerException("v2 is null");
+        }
         return compare(v1, v2, false);
     }
 
@@ -242,68 +261,76 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.3.0
      */
     public static int compareWithBuildMetaData(Version v1, Version v2) {
-        return compare(v1, v2, true);
-    }
-
-    private static int compare(Version v1, Version v2, boolean withBuildMetaData) {
+        // throw NPE to comply with Comparable specification
         if (v1 == null) {
             throw new NullPointerException("v1 is null");
         } else if (v2 == null) {
             throw new NullPointerException("v2 is null");
-        } else if (v1 == v2) {
+        }
+        return compare(v1, v2, true);
+    }
+
+    private static int compare(Version v1, Version v2, boolean withBuildMetaData) {
+        assert v1 != null;
+        assert v2 != null;
+        if (v1 == v2) {
             return 0;
         }
 
-        final int mc, mm, mp;
-        final int result;
-        if ((mc = Integer.compare(v1.major, v2.major)) == 0) {
-            if ((mm = Integer.compare(v1.minor, v2.minor)) == 0) {
-                if ((mp = Integer.compare(v1.patch, v2.patch)) == 0) {
+        final int mc, mm, mp, pr, md;
 
-                    if (v1.isPreRelease() && v2.isPreRelease()) {
-                        // compare pre release parts
-                        result = compareIdentifiers(v1.getPreReleaseParts(),
-                                v2.getPreReleaseParts());
-                    } else if (v1.isPreRelease()) {
-                        // other is greater, because it is no pre release
-                        result = -1;
-                    } else if (v2.isPreRelease()) {
-                        // this is greater because other is no pre release
-                        result = 1;
-                    } else {
-                        // both are no pre releases
-                        result = 0;
-                    }
-                } else {
-                    // versions differ in patch
-                    result = mp;
-                }
-            } else {
-                // versions differ in minor
-                result = mm;
-            }
-        } else {
-            // versions differ in major
-            result = mc;
+        if ((mc = compareInt(v1.major, v2.major)) != 0) {
+            return mc;
         }
-
-        if (withBuildMetaData && result == 0) {
-            // compare build meta data if necessary. Apply same
-            // logic as for pre release parts
-
-            if (v1.hasBuildMetaData() && v2.hasBuildMetaData()) {
-                return compareIdentifiers(v1.getBuildMetaDataParts(),
-                        v2.getBuildMetaDataParts());
-            } else if (v1.hasBuildMetaData()) {
-                // other is greater because it has no build data
-                return -1;
-            } else {
-                // this is greater because other has no build
-                // data
-                return 1;
-            }
+        if ((mm = Integer.compare(v1.minor, v2.minor)) != 0) {
+            return mm;
         }
-        return result;
+        if ((mp = compareInt(v1.patch, v2.patch)) != 0) {
+            return mp;
+        }
+        if ((pr = comparePreRelease(v1, v2)) != 0) {
+            return pr;
+        }
+        if (withBuildMetaData && ((md = compareBuildMetaData(v1, v2)) != 0)) {
+            return md;
+        }
+        return 0;
+    }
+
+    private static int compareInt(int a, int b) {
+        return a - b;
+    }
+
+    private static int comparePreRelease(Version v1, Version v2) {
+        if (v1.isPreRelease() && v2.isPreRelease()) {
+            // compare pre release parts
+            return compareIdentifiers(v1.getPreReleaseParts(),
+                    v2.getPreReleaseParts());
+        } else if (v1.isPreRelease()) {
+            // other is greater, because it is no pre release
+            return -1;
+        } else if (v2.isPreRelease()) {
+            // this is greater because other is no pre release
+            return 1;
+        }
+        return 0;
+    }
+
+    private static int compareBuildMetaData(Version v1, Version v2) {
+        // compare build meta data if necessary. Apply same
+        // logic as for pre release parts
+        if (v1.hasBuildMetaData() && v2.hasBuildMetaData()) {
+            return compareIdentifiers(v1.getBuildMetaDataParts(),
+                    v2.getBuildMetaDataParts());
+        } else if (v1.hasBuildMetaData()) {
+            // other is greater because it has no build data
+            return -1;
+        } else if (v2.hasBuildMetaData()) {
+            // this is greater because other has no build
+            // data
+            return 1;
+        }
+        return 0;
     }
 
     private static int compareIdentifiers(String[] parts1, String[] parts2) {
@@ -498,7 +525,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * <p>
      * If {@code allowPreRelease} is <code>true</code>, the String is parsed
-     * accoring to the normal semantic version specification.
+     * according to the normal semantic version specification.
      * </p>
      *
      * @param versionString The String to parse.
@@ -515,6 +542,34 @@ public final class Version implements Comparable<Version>, Serializable {
                     "Version is expected to have no pre-release or build meta data part"));
         }
         return version;
+    }
+
+    /**
+     * Returns the lower of this version and the given version according to its
+     * natural ordering. If versions are equal, {@code this} is returned.
+     *
+     * @param other The version to compare with.
+     * @return The lower version.
+     * @throws IllegalArgumentException If {@code other} is <code>null</code>.
+     * @since 0.4.0
+     * @see #min(Version, Version)
+     */
+    public Version min(Version other) {
+        return min(this, other);
+    }
+
+    /**
+     * Returns the greater of this version and the given version according to
+     * its natural ordering. If versions are equal, {@code this} is returned.
+     *
+     * @param other The version to compare with.
+     * @return The greater version.
+     * @throws IllegalArgumentException If {@code other} is <code>null</code>.
+     * @since 0.4.0
+     * @see #max(Version, Version)
+     */
+    public Version max(Version other) {
+        return max(this, other);
     }
 
     /**
@@ -645,7 +700,12 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(this.major, this.minor, this.patch, this.preRelease);
+        int h = this.hash;
+        if (h == 0) {
+            h = Objects.hash(this.major, this.minor, this.patch, this.preRelease);
+            this.hash = h;
+        }
+        return this.hash;
     }
 
     /**
@@ -673,7 +733,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return <code>true</code> iff {@code this.equals(obj)} and
      *         {@code this.getBuildMetaData().equals(((Version) obj).getBuildMetaData())}
      * @since 0.2.0
-     * @deprecated Since 0.4.0 - will be removed in 0.5.0. Use 
+     * @deprecated Since 0.4.0 - will be removed in 0.5.0. Use
      *             {@link #equalsWithBuildMetaData(Object)} instead.
      */
     @Deprecated

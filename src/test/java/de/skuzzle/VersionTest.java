@@ -1,6 +1,7 @@
 package de.skuzzle;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -386,6 +387,32 @@ public class VersionTest {
         }
     }
 
+    @Test
+    public void testPreReleaseEquality() throws Exception {
+        for (final Version version : SEMVER_ORG_VERSIONS) {
+            final Version copy = Version.create(version.getMajor(), version.getMinor(),
+                    version.getPatch(), version.getPreRelease(),
+                    version.getBuildMetaData());
+            assertEquals(version, copy);
+            assertTrue(version.equalsWithBuildMetaData(copy));
+            assertTrue(version.compareTo(copy) == 0);
+            assertTrue(version.compareToWithBuildMetaData(copy) == 0);
+        }
+    }
+
+    @Test
+    public void testBuildMDEquality() throws Exception {
+        for (final Version version : SEMVER_ORG_BMD_VERSIONS) {
+            final Version copy = Version.create(version.getMajor(), version.getMinor(),
+                    version.getPatch(), version.getPreRelease(),
+                    version.getBuildMetaData());
+            assertEquals(version, copy);
+            assertTrue(version.equalsWithBuildMetaData(copy));
+            assertTrue(version.compareTo(copy) == 0);
+            assertTrue(version.compareToWithBuildMetaData(copy) == 0);
+        }
+    }
+
     @Test(expected = NullPointerException.class)
     public void testCompareNull1() {
         Version.compare(null, Version.create(1, 1, 1));
@@ -498,6 +525,14 @@ public class VersionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testMaxNullV2() throws Exception {
         Version.max(Version.create(1, 0, 0), null);
+    }
+
+    @Test
+    public void testSamePrereleaseAndWithBuildMD() throws Exception {
+        final Version v1 = Version.parseVersion("1.0.0-a.b+a");
+        final Version v2 = Version.parseVersion("1.0.0-a.b+b");
+
+        assertTrue(v1.compareToWithBuildMetaData(v2) < 0);
     }
 
     @Test
