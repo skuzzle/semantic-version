@@ -1,5 +1,13 @@
 package de.skuzzle;
 
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -490,5 +498,21 @@ public class VersionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testMaxNullV2() throws Exception {
         Version.max(Version.create(1, 0, 0), null);
+    }
+
+    @Test
+    public void testSerialize() throws Exception {
+        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        final ObjectOutputStream out = new ObjectOutputStream(bout);
+        for (final Version v : SEMVER_ORG_VERSIONS) {
+            out.writeObject(v);
+        }
+        out.close();
+        final InputStream bin = new ByteArrayInputStream(bout.toByteArray());
+        final ObjectInputStream in = new ObjectInputStream(bin);
+        for (final Version v : SEMVER_ORG_VERSIONS) {
+            assertEquals(v, in.readObject());
+        }
+        in.close();
     }
 }
