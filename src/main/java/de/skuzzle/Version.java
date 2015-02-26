@@ -344,7 +344,7 @@ public final class Version implements Comparable<Version>, Serializable {
 
         // all pre release id's are equal, so compare amount of
         // pre release id's
-        return Integer.compare(parts1.length, parts2.length);
+        return compareInt(parts1.length, parts2.length);
     }
 
     private static int comparePreReleaseParts(String p1, String p2) {
