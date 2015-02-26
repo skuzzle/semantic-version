@@ -49,7 +49,6 @@ import java.util.regex.Pattern;
  * </p>
  *
  * @author Simon Taddiken
- * @version 0.4.0-SNAPSHOT
  */
 public final class Version implements Comparable<Version>, Serializable {
 
@@ -551,7 +550,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param other The version to compare with.
      * @return The lower version.
      * @throws IllegalArgumentException If {@code other} is <code>null</code>.
-     * @since 0.4.0
+     * @since 0.5.0
      * @see #min(Version, Version)
      */
     public Version min(Version other) {
@@ -565,7 +564,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @param other The version to compare with.
      * @return The greater version.
      * @throws IllegalArgumentException If {@code other} is <code>null</code>.
-     * @since 0.4.0
+     * @since 0.5.0
      * @see #max(Version, Version)
      */
     public Version max(Version other) {
