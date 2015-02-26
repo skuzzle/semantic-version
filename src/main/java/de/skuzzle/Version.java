@@ -282,7 +282,7 @@ public final class Version implements Comparable<Version>, Serializable {
         if ((mc = compareInt(v1.major, v2.major)) != 0) {
             return mc;
         }
-        if ((mm = Integer.compare(v1.minor, v2.minor)) != 0) {
+        if ((mm = compareInt(v1.minor, v2.minor)) != 0) {
             return mm;
         }
         if ((mp = compareInt(v1.patch, v2.patch)) != 0) {
@@ -357,7 +357,7 @@ public final class Version implements Comparable<Version>, Serializable {
             return p1.compareTo(p2);
         } else if (num1 >= 0 && num2 >= 0) {
             // both are numerical
-            return Integer.compare(num1, num2);
+            return compareInt(num1, num2);
         } else if (num1 >= 0) {
             // only part1 is numerical -> p2 is greater
             return -1;
