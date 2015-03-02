@@ -550,4 +550,20 @@ public class VersionTest {
         }
         in.close();
     }
+
+    @Test
+    public void testDeserialize() throws Exception {
+        // Deserialize a file which has been written by version 0.2.0
+        final ClassLoader cl = getClass().getClassLoader();
+        final InputStream inp = cl.getResourceAsStream("versions.bin");
+        final ObjectInputStream oin = new ObjectInputStream(inp);
+        for (final Version v : SEMVER_ORG_VERSIONS) {
+            assertEquals(v, oin.readObject());
+        }
+
+        for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
+            assertEquals(v, oin.readObject());
+        }
+        oin.close();
+    }
 }
