@@ -439,7 +439,7 @@ public final class Version implements Comparable<Version>, Serializable {
         if (preRelease == null) {
             throw new IllegalArgumentException("preRelease is null");
         }
-        if (!PRE_RELEASE.matcher(preRelease).matches()) {
+        if (!preRelease.isEmpty() && !PRE_RELEASE.matcher(preRelease).matches()) {
             throw new VersionFormatException(preRelease);
         }
         return new Version(major, minor, patch, preRelease, "");

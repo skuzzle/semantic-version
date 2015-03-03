@@ -45,6 +45,13 @@ public class VersionTest {
             Version.parseVersion("2.1.1")
     };
 
+    @Test
+    public void testPreReleaseEmptyString() {
+        final Version v = Version.create(1, 1, 1, "");
+        assertEquals("", v.getPreRelease());
+        assertEquals("", v.getBuildMetaData());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testPreReleaseNull() {
         Version.create(1, 1, 1, null);
