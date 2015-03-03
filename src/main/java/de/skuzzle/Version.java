@@ -1,18 +1,18 @@
 /*
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) 2015 Simon Taddiken
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,6 +39,10 @@ import java.util.regex.Pattern;
  * {@link #compareTo(Version)}, {@link #hashCode()} is implemented
  * appropriately. Neither method considers the {@link #getBuildMetaData() build
  * meta data} field for comparison.
+ *
+ * <p>
+ * Instances of this class are fully immutable.
+ * </p>
  *
  * <p>
  * Note that unless stated otherwise, none of the public methods of this class
@@ -98,6 +102,11 @@ public final class Version implements Comparable<Version>, Serializable {
     /**
      * Comparator for ordering versions with additionally considering the build
      * meta data field when comparing versions.
+     *
+     * <p>
+     * Note: this comparator imposes orderings that are inconsistent with
+     * equals.
+     * </p>
      *
      * @since 0.3.0
      */
