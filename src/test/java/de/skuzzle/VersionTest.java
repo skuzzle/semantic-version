@@ -1,6 +1,7 @@
 package de.skuzzle;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -532,6 +533,57 @@ public class VersionTest {
         final Version v2 = Version.parseVersion("1.0.0-a.b+b");
 
         assertTrue(v1.compareToWithBuildMetaData(v2) < 0);
+    }
+
+    @Test
+    public void testIsNoPreReleaseIdentifierNull() throws Exception {
+        assertFalse(Version.isValidPreRelease(null));
+    }
+
+    @Test
+    public void testIsPreReleaseIdentifierEmptyString() throws Exception {
+        assertTrue(Version.isValidPreRelease(""));
+    }
+
+    @Test
+    public void testIsValidPreReleaseIdentifier() throws Exception {
+        for (final Version v : SEMVER_ORG_VERSIONS) {
+            assertTrue(Version.isValidPreRelease(v.getPreRelease()));
+        }
+    }
+
+    @Test
+    public void testIsNoBuildMDIdentifierNull() throws Exception {
+        assertFalse(Version.isValidBuildMetaData(null));
+    }
+
+    @Test
+    public void testIsBuildMDIdentifierEmptyString() throws Exception {
+        assertTrue(Version.isValidBuildMetaData(""));
+    }
+
+    @Test
+    public void testIsValidBuildMDIdentifier() throws Exception {
+        for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
+            assertTrue(Version.isValidBuildMetaData(v.getPreRelease()));
+        }
+    }
+
+    @Test
+    public void testNullIsNoVersion() throws Exception {
+        assertFalse(Version.isValidVersion(null));
+    }
+
+    @Test
+    public void testEmptyStringIsNoVersion() throws Exception {
+        assertFalse(Version.isValidVersion(""));
+    }
+
+    @Test
+    public void testIsValidVersion() throws Exception {
+        for (final Version v : SEMVER_ORG_VERSIONS) {
+            assertTrue(Version.isValidVersion(v.toString()));
+        }
     }
 
     @Test

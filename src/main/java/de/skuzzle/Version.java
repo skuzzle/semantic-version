@@ -1,18 +1,18 @@
 /*
  * The MIT License (MIT)
- *
- * Copyright (c) 2014 Simon Taddiken
- *
+ * 
+ * Copyright (c) 2015 Simon Taddiken
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,11 +41,11 @@ import java.util.regex.Pattern;
  * meta data} field for comparison.
  *
  * <p>
- * Note that none of the public methods of this class accept <code>null</code>
- * values. Most methods will throw an {@link IllegalArgumentException} when
- * encountering a <code>null</code> argument. However, to comply with the
- * {@link Comparable} contract, the comparison methods will throw a
- * {@link NullPointerException} instead.
+ * Note that unless stated otherwise, none of the public methods of this class
+ * accept <code>null</code> values. Most methods will throw an
+ * {@link IllegalArgumentException} when encountering a <code>null</code>
+ * argument. However, to comply with the {@link Comparable} contract, the
+ * comparison methods will throw a {@link NullPointerException} instead.
  * </p>
  *
  * @author Simon Taddiken
@@ -140,6 +140,77 @@ public final class Version implements Comparable<Version>, Serializable {
         this.patch = patch;
         this.preRelease = preRelease;
         this.buildMetaData = buildMd;
+    }
+
+    /**
+     * Tries to parse the given String as a semantic version and returns whether
+     * the String is properly formatted according to the semantic version
+     * specification.
+     *
+     * <p>
+     * Note: this method does not throw an exception upon <code>null</code>
+     * input, but returns <code>false</code> instead.
+     * </p>
+     *
+     * @param version The String to check.
+     * @return Whether the given String is formatted as a semantic version.
+     * @since 0.5.0
+     */
+    public static boolean isValidVersion(String version) {
+        if (version == null || version.isEmpty()) {
+            return false;
+        }
+        return VERSION_PATTERN.matcher(version).matches();
+    }
+
+    /**
+     * Returns whether the given String is a valid pre-release identifier. That
+     * is, this method returns <code>true</code> if, and only if the
+     * {@code preRelease} parameter is either the empty string or properly
+     * formatted as a pre-release identifier according to the semantic version
+     * specification.
+     *
+     * <p>
+     * Note: this method does not throw an exception upon <code>null</code>
+     * input, but returns <code>false</code> instead.
+     * </p>
+     *
+     * @param preRelease The String to check.
+     * @return Whether the given String is a valid pre-release identifier.
+     * @since 0.5.0
+     */
+    public static boolean isValidPreRelease(String preRelease) {
+        if (preRelease == null) {
+            return false;
+        } else if (preRelease.isEmpty()) {
+            return true;
+        }
+        return PRE_RELEASE.matcher(preRelease).matches();
+    }
+
+    /**
+     * Returns whether the given String is a valid build meta data identifier.
+     * That is, this method returns <code>true</code> if, and only if the
+     * {@code buildMetaData} parameter is either the empty string or properly
+     * formatted as a build meta data identifier according to the semantic
+     * version specification.
+     *
+     * <p>
+     * Note: this method does not throw an exception upon <code>null</code>
+     * input, but returns <code>false</code> instead.
+     * </p>
+     *
+     * @param buildMetaData The String to check.
+     * @return Whether the given String is a valid build meta data identifier.
+     * @since 0.5.0
+     */
+    public static boolean isValidBuildMetaData(String buildMetaData) {
+        if (buildMetaData == null) {
+            return false;
+        } else if (buildMetaData.isEmpty()) {
+            return true;
+        }
+        return PRE_RELEASE.matcher(buildMetaData).matches();
     }
 
     /**
