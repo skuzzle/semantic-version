@@ -65,7 +65,7 @@ If you need to do so, you can use
 
 ```java
 v1.compareToWithBuildMetaData(v2)
-v1.equalsIncludeBuildMetaData(v2)
+v1.equalsWithBuildMetaData(v2)
 ```
 
 There also exist static methods and comparators for comparing two versions.
