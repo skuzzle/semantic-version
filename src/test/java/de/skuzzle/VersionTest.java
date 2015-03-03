@@ -454,14 +454,6 @@ public class VersionTest {
         Assert.assertFalse(v1.equals(v2));
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testEqualsIncludeBuildMetaData() {
-        final Version v1 = Version.create(1, 2, 3, "", "build");
-        final Version v2 = Version.create(1, 2, 3, "", "build");
-        Assert.assertTrue(v1.equalsIncludeBuildMetaData(v2));
-    }
-
     @Test
     public void testParseToString() {
         for (final Version v1 : SEMVER_ORG_VERSIONS) {
