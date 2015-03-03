@@ -25,7 +25,6 @@ package de.skuzzle;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -781,7 +780,10 @@ public final class Version implements Comparable<Version>, Serializable {
     public int hashCode() {
         int h = this.hash;
         if (h == 0) {
-            h = Objects.hash(this.major, this.minor, this.patch, this.preRelease);
+            h = 31 + this.major;
+            h = 31 * h + this.minor;
+            h = 31 * h + this.patch;
+            h = 31 * h + this.preRelease.hashCode();
             this.hash = h;
         }
         return this.hash;
