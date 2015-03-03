@@ -5,20 +5,20 @@ semantic-version
 ================
 
 This is a single-class [semantic version 2.0.0](http://semver.org/)
-implementation for java 7. It requires no further dependencies and is thereby
+implementation for java 6. It requires no further dependencies and is thereby
 easy to use within your own projects. You may simply copy the single class to
 your source folder and apply any modifications which suit your needs (as long
 as you preserve the license header).
 
 Go to the [implementation](https://github.com/skuzzle/semantic-version/blob/master/src/main/java/de/skuzzle/Version.java)
-or have a look at the [JavaDoc](http://www.semantic-version.skuzzle.de/0.4.0/doc).
+or have a look at the [JavaDoc](http://www.semantic-version.skuzzle.de/0.5.0/doc).
 
 This repository contains JUnit tests of the provided implementation against the
 semantic versioning specification.
 
 ## Versioning and Feedback
 This implementation is currently in its initial phase and thereby versioned
-*0.4.0* in terms of semantic versioning. Please feel free to provide feedback
+*0.5.0* in terms of semantic versioning. Please feel free to provide feedback
 by filing an issue to improve the implementation.
 
 ## Maven Dependency
@@ -29,7 +29,7 @@ the following dependency to your pom:
 <dependency>
     <groupId>de.skuzzle</groupId>
     <artifactId>semantic-version</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
