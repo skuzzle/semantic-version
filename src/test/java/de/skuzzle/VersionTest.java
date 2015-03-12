@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -607,6 +609,22 @@ public class VersionTest {
         // Deserialize a file which has been written by version 0.2.0
         final ClassLoader cl = getClass().getClassLoader();
         final InputStream inp = cl.getResourceAsStream("versions.bin");
+        final ObjectInputStream oin = new ObjectInputStream(inp);
+        for (final Version v : SEMVER_ORG_VERSIONS) {
+            assertEquals(v, oin.readObject());
+        }
+
+        for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
+            assertEquals(v, oin.readObject());
+        }
+        oin.close();
+    }
+
+    @Test
+    public void testDeserialize05() throws Exception {
+        // Deserialize a file which has been written by version 0.2.0
+        final ClassLoader cl = getClass().getClassLoader();
+        final InputStream inp = cl.getResourceAsStream("versions_0.5.bin");
         final ObjectInputStream oin = new ObjectInputStream(inp);
         for (final Version v : SEMVER_ORG_VERSIONS) {
             assertEquals(v, oin.readObject());
