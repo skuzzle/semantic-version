@@ -1,4 +1,4 @@
-package de.skuzzle.semver;
+package de.skuzzle.semantic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -13,8 +15,7 @@ import java.io.ObjectOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.skuzzle.semver.Version;
-import de.skuzzle.semver.Version.VersionFormatException;
+import de.skuzzle.semantic.Version.VersionFormatException;
 
 public class VersionTest {
 
@@ -46,6 +47,18 @@ public class VersionTest {
             Version.parseVersion("2.1.0"),
             Version.parseVersion("2.1.1")
     };
+
+    public void writeBinFile() throws IOException {
+        final FileOutputStream out = new FileOutputStream("versions.bin");
+        final ObjectOutputStream oout = new ObjectOutputStream(out);
+        for (final Version v : SEMVER_ORG_VERSIONS) {
+            oout.writeObject(v);
+        }
+        for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
+            oout.writeObject(v);
+        }
+        oout.close();
+    }
 
     @Test
     public void testPreReleaseEmptyString() {
@@ -604,26 +617,10 @@ public class VersionTest {
     }
 
     @Test
-    public void testDeserialize() throws Exception {
-        // Deserialize a file which has been written by version 0.2.0
-        final ClassLoader cl = getClass().getClassLoader();
-        final InputStream inp = cl.getResourceAsStream("versions.bin");
-        final ObjectInputStream oin = new ObjectInputStream(inp);
-        for (final Version v : SEMVER_ORG_VERSIONS) {
-            assertEquals(v, oin.readObject());
-        }
-
-        for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
-            assertEquals(v, oin.readObject());
-        }
-        oin.close();
-    }
-
-    @Test
     public void testDeserialize05() throws Exception {
-        // Deserialize a file which has been written by version 0.2.0
+        // Deserialize a file which has been written by version 0.6.0
         final ClassLoader cl = getClass().getClassLoader();
-        final InputStream inp = cl.getResourceAsStream("versions_0.5.bin");
+        final InputStream inp = cl.getResourceAsStream("versions_0.6.bin");
         final ObjectInputStream oin = new ObjectInputStream(inp);
         for (final Version v : SEMVER_ORG_VERSIONS) {
             assertEquals(v, oin.readObject());

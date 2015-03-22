@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.skuzzle.semver;
+package de.skuzzle.semantic;
 
 import java.io.Serializable;
 import java.util.Comparator;
