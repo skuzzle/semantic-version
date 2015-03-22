@@ -1,4 +1,4 @@
-package de.skuzzle;
+package de.skuzzle.semver;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -13,7 +13,8 @@ import java.io.ObjectOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.skuzzle.Version.VersionFormatException;
+import de.skuzzle.semver.Version;
+import de.skuzzle.semver.Version.VersionFormatException;
 
 public class VersionTest {
 
