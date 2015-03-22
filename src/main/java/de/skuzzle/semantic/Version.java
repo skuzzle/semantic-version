@@ -826,7 +826,7 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private boolean testEquality(Object obj, boolean includeBuildMd) {
-        return obj == this || obj != null && obj instanceof Version
+        return obj == this || obj instanceof Version
                 && compare(this, (Version) obj, includeBuildMd) == 0;
     }
 
