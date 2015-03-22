@@ -48,6 +48,10 @@ public class VersionTest {
             Version.parseVersion("2.1.1")
     };
 
+    public static void main(String[] args) throws IOException {
+        new VersionTest().writeBinFile();
+    }
+
     public void writeBinFile() throws IOException {
         final FileOutputStream out = new FileOutputStream("versions.bin");
         final ObjectOutputStream oout = new ObjectOutputStream(out);

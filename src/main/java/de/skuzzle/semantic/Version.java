@@ -55,8 +55,8 @@ import java.util.regex.Pattern;
  */
 public final class Version implements Comparable<Version>, Serializable {
 
-    /** Conforms to all Version implementations since 0.1.0 */
-    private static final long serialVersionUID = -7080189911455871050L;
+    /** Conforms to all Version implementations since 0.6.0 */
+    private static final long serialVersionUID = 6034927062401119911L;
 
     /**
      * Semantic Version Specification to which this class complies
