@@ -583,7 +583,7 @@ public class VersionTest {
     @Test
     public void testIsValidBuildMDIdentifier() throws Exception {
         for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
-            assertTrue(Version.isValidBuildMetaData(v.getPreRelease()));
+            assertTrue(v.toString(), Version.isValidBuildMetaData(v.getBuildMetaData()));
         }
     }
 

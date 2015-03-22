@@ -146,7 +146,7 @@ public final class Version implements Comparable<Version>, Serializable {
     private final String buildMetaData;
 
     // store hash code once it has been calculated
-    private int hash;
+    private volatile int hash;
 
     private Version(int major, int minor, int patch, String preRelease, String buildMd) {
         this.major = major;
@@ -194,12 +194,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.5.0
      */
     public static boolean isValidPreRelease(String preRelease) {
-        if (preRelease == null) {
-            return false;
-        } else if (preRelease.isEmpty()) {
-            return true;
-        }
-        return PRE_RELEASE.matcher(preRelease).matches();
+        return preRelease != null &&
+            (preRelease.isEmpty() || PRE_RELEASE.matcher(preRelease).matches());
     }
 
     /**
@@ -219,12 +215,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.5.0
      */
     public static boolean isValidBuildMetaData(String buildMetaData) {
-        if (buildMetaData == null) {
-            return false;
-        } else if (buildMetaData.isEmpty()) {
-            return true;
-        }
-        return PRE_RELEASE.matcher(buildMetaData).matches();
+        return buildMetaData != null &&
+            (buildMetaData.isEmpty() || BUILD_MD.matcher(buildMetaData).matches());
     }
 
     /**
@@ -239,11 +231,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.4.0
      */
     public static Version max(Version v1, Version v2) {
-        if (v1 == null) {
-            throw new IllegalArgumentException("v1 is null");
-        } else if (v2 == null) {
-            throw new IllegalArgumentException("v2 is null");
-        }
+        require(v1 != null, "v1 is null");
+        require(v2 != null, "v2 is null");
         return compare(v1, v2, false) < 0
                 ? v2
                 : v1;
@@ -261,11 +250,8 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.4.0
      */
     public static Version min(Version v1, Version v2) {
-        if (v1 == null) {
-            throw new IllegalArgumentException("v1 is null");
-        } else if (v2 == null) {
-            throw new IllegalArgumentException("v2 is null");
-        }
+        require(v1 != null, "v1 is null");
+        require(v2 != null, "v2 is null");
         return compare(v1, v2, false) <= 0
                 ? v1
                 : v2;
@@ -485,11 +471,9 @@ public final class Version implements Comparable<Version>, Serializable {
             String preRelease,
             String buildMetaData) {
         checkParams(major, minor, patch);
-        if (preRelease == null) {
-            throw new IllegalArgumentException("preRelease is null");
-        } else if (buildMetaData == null) {
-            throw new IllegalArgumentException("buildMetaData is null");
-        }
+        require(preRelease != null, "preRelease is null");
+        require(buildMetaData != null, "buildMetaData is null");
+
         if (!preRelease.isEmpty() && !PRE_RELEASE.matcher(preRelease).matches()) {
             throw new VersionFormatException(preRelease);
         }
@@ -515,11 +499,11 @@ public final class Version implements Comparable<Version>, Serializable {
      * @throws VersionFormatException If {@code preRelease} is not empty and
      *             does not conform to the semantic versioning specification
      */
-    public static final Version create(int major, int minor, int patch, String preRelease) {
+    public static final Version create(int major, int minor, int patch,
+            String preRelease) {
         checkParams(major, minor, patch);
-        if (preRelease == null) {
-            throw new IllegalArgumentException("preRelease is null");
-        }
+        require(preRelease != null, "preRelease is null");
+
         if (!preRelease.isEmpty() && !PRE_RELEASE.matcher(preRelease).matches()) {
             throw new VersionFormatException(preRelease);
         }
@@ -542,14 +526,15 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static void checkParams(int major, int minor, int patch) {
-        if (major < 0) {
-            throw new IllegalArgumentException("major < 0");
-        } else if (minor < 0) {
-            throw new IllegalArgumentException("minor < 0");
-        } else if (patch < 0) {
-            throw new IllegalArgumentException("patch < 0");
-        } else if (major == 0 && minor == 0 && patch == 0) {
-            throw new IllegalArgumentException("all parts are 0");
+        require(major >= 0, "major < 0");
+        require(minor >= 0, "minor < 0");
+        require(patch >= 0, "patch < 0");
+        require(major != 0 || minor != 0 || patch != 0, "all parts are 0");
+    }
+
+    private static void require(boolean condition, String message) {
+        if (!condition) {
+            throw new IllegalArgumentException(message);
         }
     }
 
@@ -565,9 +550,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *             <code>null</code>.
      */
     public static final Version parseVersion(String versionString) {
-        if (versionString == null) {
-            throw new IllegalArgumentException("versionString is null");
-        }
+        require(versionString != null, "versionString is null");
         final Matcher m = VERSION_PATTERN.matcher(versionString);
         if (!m.matches()) {
             throw new VersionFormatException(versionString);
@@ -619,7 +602,8 @@ public final class Version implements Comparable<Version>, Serializable {
         final Version version = parseVersion(versionString);
         if (!allowPreRelease && (version.isPreRelease() || version.hasBuildMetaData())) {
             throw new VersionFormatException(String.format(
-                    "Version is expected to have no pre-release or build meta data part"));
+                    "Version is expected to have no pre-release or build meta data part"
+                    ));
         }
         return version;
     }
