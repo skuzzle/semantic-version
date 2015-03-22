@@ -35,16 +35,16 @@ public class VersionTest {
 
     // same as above, but exchanged pre release and build meta data
     private static final Version[] SEMVER_ORG_BMD_VERSIONS = new Version[] {
-            Version.parseVersion("1.0.0+alpha"),
-            Version.parseVersion("1.0.0+alpha.1"),
-            Version.parseVersion("1.0.0+alpha.beta"),
-            Version.parseVersion("1.0.0+beta"),
-            Version.parseVersion("1.0.0+beta.2"),
-            Version.parseVersion("1.0.0+beta.11"),
-            Version.parseVersion("1.0.0+rc.1"),
-            Version.parseVersion("1.0.0"),
-            Version.parseVersion("2.0.0"),
-            Version.parseVersion("2.1.0"),
+            Version.parseVersion("1.0.0-rc.1+alpha"),
+            Version.parseVersion("1.0.0-rc.1+alpha.1"),
+            Version.parseVersion("1.0.0-rc.1+alpha.beta"),
+            Version.parseVersion("1.0.0-rc.1+beta"),
+            Version.parseVersion("1.0.0-rc.1+beta.2"),
+            Version.parseVersion("1.0.0-rc.1+beta.11"),
+            Version.parseVersion("1.0.0-rc.1+rc.1"),
+            Version.parseVersion("1.0.0-rc.1"),
+            Version.parseVersion("2.0.0-rc.1"),
+            Version.parseVersion("2.1.0-rc.1"),
             Version.parseVersion("2.1.1")
     };
 
