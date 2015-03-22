@@ -355,30 +355,22 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static int compare(Version v1, Version v2, boolean withBuildMetaData) {
-        assert v1 != null;
-        assert v2 != null;
-        if (v1 == v2) {
-            return 0;
+        int result = 0;
+        if (v1 != v2) {
+            final int mc, mm, mp, pr, md;
+            if ((mc = compareInt(v1.major, v2.major)) != 0) {
+                result = mc;
+            } else if ((mm = compareInt(v1.minor, v2.minor)) != 0) {
+                result = mm;
+            } else if ((mp = compareInt(v1.patch, v2.patch)) != 0) {
+                result = mp;
+            } else if ((pr = comparePreRelease(v1, v2)) != 0) {
+                result = pr;
+            } else if (withBuildMetaData && ((md = compareBuildMetaData(v1, v2)) != 0)) {
+                result = md;
+            }
         }
-
-        final int mc, mm, mp, pr, md;
-
-        if ((mc = compareInt(v1.major, v2.major)) != 0) {
-            return mc;
-        }
-        if ((mm = compareInt(v1.minor, v2.minor)) != 0) {
-            return mm;
-        }
-        if ((mp = compareInt(v1.patch, v2.patch)) != 0) {
-            return mp;
-        }
-        if ((pr = comparePreRelease(v1, v2)) != 0) {
-            return pr;
-        }
-        if (withBuildMetaData && ((md = compareBuildMetaData(v1, v2)) != 0)) {
-            return md;
-        }
-        return 0;
+        return result;
     }
 
     private static int compareInt(int a, int b) {
@@ -386,35 +378,37 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static int comparePreRelease(Version v1, Version v2) {
+        int result = 0;
         if (v1.isPreRelease() && v2.isPreRelease()) {
             // compare pre release parts
-            return compareIdentifiers(v1.getPreReleaseParts(),
+            result = compareIdentifiers(v1.getPreReleaseParts(),
                     v2.getPreReleaseParts());
         } else if (v1.isPreRelease()) {
             // other is greater, because it is no pre release
-            return -1;
+            result = -1;
         } else if (v2.isPreRelease()) {
             // this is greater because other is no pre release
-            return 1;
+            result = 1;
         }
-        return 0;
+        return result;
     }
 
     private static int compareBuildMetaData(Version v1, Version v2) {
         // compare build meta data if necessary. Apply same
         // logic as for pre release parts
+        int result = 0;
         if (v1.hasBuildMetaData() && v2.hasBuildMetaData()) {
-            return compareIdentifiers(v1.getBuildMetaDataParts(),
+            result = compareIdentifiers(v1.getBuildMetaDataParts(),
                     v2.getBuildMetaDataParts());
         } else if (v1.hasBuildMetaData()) {
             // other is greater because it has no build data
-            return -1;
+            result = -1;
         } else if (v2.hasBuildMetaData()) {
             // this is greater because other has no build
             // data
-            return 1;
+            result = 1;
         }
-        return 0;
+        return result;
     }
 
     private static int compareIdentifiers(String[] parts1, String[] parts2) {
@@ -436,19 +430,21 @@ public final class Version implements Comparable<Version>, Serializable {
         final int num1 = isNumeric(p1);
         final int num2 = isNumeric(p2);
 
+        final int result;
         if (num1 < 0 && num2 < 0) {
             // both are not numerical -> compare lexically
-            return p1.compareTo(p2);
+            result = p1.compareTo(p2);
         } else if (num1 >= 0 && num2 >= 0) {
             // both are numerical
-            return compareInt(num1, num2);
+            result = compareInt(num1, num2);
         } else if (num1 >= 0) {
             // only part1 is numerical -> p2 is greater
-            return -1;
+            result = -1;
         } else {
             // only part2 is numerical -> p1 is greater
-            return 1;
+            result = 1;
         }
+        return result;
     }
 
     /**
