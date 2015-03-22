@@ -132,6 +132,7 @@ public final class Version implements Comparable<Version>, Serializable {
     private static final int BUILD_MD_GROUP = 5;
 
     private static final int TO_STRING_ESTIMATE = 24;
+    private static final int HASH_PRIME = 31;
 
     private final int major;
     private final int minor;
@@ -780,10 +781,10 @@ public final class Version implements Comparable<Version>, Serializable {
     public int hashCode() {
         int h = this.hash;
         if (h == 0) {
-            h = 31 + this.major;
-            h = 31 * h + this.minor;
-            h = 31 * h + this.patch;
-            h = 31 * h + this.preRelease.hashCode();
+            h = HASH_PRIME + this.major;
+            h = HASH_PRIME * h + this.minor;
+            h = HASH_PRIME * h + this.patch;
+            h = HASH_PRIME * h + this.preRelease.hashCode();
             this.hash = h;
         }
         return this.hash;
