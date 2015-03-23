@@ -35,6 +35,10 @@
         <skipIT>true</skipIT>
     </properties>
 
+    <scm>
+        <developerConnection>scm:git:https://github.com/skuzzle/</developerConnection>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
