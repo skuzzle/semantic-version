@@ -36,7 +36,7 @@
     </properties>
 
     <scm>
-        <developerConnection>scm:git:https://github.com/skuzzle/${github.name}.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/skuzzle/</developerConnection>
     </scm>
 
     <dependencies>
