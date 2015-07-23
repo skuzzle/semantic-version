@@ -223,6 +223,11 @@ public class VersionTest {
     }
 
     @Test
+    public void testParseVersionPreReleaseSingleZero() throws Exception {
+        Version.parseVersion("1.2.3-0.1.0");
+    }
+
+    @Test
     public void testParseVersionSuccessExpectNoPreRelease() {
         Version.parseVersion("1.2.3", false);
     }
@@ -423,6 +428,7 @@ public class VersionTest {
             assertTrue(version.equalsWithBuildMetaData(copy));
             assertTrue(version.compareTo(copy) == 0);
             assertTrue(version.compareToWithBuildMetaData(copy) == 0);
+            assertEquals(version.hashCode(), copy.hashCode());
         }
     }
 
@@ -436,6 +442,7 @@ public class VersionTest {
             assertTrue(version.equalsWithBuildMetaData(copy));
             assertTrue(version.compareTo(copy) == 0);
             assertTrue(version.compareToWithBuildMetaData(copy) == 0);
+            assertEquals(version.hashCode(), copy.hashCode());
         }
     }
 
