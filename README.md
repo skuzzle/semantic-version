@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/skuzzle/semantic-version.svg?branch=master)](https://travis-ci.org/skuzzle/semantic-version)
-[SonarQube](https://www.serverd.de/sonar/dashboard/index/359)
+[SonarQube](http://projectpolly.de:9000/dashboard/index/335)
 
 semantic-version
 ================
