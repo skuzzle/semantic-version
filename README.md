@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/skuzzle/semantic-version.svg?branch=master)](https://travis-ci.org/skuzzle/semantic-version)
-[SonarQube](http://projectpolly.de:9000/dashboard/index/335)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version)
+[![JavaDoc](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version.svg?label=JavaDoc)](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version)
+
 
 semantic-version
 ================
@@ -10,16 +12,6 @@ easy to use within your own projects. You may simply copy the single class to
 your source folder and apply any modifications which suit your needs (as long
 as you preserve the license header).
 
-Go to the [implementation](https://github.com/skuzzle/semantic-version/blob/master/src/main/java/de/skuzzle/semantic/Version.java)
-or have a look at the [JavaDoc](http://www.semantic-version.skuzzle.de/0.6.0/doc).
-
-This repository contains JUnit tests of the provided implementation against the
-semantic versioning specification.
-
-## Versioning and Feedback
-This implementation is currently in its initial phase and thereby versioned
-*0.6.0* in terms of semantic versioning. Please feel free to provide feedback
-by filing an issue to improve the implementation.
 
 ## Maven Dependency
 semantic-version is available through the Maven Central Repository. Just add
@@ -29,7 +21,7 @@ the following dependency to your pom:
 <dependency>
     <groupId>de.skuzzle</groupId>
     <artifactId>semantic-version</artifactId>
-    <version>0.6.0</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
