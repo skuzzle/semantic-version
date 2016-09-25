@@ -25,7 +25,6 @@ package de.skuzzle.semantic;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.regex.Pattern;
 
 /**
  * This class is an implementation of the full <em>semantic version 2.0.0</em>
@@ -115,10 +114,6 @@ public final class Version implements Comparable<Version>, Serializable {
             return compareWithBuildMetaData(o1, o2);
         }
     };
-
-    private static final Pattern PRE_RELEASE = Pattern.compile("" +
-            "(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0)" +
-            "(?:\\.(?:(?:[0-9]+[a-zA-Z-][\\w-]*)|(?:[a-zA-Z][\\w-]*)|(?:[1-9]\\d*)|0))*");
 
     private static final int TO_STRING_ESTIMATE = 12;
     private static final int HASH_PRIME = 31;
@@ -674,7 +669,7 @@ public final class Version implements Comparable<Version>, Serializable {
         checkParams(major, minor, patch);
         require(preRelease != null, "preRelease is null");
 
-        if (!preRelease.isEmpty() && !PRE_RELEASE.matcher(preRelease).matches()) {
+        if (!isValidPreRelease(preRelease)) {
             throw new VersionFormatException(preRelease);
         }
         return new Version(major, minor, patch, preRelease, "");
