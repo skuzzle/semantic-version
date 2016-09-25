@@ -1,7 +1,5 @@
 package de.skuzzle.semantic;
 
-import java.util.function.Function;
-
 import org.junit.Test;
 
 public class ParsingPerformanceTest {
@@ -12,45 +10,42 @@ public class ParsingPerformanceTest {
 
     @Test
     public void testNoRegex() throws Exception {
-        performTest("Without regex", RUN, TEST_STRING,
-                new Function<String, Version>() {
+        performTest("Without regex", RUN, new Runnable() {
 
-                    @Override
-                    public Version apply(String t) {
-                        return Version.parseVersion(t);
-                    }
-                });
+            @Override
+            public void run() {
+                Version.parseVersion(TEST_STRING);
+            }
+        });
     }
 
     @Test
     public void testWithRegex() throws Exception {
-        performTest("With regex", RUN, TEST_STRING,
-                new Function<String, VersionRegEx>() {
+        performTest("With regex", RUN, new Runnable() {
 
-                    @Override
-                    public VersionRegEx apply(String t) {
-                        return VersionRegEx.parseVersion(t);
-                    }
-                });
+            @Override
+            public void run() {
+                VersionRegEx.parseVersion(TEST_STRING);
+            }
+        });
     }
 
-    private void warmUp(String s, Function<String, ?> producer) {
+    private void warmUp(Runnable subject) {
         for (int i = 0; i < WARM_UP; ++i) {
-            producer.apply(s);
+            subject.run();
         }
     }
 
-    private void performTest(String description, int iterations, String toParse,
-            Function<String, ?> producer) {
+    private void performTest(String description, int iterations, Runnable subject) {
 
         System.out.println("Test: " + description);
-        warmUp(toParse, producer);
+        warmUp(subject);
         long min = Long.MAX_VALUE;
         long max = 0;
         long sum = 0;
         for (int i = 0; i < iterations; ++i) {
             final long start = System.nanoTime();
-            producer.apply(toParse);
+            subject.run();
             final long time = System.nanoTime() - start;
             min = Math.min(min, time);
             max = Math.max(max, time);
