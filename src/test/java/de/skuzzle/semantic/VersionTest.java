@@ -190,6 +190,16 @@ public class VersionTest {
     }
 
     @Test(expected = VersionFormatException.class)
+    public void testParseMajorUnexpectedChar() throws Exception {
+        Version.parseVersion("1$.0.0");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParsePatchUnexpectedChar() throws Exception {
+        Version.parseVersion("1.0.1$");
+    }
+
+    @Test(expected = VersionFormatException.class)
     public void testParseLeadingZeroMinor() throws Exception {
         Version.parseVersion("1.01.1");
     }
