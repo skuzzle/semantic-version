@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/skuzzle/semantic-version.svg?branch=master)](https://travis-ci.org/skuzzle/semantic-version)
-[![Coverage Status](https://coveralls.io/repos/skuzzle/semantic-version/badge.svg?branch=master&service=github)](https://coveralls.io/github/skuzzle/semantic-version?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/skuzzle/semantic-version/badge.svg?branch=master)](https://coveralls.io/github/skuzzle/semantic-version?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version)
 [![JavaDoc](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version.svg?label=JavaDoc)](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version)
 
