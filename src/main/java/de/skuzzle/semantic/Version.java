@@ -123,6 +123,15 @@ public final class Version implements Comparable<Version>, Serializable {
     private static final int TO_STRING_ESTIMATE = 12;
     private static final int HASH_PRIME = 31;
 
+    // state machine states for parsing a version string
+    private static final int STATE_MAJOR = 0;
+    private static final int STATE_MINOR = 1;
+    private static final int STATE_PATCH = 2;
+    private static final int STATE_PRE_RELEASE = 3;
+    private static final int STATE_PRE_RELEASE_ID = 4;
+    private static final int STATE_BUILD_MD = 5;
+    private static final int EOS = -1;
+
     private final int major;
     private final int minor;
     private final int patch;
@@ -141,25 +150,17 @@ public final class Version implements Comparable<Version>, Serializable {
         this.buildMetaData = buildMd;
     }
 
-    private static final int STATE_MAJOR = 0;
-    private static final int STATE_MINOR = 1;
-    private static final int STATE_PATCH = 2;
-    private static final int STATE_PRE_RELEASE = 3;
-    private static final int STATE_PRE_RELEASE_ID = 4;
-    private static final int STATE_BUILD_MD = 5;
-    private static final int EOS = -1;
-
     private Version(String v) {
         int i = 0;
         int stateBefore = STATE_MAJOR;
         int state = stateBefore;
         final char[] chars = v.toCharArray();
 
-        int major = 0;
-        int minor = 0;
-        int patch = 0;
-        StringBuilder preRelease = null;
-        StringBuilder buildMD = null;
+        int majorPart = 0;
+        int minorPart = 0;
+        int patchpart = 0;
+        StringBuilder preReleasePart = null;
+        StringBuilder buildMDPart = null;
 
         while (i <= chars.length) {
             final boolean stateSwitched = i == 0 || state != stateBefore;
@@ -168,10 +169,10 @@ public final class Version implements Comparable<Version>, Serializable {
 
             switch (state) {
             case STATE_MAJOR:
-                if (c != '.' && major == 0 && !stateSwitched) {
+                if (c != '.' && majorPart == 0 && !stateSwitched) {
                     throw illegalLeadingChar(v, c, "major");
                 } else if (c >= '0' && c <= '9') {
-                    major = Character.digit(c, 10) + major * 10;
+                    majorPart = Character.digit(c, 10) + majorPart * 10;
                 } else if (c == '.') {
                     state = STATE_MINOR;
                 } else {
@@ -179,10 +180,10 @@ public final class Version implements Comparable<Version>, Serializable {
                 }
                 break;
             case STATE_MINOR:
-                if (c != '.' && minor == 0 && !stateSwitched) {
+                if (c != '.' && minorPart == 0 && !stateSwitched) {
                     throw illegalLeadingChar(v, c, "minor");
                 } else if (c >= '0' && c <= '9') {
-                    minor = Character.digit(c, 10) + minor * 10;
+                    minorPart = Character.digit(c, 10) + minorPart * 10;
                 } else if (c == '.') {
                     state = STATE_PATCH;
                 } else {
@@ -190,10 +191,11 @@ public final class Version implements Comparable<Version>, Serializable {
                 }
                 break;
             case STATE_PATCH:
-                if (c != EOS && c != '-' && c != '+' && patch == 0 && !stateSwitched) {
+                if (c != EOS && c != '-' && c != '+' && patchpart == 0
+                        && !stateSwitched) {
                     throw illegalLeadingChar(v, c, "patch");
                 } else if (c >= '0' && c <= '9') {
-                    patch = Character.digit(c, 10) + patch * 10;
+                    patchpart = Character.digit(c, 10) + patchpart * 10;
                 } else if (c == '-') {
                     state = STATE_PRE_RELEASE;
                 } else if (c == '+') {
@@ -204,14 +206,14 @@ public final class Version implements Comparable<Version>, Serializable {
                 break;
 
             case STATE_PRE_RELEASE:
-                preRelease = new StringBuilder();
-                state = parseIdentifiers(chars, i, preRelease, false, "pre-release");
-                i += preRelease.length();
+                preReleasePart = new StringBuilder();
+                state = parseIdentifiers(chars, i, preReleasePart, false, "pre-release");
+                i += preReleasePart.length();
                 break;
 
             case STATE_BUILD_MD:
-                buildMD = new StringBuilder();
-                state = parseIdentifiers(chars, i, buildMD, true, "build-meta-data");
+                buildMDPart = new StringBuilder();
+                state = parseIdentifiers(chars, i, buildMDPart, true, "build-meta-data");
                 break;
 
             case EOS:
@@ -221,12 +223,12 @@ public final class Version implements Comparable<Version>, Serializable {
             }
             ++i;
         }
-        this.major = major;
-        this.minor = minor;
-        this.patch = patch;
-        checkParams(major, minor, patch);
-        this.preRelease = preRelease == null ? "" : preRelease.toString();
-        this.buildMetaData = buildMD == null ? "" : buildMD.toString();
+        this.major = majorPart;
+        this.minor = minorPart;
+        this.patch = patchpart;
+        checkParams(majorPart, minorPart, patchpart);
+        this.preRelease = preReleasePart == null ? "" : preReleasePart.toString();
+        this.buildMetaData = buildMDPart == null ? "" : buildMDPart.toString();
     }
 
     private static int parseIdentifiers(char[] chars, int start, StringBuilder b,
@@ -266,7 +268,6 @@ public final class Version implements Comparable<Version>, Serializable {
                     if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
                         throw illegalLeadingChar(new String(chars), c, partName);
                     }
-                    partStart = -1;
                     return STATE_BUILD_MD;
                 } else if (c == EOS) {
                     if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
@@ -288,7 +289,6 @@ public final class Version implements Comparable<Version>, Serializable {
                 } else if (c >= '0' && c <= '9') {
                     b.appendCodePoint(c);
                 } else if (c == '+') {
-                    partStart = -1;
                     return STATE_BUILD_MD;
                 } else if (c != EOS) {
                     throw unexpectedChar(new String(chars), c);
