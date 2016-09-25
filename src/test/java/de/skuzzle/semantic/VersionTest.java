@@ -152,6 +152,12 @@ public class VersionTest {
         Assert.assertEquals("some.id-1.foo", v.getBuildMetaData());
     }
 
+    @Test
+    public void testParseMajorIsZero() throws Exception {
+        final Version version = Version.parseVersion("0.1.2");
+        assertEquals(0, version.getMajor());
+    }
+
     @Test(expected = VersionFormatException.class)
     public void testVersionWithBuildMDEmptyLastPart() {
         Version.create(1, 2, 3, "", "some.id.");
@@ -172,9 +178,60 @@ public class VersionTest {
 
     @Test
     public void testVersionWithPreReleaseAndBuildMD() {
-        final Version v = Version.parseVersion("1.2.3-pre.release-foo.1+some.id-with-hyphen");
+        final Version v = Version
+                .parseVersion("1.2.3-pre.release-foo.1+some.id-with-hyphen");
         Assert.assertEquals("pre.release-foo.1", v.getPreRelease());
         Assert.assertEquals("some.id-with-hyphen", v.getBuildMetaData());
+    }
+
+    @Test
+    public void testIsValidVersionLeadingZeroMinor() throws Exception {
+        assertFalse(Version.isValidVersion("1.01.1"));
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseLeadingZeroMinor() throws Exception {
+        Version.parseVersion("1.01.1");
+    }
+
+    @Test
+    public void testIsValidVersionLeadingZeroPatch() throws Exception {
+        assertFalse(Version.isValidVersion("1.1.01"));
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseLeadingZeroPatch() throws Exception {
+        Version.parseVersion("1.1.01");
+    }
+
+    @Test
+    public void testIsValidVersionLeadingZeroMajor() throws Exception {
+        assertFalse(Version.isValidVersion("01.1.1"));
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseMissingPart() throws Exception {
+        Version.parseVersion("1.0");
+    }
+
+    @Test
+    public void testIsValidVersionMissingPart() throws Exception {
+        assertFalse(Version.isValidVersion("1.1"));
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParsePrematureStop() throws Exception {
+        Version.parseVersion("1.");
+    }
+
+    @Test
+    public void testIsValidVersionPrematureStop() throws Exception {
+        assertFalse(Version.isValidVersion("1."));
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseMajorLeadingZero() throws Exception {
+        Version.parseVersion("01.0.0");
     }
 
     @Test(expected = VersionFormatException.class)
@@ -208,6 +265,16 @@ public class VersionTest {
     }
 
     @Test(expected = VersionFormatException.class)
+    public void testBuildMDMiddleEmptyIdentifier() {
+        Version.parseVersion("1.2.3+pre..foo");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testBuildMDLastEmptyIdentifier() {
+        Version.parseVersion("1.2.3-pre.foo.");
+    }
+
+    @Test(expected = VersionFormatException.class)
     public void testParseExpectNoPrelease() {
         Version.parseVersion("1.2.3-foo", false);
     }
@@ -222,9 +289,59 @@ public class VersionTest {
         Version.parseVersion("1.2.3-foo+foo", false);
     }
 
+    @Test(expected = VersionFormatException.class)
+    public void testParseVersionIllegalCharInPreReleaseOnly() throws Exception {
+        Version.parseVersion("1.2.3-$+foo");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseVersionIllegalCharBuildMDOnly() throws Exception {
+        Version.parseVersion("1.2.3+$");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseVersionIllegalCharInPreRelease() throws Exception {
+        Version.parseVersion("1.2.3-foo$+foo");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseVersionIllegalCharInPreReleaseNumericPart() throws Exception {
+        Version.parseVersion("1.2.3-1$+foo");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseVersionIllegalCharInBuildMDNumericPart() throws Exception {
+        Version.parseVersion("1.2.3-1+1$");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParseVersionIllegalCharInBuildMD() throws Exception {
+        Version.parseVersion("1.2.3-foo+foo$");
+    }
+
     @Test
     public void testParseVersionPreReleaseSingleZero() throws Exception {
         Version.parseVersion("1.2.3-0.1.0");
+    }
+
+    @Test
+    public void testParseVersionPreReleaseAndBuildMDSingleZero() throws Exception {
+        Version.parseVersion("1.2.3-0.1.0+0.0.0.1");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParsePreReleaseIllegalLeadingZero() throws Exception {
+        Version.parseVersion("1.2.3-01.1");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParsePreReleaseIllegalLeadingZeroBeforeBuildMD() throws Exception {
+        Version.parseVersion("1.2.3-1.01+abc");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testParsePreReleaseIllegalLeadingZeroInLastPart() throws Exception {
+        Version.parseVersion("1.2.3-1.01");
     }
 
     @Test
@@ -641,5 +758,17 @@ public class VersionTest {
             assertEquals(v, oin.readObject());
         }
         oin.close();
+    }
+
+    @Test
+    public void testEmptyArrayPreRelease() throws Exception {
+        final Version v = Version.parseVersion("1.0.0");
+        assertEquals(0, v.getPreReleaseParts().length);
+    }
+
+    @Test
+    public void testEmptyArrayBuildMetaData() throws Exception {
+        final Version v = Version.parseVersion("1.0.0");
+        assertEquals(0, v.getBuildMetaDataParts().length);
     }
 }
