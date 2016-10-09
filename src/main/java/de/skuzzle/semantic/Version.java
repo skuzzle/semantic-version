@@ -79,7 +79,7 @@ public final class Version implements Comparable<Version>, Serializable {
          *
          * @param message The exception message.
          */
-        public VersionFormatException(String message) {
+        private VersionFormatException(String message) {
             super(message);
         }
     }
@@ -748,7 +748,9 @@ public final class Version implements Comparable<Version>, Serializable {
         final Version version = parseVersion(versionString);
         if (!allowPreRelease && (version.isPreRelease() || version.hasBuildMetaData())) {
             throw new VersionFormatException(String.format(
-                    "Version is expected to have no pre-release or build meta data part"));
+                    "Version string '%s' is expected to have no pre-release or "
+                            + "build meta data part",
+                    versionString));
         }
         return version;
     }
