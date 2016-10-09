@@ -126,6 +126,7 @@ public final class Version implements Comparable<Version>, Serializable {
     private static final int STATE_PRE_RELEASE_ID = 4;
     private static final int STATE_BUILD_MD = 5;
     private static final int EOS = -1;
+    private static final int FAILURE = -2;
 
     private final int major;
     private final int minor;
@@ -202,14 +203,14 @@ public final class Version implements Comparable<Version>, Serializable {
 
             case STATE_PRE_RELEASE:
                 preReleasePart = new StringBuilder();
-                state = parseIdentifiers(chars, i, preReleasePart, false, true,
+                state = parseIdentifiers(chars, i, preReleasePart, false, true, false,
                         "pre-release");
                 i += preReleasePart.length();
                 break;
 
             case STATE_BUILD_MD:
                 buildMDPart = new StringBuilder();
-                state = parseIdentifiers(chars, i, buildMDPart, true, true,
+                state = parseIdentifiers(chars, i, buildMDPart, true, true, false,
                         "build-meta-data");
                 break;
 
@@ -229,7 +230,8 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static int parseIdentifiers(char[] chars, int start, StringBuilder b,
-            boolean allowLeading0, boolean allowTransition, String partName) {
+            boolean allowLeading0, boolean allowTransition, boolean checkOnly,
+            String partName) {
         int state = STATE_PRE_RELEASE;
         int partStart = -1;
         int i = start;
@@ -239,10 +241,16 @@ public final class Version implements Comparable<Version>, Serializable {
             case STATE_PRE_RELEASE:
                 if ((c == '.' || c == EOS) && partStart == -1) {
                     // empty part
+                    if (checkOnly) {
+                        return FAILURE;
+                    }
                     throw unexpectedChar(new String(chars), c);
                 } else if (c == '.') {
                     // start of new part
                     if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
+                        if (checkOnly) {
+                            return FAILURE;
+                        }
                         throw illegalLeadingChar(new String(chars), c, partName);
                     }
 
@@ -263,16 +271,28 @@ public final class Version implements Comparable<Version>, Serializable {
                     b.appendCodePoint(c);
                 } else if (c == '+') {
                     if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
+                        if (checkOnly) {
+                            return FAILURE;
+                        }
                         throw illegalLeadingChar(new String(chars), c, partName);
                     } else if (!allowTransition) {
+                        if (checkOnly) {
+                            return FAILURE;
+                        }
                         throw unexpectedChar(new String(chars), c);
                     }
                     return STATE_BUILD_MD;
                 } else if (c == EOS) {
                     if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
+                        if (checkOnly) {
+                            return FAILURE;
+                        }
                         throw illegalLeadingChar(new String(chars), partStart, partName);
                     }
                 } else {
+                    if (checkOnly) {
+                        return FAILURE;
+                    }
                     throw unexpectedChar(new String(chars), c);
                 }
 
@@ -289,10 +309,16 @@ public final class Version implements Comparable<Version>, Serializable {
                     b.appendCodePoint(c);
                 } else if (c == '+') {
                     if (!allowTransition) {
+                        if (checkOnly) {
+                            return FAILURE;
+                        }
                         throw unexpectedChar(new String(chars), c);
                     }
                     return STATE_BUILD_MD;
                 } else if (c != EOS) {
+                    if (checkOnly) {
+                        return FAILURE;
+                    }
                     throw unexpectedChar(new String(chars), c);
                 }
 
@@ -371,13 +397,9 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (preRelease.isEmpty()) {
             return true;
         }
-        try {
-            parseIdentifiers(preRelease.toCharArray(), 0, new StringBuilder(), false,
-                    false, "");
-            return true;
-        } catch (final VersionFormatException e) {
-            return false;
-        }
+
+        return parseIdentifiers(preRelease.toCharArray(), 0, new StringBuilder(), false,
+                false, true, "") != FAILURE;
     }
 
     /**
@@ -401,13 +423,8 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (buildMetaData.isEmpty()) {
             return true;
         }
-        try {
-            parseIdentifiers(buildMetaData.toCharArray(), 0, new StringBuilder(), true,
-                    false, "");
-            return true;
-        } catch (final VersionFormatException e) {
-            return false;
-        }
+        return parseIdentifiers(buildMetaData.toCharArray(), 0, new StringBuilder(), true,
+                false, true, "") != FAILURE;
     }
 
     /**
