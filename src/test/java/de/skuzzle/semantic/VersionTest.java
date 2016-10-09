@@ -1,8 +1,11 @@
 package de.skuzzle.semantic;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,6 +21,11 @@ import org.junit.Test;
 import de.skuzzle.semantic.Version.VersionFormatException;
 
 public class VersionTest {
+
+    private static final char[] ILLEGAL_CHAR_BOUNDS = { 'a' - 1, 'z' + 1, '0' - 1,
+            '9' + 1, 'A' - 1, 'Z' + 1, '-' - 1 };
+
+    private static final char[] ILLEGAL_NUMERIC_BOUNDS = { '0' - 1, '9' + 1 };
 
     private static final Version[] SEMVER_ORG_VERSIONS = new Version[] {
             Version.parseVersion("1.0.0-alpha"),
@@ -169,6 +177,19 @@ public class VersionTest {
     }
 
     @Test
+    public void testParseBuildMDWithLeadingZeroInIdentifierPart() throws Exception {
+        final Version v = Version.parseVersion("1.2.3+0abc");
+        assertEquals("0abc", v.getBuildMetaData());
+    }
+
+    @Test
+    public void testParsePreReleaseLastPartIsNumeric() throws Exception {
+        final Version v = Version.parseVersion("1.2.3-a.11+buildmd");
+        assertEquals("a.11", v.getPreRelease());
+        assertEquals("buildmd", v.getBuildMetaData());
+    }
+
+    @Test
     public void testVersionWithPreRelease() {
         final Version v = Version.parseVersion("1.2.3-pre.release-foo.1");
         Assert.assertEquals("pre.release-foo.1", v.getPreRelease());
@@ -187,6 +208,66 @@ public class VersionTest {
     @Test
     public void testIsValidVersionLeadingZeroMinor() throws Exception {
         assertFalse(Version.isValidVersion("1.01.1"));
+    }
+
+    private void shouldNotBeParseable(String template, char c) {
+        final String v = String.format(template, c);
+
+        try {
+            Version.parseVersion(v);
+            fail("Version " + v + " should not be parsable");
+        } catch (final VersionFormatException e) {
+
+        }
+    }
+
+    @Test
+    public void testIllegalCharNumericParts() throws Exception {
+        for (final char c : ILLEGAL_NUMERIC_BOUNDS) {
+            shouldNotBeParseable("%c.2.3", c);
+            shouldNotBeParseable("1.%c.3", c);
+            shouldNotBeParseable("1.2.%c", c);
+        }
+    }
+
+    @Test
+    public void testPreReleaseInvalidChar1() throws Exception {
+        for (final char c : ILLEGAL_CHAR_BOUNDS) {
+            shouldNotBeParseable("1.0.0-%c", c);
+        }
+    }
+
+    @Test
+    public void testPreReleaseInvalidChar2() throws Exception {
+        for (final char c : ILLEGAL_CHAR_BOUNDS) {
+            shouldNotBeParseable("1.0.0-1.a%c", c);
+        }
+    }
+
+    @Test
+    public void testBuildMDInvalidChar1() throws Exception {
+        for (final char c : ILLEGAL_CHAR_BOUNDS) {
+            shouldNotBeParseable("1.0.0+%c", c);
+        }
+    }
+
+    @Test
+    public void testBuildMDInvalidChar2() throws Exception {
+        for (final char c : ILLEGAL_CHAR_BOUNDS) {
+            shouldNotBeParseable("1.0.0+1.a%c", c);
+        }
+    }
+
+    @Test
+    public void testBuildMetaDataHyphenOnly() throws Exception {
+        final Version v = Version.parseVersion("1.2.3+-");
+        assertEquals("-", v.getBuildMetaData());
+    }
+
+    @Test
+    public void testPreReleaseHyphenOnly() throws Exception {
+        final Version v = Version.parseVersion("1.2.3--");
+        assertEquals("-", v.getPreRelease());
     }
 
     @Test(expected = VersionFormatException.class)
@@ -255,13 +336,18 @@ public class VersionTest {
     }
 
     @Test(expected = VersionFormatException.class)
-    public void testPreReleaseWithLeadingZero() {
+    public void testPreReleaseWithLeadingZeroEOS() {
         Version.parseVersion("1.2.3-pre.01");
     }
 
     @Test(expected = VersionFormatException.class)
-    public void testPreReleaseWithLeadingZero2() {
+    public void testPreReleaseWithLeadingZeroEOS2() {
         Version.create(1, 2, 3, "pre.01");
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testPreReleaseWithLeadingZeroAndBuildMD() {
+        Version.parseVersion("1.2.3-pre.01+a.b");
     }
 
     @Test(expected = VersionFormatException.class)
@@ -574,6 +660,16 @@ public class VersionTest {
     }
 
     @Test(expected = NullPointerException.class)
+    public void testCompareWithBuildMDNull1() throws Exception {
+        Version.compareWithBuildMetaData(null, Version.create(1, 0, 0));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testCompareWithBuildMDNull2() throws Exception {
+        Version.compareWithBuildMetaData(Version.create(1, 0, 0), null);
+    }
+
+    @Test(expected = NullPointerException.class)
     public void testCompareNull1() {
         Version.compare(null, Version.create(1, 1, 1));
     }
@@ -624,12 +720,31 @@ public class VersionTest {
     }
 
     @Test
+    public void testParseToStringUpperCase() {
+        for (final Version v1 : SEMVER_ORG_VERSIONS) {
+            final Version v2 = Version.parseVersion(v1.toString().toUpperCase());
+            Assert.assertEquals(v1.toUpperCase(), v2);
+            Assert.assertEquals(v1.toUpperCase().hashCode(), v2.hashCode());
+        }
+    }
+
+    @Test
+    public void testParseToStringLowerCase() {
+        for (final Version v1 : SEMVER_ORG_VERSIONS) {
+            final Version v2 = Version.parseVersion(v1.toString().toLowerCase());
+            Assert.assertEquals(v1.toLowerCase(), v2);
+            Assert.assertEquals(v1.toLowerCase().hashCode(), v2.hashCode());
+        }
+    }
+
+    @Test
     public void testMin() throws Exception {
         final Version v1 = Version.create(1, 0, 0);
         final Version v2 = Version.create(0, 1, 0);
 
-        Assert.assertSame(Version.min(v1, v2), Version.min(v2, v1));
-        Assert.assertSame(v2, Version.min(v1, v2));
+        assertSame(Version.min(v1, v2), Version.min(v2, v1));
+        assertSame(v2, Version.min(v1, v2));
+        assertSame(v2, v2.min(v1));
     }
 
     @Test
@@ -638,7 +753,8 @@ public class VersionTest {
         final Version v2 = Version.create(1, 0, 0);
 
         final Version min = Version.min(v1, v2);
-        Assert.assertSame(v1, min);
+        assertSame(v1, min);
+        assertSame(v1, v1.min(v2));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -656,8 +772,9 @@ public class VersionTest {
         final Version v1 = Version.create(1, 0, 0);
         final Version v2 = Version.create(0, 1, 0);
 
-        Assert.assertSame(Version.max(v1, v2), Version.max(v2, v1));
-        Assert.assertSame(v1, Version.max(v1, v2));
+        assertSame(Version.max(v1, v2), Version.max(v2, v1));
+        assertSame(v1, Version.max(v1, v2));
+        assertSame(v1, v1.max(v2));
     }
 
     @Test
@@ -666,7 +783,8 @@ public class VersionTest {
         final Version v2 = Version.create(1, 0, 0);
 
         final Version max = Version.max(v1, v2);
-        Assert.assertSame(v1, max);
+        assertSame(v1, max);
+        assertSame(v1, v1.max(v2));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -702,6 +820,27 @@ public class VersionTest {
         for (final Version v : SEMVER_ORG_VERSIONS) {
             assertTrue(Version.isValidPreRelease(v.getPreRelease()));
         }
+        assertTrue(Version.isValidPreRelease("-"));
+    }
+
+    @Test
+    public void testIsNotValidPreReleaseIdentifier() throws Exception {
+        assertFalse(Version.isValidPreRelease("a+b"));
+    }
+
+    @Test
+    public void testIsNotValidPreReleaseNumericIdentifier() throws Exception {
+        assertFalse(Version.isValidPreRelease("123+b"));
+    }
+
+    @Test
+    public void testIsNotValidBuildMDIdentifier() throws Exception {
+        assertFalse(Version.isValidBuildMetaData("a+b"));
+    }
+
+    @Test
+    public void testIsNotValidBuildMDNumericIdentifier() throws Exception {
+        assertFalse(Version.isValidBuildMetaData("123+b"));
     }
 
     @Test
@@ -719,6 +858,7 @@ public class VersionTest {
         for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
             assertTrue(v.toString(), Version.isValidBuildMetaData(v.getBuildMetaData()));
         }
+        assertTrue(Version.isValidBuildMetaData("-"));
     }
 
     @Test
@@ -780,5 +920,12 @@ public class VersionTest {
     public void testEmptyArrayBuildMetaData() throws Exception {
         final Version v = Version.parseVersion("1.0.0");
         assertEquals(0, v.getBuildMetaDataParts().length);
+    }
+
+    @Test
+    public void testGetBuildMDParts() throws Exception {
+        final Version v = Version.parseVersion("1.0.0+a.b.c.001");
+        assertArrayEquals(new String[] { "a", "b", "c", "001" },
+                v.getBuildMetaDataParts());
     }
 }

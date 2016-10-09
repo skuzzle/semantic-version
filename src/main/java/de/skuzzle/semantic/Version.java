@@ -202,13 +202,15 @@ public final class Version implements Comparable<Version>, Serializable {
 
             case STATE_PRE_RELEASE:
                 preReleasePart = new StringBuilder();
-                state = parseIdentifiers(chars, i, preReleasePart, false, "pre-release");
+                state = parseIdentifiers(chars, i, preReleasePart, false, true,
+                        "pre-release");
                 i += preReleasePart.length();
                 break;
 
             case STATE_BUILD_MD:
                 buildMDPart = new StringBuilder();
-                state = parseIdentifiers(chars, i, buildMDPart, true, "build-meta-data");
+                state = parseIdentifiers(chars, i, buildMDPart, true, true,
+                        "build-meta-data");
                 break;
 
             case EOS:
@@ -227,7 +229,7 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static int parseIdentifiers(char[] chars, int start, StringBuilder b,
-            boolean allowLeading0, String partName) {
+            boolean allowLeading0, boolean allowTransition, String partName) {
         int state = STATE_PRE_RELEASE;
         int partStart = -1;
         int i = start;
@@ -262,6 +264,8 @@ public final class Version implements Comparable<Version>, Serializable {
                 } else if (c == '+') {
                     if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
                         throw illegalLeadingChar(new String(chars), c, partName);
+                    } else if (!allowTransition) {
+                        throw unexpectedChar(new String(chars), c);
                     }
                     return STATE_BUILD_MD;
                 } else if (c == EOS) {
@@ -284,6 +288,9 @@ public final class Version implements Comparable<Version>, Serializable {
                 } else if (c >= '0' && c <= '9') {
                     b.appendCodePoint(c);
                 } else if (c == '+') {
+                    if (!allowTransition) {
+                        throw unexpectedChar(new String(chars), c);
+                    }
                     return STATE_BUILD_MD;
                 } else if (c != EOS) {
                     throw unexpectedChar(new String(chars), c);
@@ -365,7 +372,8 @@ public final class Version implements Comparable<Version>, Serializable {
             return true;
         }
         try {
-            parseIdentifiers(preRelease.toCharArray(), 0, new StringBuilder(), false, "");
+            parseIdentifiers(preRelease.toCharArray(), 0, new StringBuilder(), false,
+                    false, "");
             return true;
         } catch (final VersionFormatException e) {
             return false;
@@ -395,7 +403,7 @@ public final class Version implements Comparable<Version>, Serializable {
         }
         try {
             parseIdentifiers(buildMetaData.toCharArray(), 0, new StringBuilder(), true,
-                    "");
+                    false, "");
             return true;
         } catch (final VersionFormatException e) {
             return false;
@@ -715,32 +723,6 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public static final Version parseVersion(String versionString) {
         require(versionString != null, "versionString is null");
-        // final Matcher m = VERSION_PATTERN.matcher(versionString);
-        // if (!m.matches()) {
-        // throw new VersionFormatException(versionString);
-        // }
-        //
-        // final int major = Integer.parseInt(m.group(MAJOR_GROUP));
-        // final int minor = Integer.parseInt(m.group(MINOR_GROUP));
-        // final int patch = Integer.parseInt(m.group(PATCH_GROUP));
-        //
-        // checkParams(major, minor, patch);
-        //
-        // final String preRelease;
-        // if (m.group(PRE_RELEASE_GROUP) != null) {
-        // preRelease = m.group(PRE_RELEASE_GROUP);
-        // } else {
-        // preRelease = "";
-        // }
-        //
-        // final String buildMD;
-        // if (m.group(BUILD_MD_GROUP) != null) {
-        // buildMD = m.group(BUILD_MD_GROUP);
-        // } else {
-        // buildMD = "";
-        // }
-        //
-        // return new Version(major, minor, patch, preRelease, buildMD);
         return new Version(versionString);
     }
 
@@ -1008,5 +990,27 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public int compareToWithBuildMetaData(Version other) {
         return compareWithBuildMetaData(this, other);
+    }
+
+    /**
+     * Returns a new Version where all identifiers are converted to upper case letters.
+     *
+     * @return A new version with upper case identifiers.
+     * @since 1.1.0
+     */
+    public Version toUpperCase() {
+        return new Version(this.major, this.minor, this.patch,
+                this.preRelease.toUpperCase(), this.buildMetaData.toUpperCase());
+    }
+
+    /**
+     * Returns a new Version where all identifiers are converted to lower case letters.
+     *
+     * @return A new version with lower case identifiers.
+     * @since 1.1.0
+     */
+    public Version toLowerCase() {
+        return new Version(this.major, this.minor, this.patch,
+                this.preRelease.toLowerCase(), this.buildMetaData.toLowerCase());
     }
 }
