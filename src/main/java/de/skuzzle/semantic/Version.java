@@ -147,6 +147,16 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private Version(String v) {
+
+        /*
+         * Since 1.1.0:
+         *
+         * This huge and ugly inline parsing replaces the prior regex because it is way
+         * faster. Besides that it also does provide better error messages in case a
+         * String could not be parsed correctly. Condition and mutation coverage is
+         * extremely high to ensure correctness.
+         */
+
         int i = 0;
         int stateBefore = STATE_MAJOR;
         int state = stateBefore;
