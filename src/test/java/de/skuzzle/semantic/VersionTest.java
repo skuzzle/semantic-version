@@ -56,6 +56,11 @@ public class VersionTest {
             Version.parseVersion("2.1.1")
     };
 
+    private static final String[][] ILLEGAL_VERSIONS = {
+            { "1.", "Incomplete version part in 1." },
+            { "1.1.", "Incomplete version part in 1.1." }
+    };
+
     public static void main(String[] args) throws IOException {
         new VersionTest().writeBinFile();
     }
@@ -70,6 +75,19 @@ public class VersionTest {
             oout.writeObject(v);
         }
         oout.close();
+    }
+
+    @Test
+    public void testIllegalVersions() throws Exception {
+        for (final String[] input : ILLEGAL_VERSIONS) {
+            try {
+                Version.parseVersion(input[0]);
+                fail("String '" + input[0] + "' should not be parsable");
+            } catch (final VersionFormatException e) {
+                assertEquals("Expected different exception message", e.getMessage(),
+                        input[1]);
+            }
+        }
     }
 
     @Test
@@ -367,7 +385,7 @@ public class VersionTest {
 
     @Test(expected = VersionFormatException.class)
     public void testBuildMDLastEmptyIdentifier() {
-        Version.parseVersion("1.2.3-pre.foo.");
+        Version.parseVersion("1.2.3+pre.foo.");
     }
 
     @Test(expected = VersionFormatException.class)
@@ -818,7 +836,8 @@ public class VersionTest {
     @Test
     public void testIsValidPreReleaseIdentifier() throws Exception {
         for (final Version v : SEMVER_ORG_VERSIONS) {
-            assertTrue(Version.isValidPreRelease(v.getPreRelease()));
+            assertTrue(v.getPreRelease() + " should be a valid identifier",
+                    Version.isValidPreRelease(v.getPreRelease()));
         }
         assertTrue(Version.isValidPreRelease("-"));
     }
@@ -857,6 +876,7 @@ public class VersionTest {
     public void testIsValidBuildMDIdentifier() throws Exception {
         for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
             assertTrue(v.toString(), Version.isValidBuildMetaData(v.getBuildMetaData()));
+            assertTrue(v.toString(), Version.isValidBuildMetaData(v.getPreRelease()));
         }
         assertTrue(Version.isValidBuildMetaData("-"));
     }
@@ -927,5 +947,75 @@ public class VersionTest {
         final Version v = Version.parseVersion("1.0.0+a.b.c.001");
         assertArrayEquals(new String[] { "a", "b", "c", "001" },
                 v.getBuildMetaDataParts());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithMajorAllWillbe0() throws Exception {
+        final Version v = Version.create(1, 0, 0);
+        v.withMajor(0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithMinorAllWillbe0() throws Exception {
+        final Version v = Version.create(0, 1, 0);
+        v.withMinor(0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithPatchAllWillbe0() throws Exception {
+        final Version v = Version.create(0, 0, 1);
+        v.withPatch(0);
+    }
+
+    @Test
+    public void testWithMajorKeepEverythingElse() throws Exception {
+        final Version v = Version.create(1, 2, 3, "foo", "bar");
+        assertEquals(Version.create(2, 2, 3, "foo", "bar"), v.withMajor(2));
+    }
+
+    @Test
+    public void testWithMinorKeepEverythingElse() throws Exception {
+        final Version v = Version.create(1, 2, 3, "foo", "bar");
+        assertEquals(Version.create(1, 1, 3, "foo", "bar"), v.withMinor(1));
+    }
+
+    @Test
+    public void testWithPatchKeepEverythingElse() throws Exception {
+        final Version v = Version.create(1, 2, 3, "foo", "bar");
+        assertEquals(Version.create(1, 2, 2, "foo", "bar"), v.withPatch(2));
+    }
+
+    @Test
+    public void testWithPreReleaseKeepEverythingElse() throws Exception {
+        final Version v = Version.create(1, 2, 3, "foo", "bar");
+        assertEquals(Version.create(1, 2, 3, "bar", "bar"), v.withPreRelease("bar"));
+    }
+
+    @Test
+    public void testWithPreReleaseEmpty() throws Exception {
+        final Version v = Version.create(1, 2, 3, "foo");
+        assertEquals(Version.create(1, 2, 3), v.withPreRelease(""));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithPreReleaseNull() throws Exception {
+        Version.create(1, 2, 3).withPreRelease(null);
+    }
+
+    @Test
+    public void testWithBuildMDKeepEverythingElse() throws Exception {
+        final Version v = Version.create(1, 2, 3, "foo", "bar");
+        assertEquals(Version.create(1, 2, 3, "foo", "foo"), v.withBuildMetaData("foo"));
+    }
+
+    @Test
+    public void testWithBuildMDEmpty() throws Exception {
+        final Version v = Version.create(1, 2, 3, "", "foo");
+        assertEquals(Version.create(1, 2, 3), v.withBuildMetaData(""));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithBuildMdNull() throws Exception {
+        Version.create(1, 2, 3).withBuildMetaData(null);
     }
 }

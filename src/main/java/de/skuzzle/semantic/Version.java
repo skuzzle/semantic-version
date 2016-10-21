@@ -23,8 +23,12 @@
  */
 package de.skuzzle.semantic;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * This class is an implementation of the full <em>semantic version 2.0.0</em>
@@ -115,39 +119,60 @@ public final class Version implements Comparable<Version>, Serializable {
         }
     };
 
-    private static final int TO_STRING_ESTIMATE = 12;
+    private static final int TO_STRING_ESTIMATE = 16;
     private static final int HASH_PRIME = 31;
 
     // state machine states for parsing a version string
-    private static final int STATE_MAJOR = 0;
-    private static final int STATE_MINOR = 1;
-    private static final int STATE_PATCH = 2;
-    private static final int STATE_PRE_RELEASE = 3;
-    private static final int STATE_PRE_RELEASE_ID = 4;
-    private static final int STATE_BUILD_MD = 5;
+    private static final int STATE_MAJOR_INIT = 0;
+    private static final int STATE_MAJOR_LEADING_ZERO = 1;
+    private static final int STATE_MAJOR_DEFAULT = 2;
+    private static final int STATE_MINOR_INIT = 3;
+    private static final int STATE_MINOR_LEADING_ZERO = 4;
+    private static final int STATE_MINOR_DEFAULT = 5;
+    private static final int STATE_PATCH_INIT = 6;
+    private static final int STATE_PATCH_LEADING_ZERO = 7;
+    private static final int STATE_PATCH_DEFAULT = 8;
+    private static final int STATE_PRERELEASE_INIT = 9;
+    private static final int STATE_BUILDMD_INIT = 10;
+
+    private static final int STATE_PART_INIT = 0;
+    private static final int STATE_PART_LEADING_ZERO = 1;
+    private static final int STATE_PART_NUMERIC = 2;
+    private static final int STATE_PART_DEFAULT = 3;
+
+    private static final int DECIMAL = 10;
+
     private static final int EOS = -1;
     private static final int FAILURE = -2;
 
     private final int major;
     private final int minor;
     private final int patch;
-    private final String preRelease;
-    private final String buildMetaData;
+    private final String[] preReleaseParts;
+    private final String[] buildMetaDataParts;
+
+    // Since 1.1.0
+    // these fields are only necessary for deserializing previous versions
+    // see #readResolve method
+    @Deprecated
+    private String preRelease;
+    @Deprecated
+    private String buildMetaData;
 
     // store hash code once it has been calculated
     private volatile int hash;
 
-    private Version(int major, int minor, int patch, String preRelease,
-            String buildMd) {
+    private Version(int major, int minor, int patch, String[] preRelease,
+            String[] buildMd) {
+        checkParams(major, minor, patch);
         this.major = major;
         this.minor = minor;
         this.patch = patch;
-        this.preRelease = preRelease;
-        this.buildMetaData = buildMd;
+        this.preReleaseParts = preRelease;
+        this.buildMetaDataParts = buildMd;
     }
 
-    private Version(String v) {
-
+    private static Version parse(String s, boolean verifyOnly) {
         /*
          * Since 1.1.0:
          *
@@ -157,196 +182,331 @@ public final class Version implements Comparable<Version>, Serializable {
          * extremely high to ensure correctness.
          */
 
-        int i = 0;
-        int stateBefore = STATE_MAJOR;
-        int state = stateBefore;
-        final char[] chars = v.toCharArray();
+        final char[] stream = s.toCharArray();
+        int major = 0;
+        int minor = 0;
+        int patch = 0;
+        int state = STATE_MAJOR_INIT;
 
-        int majorPart = 0;
-        int minorPart = 0;
-        int patchpart = 0;
-        StringBuilder preReleasePart = null;
-        StringBuilder buildMDPart = null;
-
-        while (i <= chars.length) {
-            final boolean stateSwitched = i == 0 || state != stateBefore;
-            stateBefore = state;
-            final int c = i == chars.length ? -1 : chars[i];
+        List<String> preRelease = null;
+        List<String> buildMd = null;
+        int step = 1;
+        loop: for (int i = 0; i <= stream.length; i = i + step) {
+            final int c = i < stream.length ? stream[i] : EOS;
 
             switch (state) {
-            case STATE_MAJOR:
-                if (c != '.' && majorPart == 0 && !stateSwitched) {
-                    throw illegalLeadingChar(v, c, "major");
-                } else if (c >= '0' && c <= '9') {
-                    majorPart = Character.digit(c, 10) + majorPart * 10;
-                } else if (c == '.') {
-                    state = STATE_MINOR;
+
+            // Parse major part
+            case STATE_MAJOR_INIT:
+                if (c == '0') {
+                    state = STATE_MAJOR_LEADING_ZERO;
+                } else if (c >= '1' && c <= '9') {
+                    major = major * 10 + Character.digit(c, DECIMAL);
+                    state = STATE_MAJOR_DEFAULT;
+                } else if (verifyOnly) {
+                    return null;
                 } else {
-                    throw unexpectedChar(v, c);
+                    throw unexpectedChar(s, c);
                 }
                 break;
-            case STATE_MINOR:
-                if (c != '.' && minorPart == 0 && !stateSwitched) {
-                    throw illegalLeadingChar(v, c, "minor");
+            case STATE_MAJOR_LEADING_ZERO:
+                if (c == '.') {
+                    // single 0 is allowed
+                    state = STATE_MINOR_INIT;
                 } else if (c >= '0' && c <= '9') {
-                    minorPart = Character.digit(c, 10) + minorPart * 10;
-                } else if (c == '.') {
-                    state = STATE_PATCH;
+                    if (verifyOnly) {
+                        return null;
+                    }
+                    throw illegalLeadingChar(s, '0', "major");
+                } else if (verifyOnly) {
+                    return null;
                 } else {
-                    throw unexpectedChar(v, c);
+                    throw unexpectedChar(s, c);
                 }
                 break;
-            case STATE_PATCH:
-                if (c != EOS && c != '-' && c != '+' && patchpart == 0
-                        && !stateSwitched) {
-                    throw illegalLeadingChar(v, c, "patch");
+            case STATE_MAJOR_DEFAULT:
+                if (c >= '0' && c <= '9') {
+                    major = major * 10 + Character.digit(c, DECIMAL);
+                } else if (c == '.') {
+                    state = STATE_MINOR_INIT;
+                } else if (verifyOnly) {
+                    return null;
+                } else {
+                    throw unexpectedChar(s, c);
+                }
+                break;
+
+            // parse minor part
+            case STATE_MINOR_INIT:
+                if (c == '0') {
+                    state = STATE_MINOR_LEADING_ZERO;
+                } else if (c >= '1' && c <= '9') {
+                    minor = minor * 10 + Character.digit(c, DECIMAL);
+                    state = STATE_MINOR_DEFAULT;
+                } else if (verifyOnly) {
+                    return null;
+                } else {
+                    throw unexpectedChar(s, c);
+                }
+                break;
+            case STATE_MINOR_LEADING_ZERO:
+                if (c == '.') {
+                    // single 0 is allowed
+                    state = STATE_PATCH_INIT;
                 } else if (c >= '0' && c <= '9') {
-                    patchpart = Character.digit(c, 10) + patchpart * 10;
-                } else if (c == '-') {
-                    state = STATE_PRE_RELEASE;
+                    if (verifyOnly) {
+                        return null;
+                    }
+                    throw illegalLeadingChar(s, '0', "minor");
+                } else if (verifyOnly) {
+                    return null;
+                } else {
+                    throw unexpectedChar(s, c);
+                }
+                break;
+            case STATE_MINOR_DEFAULT:
+                if (c >= '0' && c <= '9') {
+                    minor = minor * 10 + Character.digit(c, DECIMAL);
+                } else if (c == '.') {
+                    state = STATE_PATCH_INIT;
+                } else if (verifyOnly) {
+                    return null;
+                } else {
+                    throw unexpectedChar(s, c);
+                }
+                break;
+
+            // parse patch part
+            case STATE_PATCH_INIT:
+                if (c == '0') {
+                    state = STATE_PATCH_LEADING_ZERO;
+                } else if (c >= '1' && c <= '9') {
+                    patch = patch * 10 + Character.digit(c, DECIMAL);
+                    state = STATE_PATCH_DEFAULT;
+                } else if (verifyOnly) {
+                    return null;
+                } else {
+                    throw unexpectedChar(s, c);
+                }
+                break;
+            case STATE_PATCH_LEADING_ZERO:
+                if (c == '-') {
+                    // single 0 is allowed
+                    state = STATE_PRERELEASE_INIT;
                 } else if (c == '+') {
-                    state = STATE_BUILD_MD;
+                    state = STATE_BUILDMD_INIT;
+                } else if (c == EOS) {
+                    state = EOS;
+                } else if (c >= '0' && c <= '9') {
+                    if (verifyOnly) {
+                        return null;
+                    }
+                    throw illegalLeadingChar(s, '0', "patch");
+                } else if (verifyOnly) {
+                    return null;
+                } else {
+                    throw unexpectedChar(s, c);
+                }
+                break;
+            case STATE_PATCH_DEFAULT:
+                if (c >= '0' && c <= '9') {
+                    patch = patch * 10 + Character.digit(c, DECIMAL);
+                } else if (c == '-') {
+                    state = STATE_PRERELEASE_INIT;
+                } else if (c == '+') {
+                    state = STATE_BUILDMD_INIT;
                 } else if (c != EOS) {
-                    throw unexpectedChar(v, c);
+                    // eos is allowed here
+                    if (verifyOnly) {
+                        return null;
+                    }
+                    throw unexpectedChar(s, c);
+                }
+                break;
+            case STATE_PRERELEASE_INIT:
+
+                preRelease = verifyOnly ? null : new ArrayList<String>();
+                step = 0; // do not increment i in loop header
+                i = parseID(stream, i, verifyOnly, false, true, preRelease,
+                        "pre-release");
+                if (i == FAILURE) {
+                    // implies verifyOnly == true, otherwise exception would have been
+                    // thrown
+                    return null;
+                }
+                final int c1 = i < stream.length ? stream[i] : EOS;
+
+                if (c1 == '+') {
+                    ++i;
+                    state = STATE_BUILDMD_INIT;
+                } else {
+                    break loop;
                 }
                 break;
 
-            case STATE_PRE_RELEASE:
-                preReleasePart = new StringBuilder();
-                state = parseIdentifiers(chars, i, preReleasePart, false, true, false,
-                        "pre-release");
-                i += preReleasePart.length();
-                break;
-
-            case STATE_BUILD_MD:
-                buildMDPart = new StringBuilder();
-                state = parseIdentifiers(chars, i, buildMDPart, true, true, false,
+            case STATE_BUILDMD_INIT:
+                buildMd = verifyOnly ? null : new ArrayList<String>();
+                step = 0; // do not increment i in loop header
+                i = parseID(stream, i, verifyOnly, true, false, buildMd,
                         "build-meta-data");
-                break;
+                if (i == FAILURE) {
+                    // implies verifyOnly == true, otherwise exception would have been
+                    // thrown
+                    return null;
+                }
 
-            case EOS:
-                break;
+                break loop;
             default:
-                throw new IllegalStateException("Illegal state " + state);
+                throw new IllegalStateException("Illegal state: " + state);
             }
-            ++i;
         }
-        this.major = majorPart;
-        this.minor = minorPart;
-        this.patch = patchpart;
-        checkParams(majorPart, minorPart, patchpart);
-        this.preRelease = preReleasePart == null ? "" : preReleasePart.toString();
-        this.buildMetaData = buildMDPart == null ? "" : buildMDPart.toString();
+        checkParams(major, minor, patch);
+        final String[] prerelease = preRelease == null ? EMPTY_ARRAY
+                : preRelease.toArray(new String[preRelease.size()]);
+        final String[] buildmetadata = buildMd == null ? EMPTY_ARRAY
+                : buildMd.toArray(new String[buildMd.size()]);
+        return new Version(major, minor, patch, prerelease, buildmetadata);
     }
 
-    private static int parseIdentifiers(char[] chars, int start, StringBuilder b,
-            boolean allowLeading0, boolean allowTransition, boolean checkOnly,
+    private static int parseID(char[] stream, int start, boolean verifyOnly,
+            boolean allowLeading0, boolean preRelease, List<String> parts,
             String partName) {
-        int state = STATE_PRE_RELEASE;
-        int partStart = -1;
+
+        assert verifyOnly || parts != null;
+
+        final StringBuilder b = verifyOnly ? null : new StringBuilder();
         int i = start;
-        while (i <= chars.length) {
-            final int c = i == chars.length ? -1 : chars[i];
-            switch (state) {
-            case STATE_PRE_RELEASE:
-                if ((c == '.' || c == EOS) && partStart == -1) {
-                    // empty part
-                    if (checkOnly) {
-                        return FAILURE;
-                    }
-                    throw unexpectedChar(new String(chars), c);
-                } else if (c == '.') {
-                    // start of new part
-                    if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
-                        if (checkOnly) {
-                            return FAILURE;
-                        }
-                        throw illegalLeadingChar(new String(chars), c, partName);
-                    }
+        while (i <= stream.length) {
 
-                    partStart = -1;
-                    b.appendCodePoint(c);
-                    i++;
-                    continue;
-                }
-
-                if (partStart == -1) {
-                    partStart = i;
-                }
-
-                if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '-') {
-                    b.appendCodePoint(c);
-                    state = STATE_PRE_RELEASE_ID;
-                } else if (c >= '0' && c <= '9') {
-                    b.appendCodePoint(c);
-                } else if (c == '+') {
-                    if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
-                        if (checkOnly) {
-                            return FAILURE;
-                        }
-                        throw illegalLeadingChar(new String(chars), c, partName);
-                    } else if (!allowTransition) {
-                        if (checkOnly) {
-                            return FAILURE;
-                        }
-                        throw unexpectedChar(new String(chars), c);
-                    }
-                    return STATE_BUILD_MD;
-                } else if (c == EOS) {
-                    if (!allowLeading0 && chars[partStart] == '0' && i - partStart > 1) {
-                        if (checkOnly) {
-                            return FAILURE;
-                        }
-                        throw illegalLeadingChar(new String(chars), partStart, partName);
-                    }
-                } else {
-                    if (checkOnly) {
-                        return FAILURE;
-                    }
-                    throw unexpectedChar(new String(chars), c);
-                }
-
-                break;
-
-            case STATE_PRE_RELEASE_ID:
-                if (c == '.') {
-                    b.appendCodePoint(c);
-                    partStart = -1;
-                    state = STATE_PRE_RELEASE;
-                } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '-') {
-                    b.appendCodePoint(c);
-                } else if (c >= '0' && c <= '9') {
-                    b.appendCodePoint(c);
-                } else if (c == '+') {
-                    if (!allowTransition) {
-                        if (checkOnly) {
-                            return FAILURE;
-                        }
-                        throw unexpectedChar(new String(chars), c);
-                    }
-                    return STATE_BUILD_MD;
-                } else if (c != EOS) {
-                    if (checkOnly) {
-                        return FAILURE;
-                    }
-                    throw unexpectedChar(new String(chars), c);
-                }
-
-                break;
-            default:
-                throw new IllegalStateException("Illegal state" + start);
+            i = parseIDPart(stream, i, verifyOnly, allowLeading0, preRelease, b,
+                    partName);
+            if (i == FAILURE) {
+                // implies verifyOnly == true, otherwise exception would have been thrown
+                return FAILURE;
+            } else if (!verifyOnly) {
+                parts.add(b.toString());
             }
-            ++i;
+
+            final int c = i < stream.length ? stream[i] : EOS;
+            if (c == '.') {
+                // keep looping
+                ++i;
+            } else {
+                // identifier is done (hit EOS or '+')
+                return i;
+            }
         }
-        return EOS;
+        throw new IllegalStateException();
+    }
+
+    private static int parseIDPart(char[] stream, int start, boolean verifyOnly,
+            boolean allowLeading0, boolean preRelease, StringBuilder b, String partName) {
+
+        assert verifyOnly || b != null;
+
+        if (!verifyOnly) {
+            b.setLength(0);
+        }
+
+        int state = STATE_PART_INIT;
+        for (int i = start; i <= stream.length; ++i) {
+            final int c = i < stream.length ? stream[i] : EOS;
+
+            switch (state) {
+            case STATE_PART_INIT:
+                if (c == '0' && !allowLeading0) {
+                    state = STATE_PART_LEADING_ZERO;
+                    if (!verifyOnly) {
+                        b.append('0');
+                    }
+                } else if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
+                        || c >= '0' && c <= '9') {
+                    if (!verifyOnly) {
+                        b.appendCodePoint(c);
+                    }
+                    state = STATE_PART_DEFAULT;
+                } else {
+                    if (verifyOnly) {
+                        return FAILURE;
+                    }
+                    throw unexpectedChar(new String(stream), c);
+                }
+                break;
+            case STATE_PART_LEADING_ZERO:
+                // when in this state we consumed a single '0'
+                if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+                    if (!verifyOnly) {
+                        b.appendCodePoint(c);
+                    }
+                    state = STATE_PART_DEFAULT;
+                } else if (c >= '0' && c <= '9') {
+                    if (!verifyOnly) {
+                        b.appendCodePoint(c);
+                    }
+                    state = STATE_PART_NUMERIC;
+                } else if (c == '.' || c == EOS || c == '+' && preRelease) {
+                    // if we are parsing a pre release part it can be terminated by a
+                    // '+' in case a build meta data follows
+
+                    // here, this part consist of a single '0'
+                    return i;
+                } else if (verifyOnly) {
+                    return FAILURE;
+                } else {
+                    throw unexpectedChar(new String(stream), c);
+                }
+                break;
+            case STATE_PART_NUMERIC:
+                // when in this state, the part began with a '0' and we only consumed
+                // numeric chars so far
+                if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+                    if (!verifyOnly) {
+                        b.appendCodePoint(c);
+                    }
+                    state = STATE_PART_DEFAULT;
+                } else if (c >= '0' && c <= '9') {
+                    if (!verifyOnly) {
+                        b.appendCodePoint(c);
+                    }
+                } else if (c == '.' || c == EOS || c == '+' && preRelease) {
+                    // if we are parsing a pre release part it can be terminated by a
+                    // '+' in case a build meta data follows
+
+                    if (verifyOnly) {
+                        return FAILURE;
+                    }
+                    throw illegalLeadingChar(new String(stream), '0', partName);
+                } else if (verifyOnly) {
+                    return FAILURE;
+                } else {
+                    throw unexpectedChar(new String(stream), c);
+                }
+                break;
+            case STATE_PART_DEFAULT:
+                if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
+                        || c >= '0' && c <= '9') {
+                    if (!verifyOnly) {
+                        b.appendCodePoint(c);
+                    }
+                } else if (c == '.' || c == EOS || c == '+' && preRelease) {
+                    // if we are parsing a pre release part it can be terminated by a
+                    // '+' in case a build meta data follows
+                    return i;
+                } else if (verifyOnly) {
+                    return FAILURE;
+                } else {
+                    throw unexpectedChar(new String(stream), c);
+                }
+                break;
+
+            }
+        }
+
+        throw new IllegalStateException();
     }
 
     private static VersionFormatException illegalLeadingChar(String v, int c,
             String part) {
-        if (c == -1) {
-            return new VersionFormatException(String.format(
-                    "Incomplete version part in %s", v));
-        }
         return new VersionFormatException(
                 String.format("Illegal leading char '%c' in %s part of %s", c, part, v));
     }
@@ -358,6 +518,86 @@ public final class Version implements Comparable<Version>, Serializable {
         }
         return new VersionFormatException(
                 String.format("Unexpected char in %s: %c", v, c));
+    }
+
+    /**
+     * Creates a new Version from this one, replacing only the major part with the given
+     * one. All other parts will remain the same as in this Version.
+     *
+     * @param newMajor The new major version.
+     * @return A new Version.
+     * @throws IllegalArgumentException If all fields in the resulting Version are 0.
+     * @since 1.1.0
+     */
+    public Version withMajor(int newMajor) {
+        return new Version(newMajor, this.minor, this.patch, this.preReleaseParts,
+                this.buildMetaDataParts);
+    }
+
+    /**
+     * Creates a new Version from this one, replacing only the minor part with the given
+     * one. All other parts will remain the same as in this Version.
+     *
+     * @param newMinor The new minor version.
+     * @return A new Version.
+     * @throws IllegalArgumentException If all fields in the resulting Version are 0.
+     * @since 1.1.0
+     */
+    public Version withMinor(int newMinor) {
+        return new Version(this.major, newMinor, this.patch, this.preReleaseParts,
+                this.buildMetaDataParts);
+    }
+
+    /**
+     * Creates a new Version from this one, replacing only the patch part with the given
+     * one. All other parts will remain the same as in this Version.
+     *
+     * @param newPatch The new patch version.
+     * @return A new Version.
+     * @throws IllegalArgumentException If all fields in the resulting Version are 0.
+     * @since 1.1.0
+     */
+    public Version withPatch(int newPatch) {
+        return new Version(this.major, this.minor, newPatch, this.preReleaseParts,
+                this.buildMetaDataParts);
+    }
+
+    /**
+     * Creates a new Version from this one, replacing only the pre-release part with the
+     * given String. All other parts will remain the same as in this Version. You can
+     * remove the pre-release part by passing an empty String.
+     *
+     * @param newPreRelease The new pre-release identifier.
+     * @return A new Version.
+     * @throws VersionFormatException If the given String is not a valid pre-release
+     *             identifier.
+     * @throws IllegalArgumentException If preRelease is null.
+     * @since 1.1.0
+     */
+    public Version withPreRelease(String newPreRelease) {
+        require(newPreRelease != null, "newPreRelease is null");
+        final String[] newPreReleaseParts = parsePreRelease(newPreRelease);
+        return new Version(this.major, this.minor, this.patch, newPreReleaseParts,
+                this.buildMetaDataParts);
+    }
+
+    /**
+     * Creates a new Version from this one, replacing only the build-meta-data part with
+     * the given String. All other parts will remain the same as in this Version. You can
+     * remove the build-meta-data part by passing an empty String.
+     *
+     * @param newBuildMetaData The new build meta data identifier.
+     * @return A new Version.
+     * @throws VersionFormatException If the given String is not a valid build-meta-data
+     *             identifier.
+     * @throws IllegalArgumentException If newBuildMetaData is null.
+     * @since 1.1.0
+     */
+    public Version withBuildMetaData(String newBuildMetaData) {
+        require(newBuildMetaData != null, "newBuildMetaData is null");
+        final String[] newBuildMdParts = parseBuildMd(newBuildMetaData);
+        return new Version(this.major, this.minor, this.patch, this.preReleaseParts,
+                newBuildMdParts);
     }
 
     /**
@@ -374,16 +614,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @since 0.5.0
      */
     public static boolean isValidVersion(String version) {
-        if (version == null || version.isEmpty()) {
-            return false;
-        }
-
-        try {
-            new Version(version);
-            return true;
-        } catch (final VersionFormatException e) {
-            return false;
-        }
+        return version != null && !version.isEmpty() && parse(version, true) != null;
     }
 
     /**
@@ -408,8 +639,8 @@ public final class Version implements Comparable<Version>, Serializable {
             return true;
         }
 
-        return parseIdentifiers(preRelease.toCharArray(), 0, new StringBuilder(), false,
-                false, true, "") != FAILURE;
+        return parseID(preRelease.toCharArray(), 0, true, false, false, null,
+                "") != FAILURE;
     }
 
     /**
@@ -433,8 +664,9 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (buildMetaData.isEmpty()) {
             return true;
         }
-        return parseIdentifiers(buildMetaData.toCharArray(), 0, new StringBuilder(), true,
-                false, true, "") != FAILURE;
+
+        return parseID(buildMetaData.toCharArray(), 0, true, true, false, null,
+                "") != FAILURE;
     }
 
     /**
@@ -578,22 +810,22 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static int comparePreRelease(Version v1, Version v2) {
-        return compareLiterals(v1.getPreRelease(), v2.getPreRelease());
+        return compareLiterals(v1.preReleaseParts, v2.preReleaseParts);
     }
 
     private static int compareBuildMetaData(Version v1, Version v2) {
-        return compareLiterals(v1.getBuildMetaData(), v2.getBuildMetaData());
+        return compareLiterals(v1.buildMetaDataParts, v2.buildMetaDataParts);
     }
 
-    private static int compareLiterals(String v1Literal, String v2Literal) {
+    private static int compareLiterals(String[] v1Literal, String[] v2Literal) {
         int result = 0;
-        if (!v1Literal.isEmpty() && !v2Literal.isEmpty()) {
+        if (v1Literal.length > 0 && v2Literal.length > 0) {
             // compare pre release parts
-            result = compareIdentifiers(v1Literal.split("\\."), v2Literal.split("\\."));
-        } else if (!v1Literal.isEmpty()) {
+            result = compareIdentifiers(v1Literal, v2Literal);
+        } else if (v1Literal.length > 0) {
             // other is greater, because it is no pre release
             result = -1;
-        } else if (!v2Literal.isEmpty()) {
+        } else if (v2Literal.length > 0) {
             // this is greater because other is no pre release
             result = 1;
         }
@@ -643,11 +875,45 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return The positive number (incl. 0) if s a number, or -1 if it is not.
      */
     private static int isNumeric(String s) {
-        try {
-            return Integer.parseInt(s);
-        } catch (final NumberFormatException e) {
-            return -1;
+        final char chars[] = s.toCharArray();
+        int num = 0;
+        for (int i = 0; i < chars.length; ++i) {
+            final char c = chars[i];
+            if (c >= '0' && c <= '9') {
+                num = Character.digit(c, 10) + num * 10;
+            } else {
+                return -1;
+            }
         }
+        return num;
+    }
+
+    private static String[] parsePreRelease(String preRelease) {
+        if (preRelease != null && !preRelease.isEmpty()) {
+            final List<String> parts = new ArrayList<String>();
+            parseID(preRelease.toCharArray(), 0, false, false, false, parts,
+                    "pre-release");
+            return parts.toArray(new String[parts.size()]);
+        }
+        return EMPTY_ARRAY;
+    }
+
+    private static String[] parseBuildMd(String buildMetaData) {
+        if (buildMetaData != null && !buildMetaData.isEmpty()) {
+            final List<String> parts = new ArrayList<String>();
+            parseID(buildMetaData.toCharArray(), 0, false, true, false, parts,
+                    "build-meta-data");
+            return parts.toArray(new String[parts.size()]);
+        }
+        return EMPTY_ARRAY;
+    }
+
+    private static final Version createInternal(int major, int minor, int patch,
+            String preRelease, String buildMetaData) {
+
+        final String[] preReleaseParts = parsePreRelease(preRelease);
+        final String[] buildMdParts = parseBuildMd(buildMetaData);
+        return new Version(major, minor, patch, preReleaseParts, buildMdParts);
     }
 
     /**
@@ -670,18 +936,9 @@ public final class Version implements Comparable<Version>, Serializable {
     public static final Version create(int major, int minor, int patch,
             String preRelease,
             String buildMetaData) {
-        checkParams(major, minor, patch);
         require(preRelease != null, "preRelease is null");
         require(buildMetaData != null, "buildMetaData is null");
-
-        if (!isValidPreRelease(preRelease)) {
-            throw new VersionFormatException(
-                    String.format("Illegal pre-release part: %s", preRelease));
-        } else if (!isValidBuildMetaData(buildMetaData)) {
-            throw new VersionFormatException(
-                    String.format("Illegal build-meta-data part: %s", buildMetaData));
-        }
-        return new Version(major, minor, patch, preRelease, buildMetaData);
+        return createInternal(major, minor, patch, preRelease, buildMetaData);
     }
 
     /**
@@ -701,13 +958,7 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public static final Version create(int major, int minor, int patch,
             String preRelease) {
-        checkParams(major, minor, patch);
-        require(preRelease != null, "preRelease is null");
-
-        if (!isValidPreRelease(preRelease)) {
-            throw new VersionFormatException(preRelease);
-        }
-        return new Version(major, minor, patch, preRelease, "");
+        return create(major, minor, patch, preRelease, "");
     }
 
     /**
@@ -721,8 +972,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return The version instance.
      */
     public static final Version create(int major, int minor, int patch) {
-        checkParams(major, minor, patch);
-        return new Version(major, minor, patch, "", "");
+        return new Version(major, minor, patch, EMPTY_ARRAY, EMPTY_ARRAY);
     }
 
     private static void checkParams(int major, int minor, int patch) {
@@ -750,7 +1000,7 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public static final Version parseVersion(String versionString) {
         require(versionString != null, "versionString is null");
-        return new Version(versionString);
+        return parse(versionString, false);
     }
 
     /**
@@ -845,7 +1095,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *         release part.
      */
     public String[] getPreReleaseParts() {
-        return this.preRelease.isEmpty() ? EMPTY_ARRAY : this.preRelease.split("\\.");
+        return Arrays.copyOf(this.preReleaseParts, this.preReleaseParts.length);
     }
 
     /**
@@ -856,7 +1106,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *         has no such identifier.
      */
     public String getPreRelease() {
-        return this.preRelease;
+        return join(this.preReleaseParts);
     }
 
     /**
@@ -867,7 +1117,19 @@ public final class Version implements Comparable<Version>, Serializable {
      *         data.
      */
     public String getBuildMetaData() {
-        return this.buildMetaData;
+        return join(this.buildMetaDataParts);
+    }
+
+    private static String join(String[] parts) {
+        final StringBuilder b = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            final String part = parts[i];
+            b.append(part);
+            if (i < parts.length - 1) {
+                b.append(".");
+            }
+        }
+        return b.toString();
     }
 
     /**
@@ -877,8 +1139,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return The build meta data as array.
      */
     public String[] getBuildMetaDataParts() {
-        return this.buildMetaData.isEmpty() ? EMPTY_ARRAY
-                : this.buildMetaData.split("\\.");
+        return Arrays.copyOf(this.buildMetaDataParts, this.buildMetaDataParts.length);
     }
 
     /**
@@ -896,7 +1157,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return <code>true</code> iff {@link #getPreRelease()} is not empty.
      */
     public boolean isPreRelease() {
-        return !this.preRelease.isEmpty();
+        return this.preReleaseParts.length > 0;
     }
 
     /**
@@ -905,7 +1166,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return <code>true</code> iff {@link #getBuildMetaData()} is not empty.
      */
     public boolean hasBuildMetaData() {
-        return !this.buildMetaData.isEmpty();
+        return this.buildMetaDataParts.length > 0;
     }
 
     /**
@@ -916,15 +1177,16 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     @Override
     public String toString() {
-        final StringBuilder b = new StringBuilder(this.preRelease.length()
-                + this.buildMetaData.length() + TO_STRING_ESTIMATE);
-        b.append(this.major).append(".").append(this.minor).append(".")
+        final StringBuilder b = new StringBuilder(TO_STRING_ESTIMATE);
+        b.append(this.major).append(".")
+                .append(this.minor).append(".")
                 .append(this.patch);
-        if (!this.preRelease.isEmpty()) {
-            b.append("-").append(this.preRelease);
+
+        if (isPreRelease()) {
+            b.append("-").append(getPreRelease());
         }
-        if (!this.buildMetaData.isEmpty()) {
-            b.append("+").append(this.buildMetaData);
+        if (hasBuildMetaData()) {
+            b.append("+").append(getBuildMetaData());
         }
         return b.toString();
     }
@@ -943,7 +1205,7 @@ public final class Version implements Comparable<Version>, Serializable {
             h = HASH_PRIME + this.major;
             h = HASH_PRIME * h + this.minor;
             h = HASH_PRIME * h + this.patch;
-            h = HASH_PRIME * h + this.preRelease.hashCode();
+            h = HASH_PRIME * h + Arrays.hashCode(this.preReleaseParts);
             this.hash = h;
         }
         return this.hash;
@@ -1029,7 +1291,8 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public Version toUpperCase() {
         return new Version(this.major, this.minor, this.patch,
-                this.preRelease.toUpperCase(), this.buildMetaData.toUpperCase());
+                copyCase(this.preReleaseParts, true),
+                copyCase(this.buildMetaDataParts, true));
     }
 
     /**
@@ -1040,6 +1303,65 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public Version toLowerCase() {
         return new Version(this.major, this.minor, this.patch,
-                this.preRelease.toLowerCase(), this.buildMetaData.toLowerCase());
+                copyCase(this.preReleaseParts, false),
+                copyCase(this.buildMetaDataParts, false));
+    }
+
+    private static String[] copyCase(String[] source, boolean toUpper) {
+        final String[] result = new String[source.length];
+        for (int i = 0; i < source.length; i++) {
+            final String string = source[i];
+            result[i] = toUpper ? string.toUpperCase() : string.toLowerCase();
+        }
+        return result;
+    }
+
+    /**
+     * Tests whether this version is strictly greater than the given other version in
+     * terms of precedence. Does not consider the build meta data part.
+     * <p>
+     * Convenience method for {@code this.compareTo(other) > 0} except that this method
+     * throws an {@link IllegalArgumentException} if other is null.
+     * </p>
+     *
+     * @param other The version to compare to.
+     * @return Whether this version is strictly greater.
+     * @since 1.1.0
+     */
+    public boolean isGreaterThan(Version other) {
+        require(other != null, "other must no be null");
+        return compareTo(other) > 0;
+    }
+
+    /**
+     * Tests whether this version is strictly lower than the given other version in terms
+     * of precedence. Does not consider the build meta data part.
+     * <p>
+     * Convenience method for {@code this.compareTo(other) < 0} except that this method
+     * throws an {@link IllegalArgumentException} if other is null.
+     * </p>
+     *
+     * @param other The version to compare to.
+     * @return Whether this version is strictly lower.
+     * @since 1.1.0
+     */
+    public boolean isLowerThan(Version other) {
+        require(other != null, "other must no be null");
+        return compareTo(other) < 0;
+    }
+
+    /**
+     * Handles proper deserialization of objects serialized with a version prior to 1.1.0
+     *
+     * @return the deserialized object.
+     * @throws ObjectStreamException
+     * @since 1.1.0
+     */
+    private Object readResolve() throws ObjectStreamException {
+        if (this.preRelease != null || this.buildMetaData != null) {
+            return createInternal(this.major, this.minor, this.patch, this.preRelease,
+                    this.buildMetaData);
+        }
+        return this;
     }
 }

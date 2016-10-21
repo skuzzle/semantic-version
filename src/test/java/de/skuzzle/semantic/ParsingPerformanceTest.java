@@ -2,9 +2,11 @@ package de.skuzzle.semantic;
 
 import org.junit.Test;
 
+import com.vdurmont.semver4j.Semver;
+
 public class ParsingPerformanceTest extends AbstractVersionPerformanceTest {
 
-    private static final String TEST_STRING = "10.153.132-very.long-prelease.id.1234+with.build.md";
+    private static final String TEST_STRING = "10.153.132-123.123.123.very.long-prelease.012aid.1234+with.build.md.000112";
 
     @Test
     public void testNoRegex() throws Exception {
@@ -24,6 +26,28 @@ public class ParsingPerformanceTest extends AbstractVersionPerformanceTest {
             @Override
             public void run() {
                 VersionRegEx.parseVersion(TEST_STRING);
+            }
+        });
+    }
+
+    @Test
+    public void testJSemver() throws Exception {
+        performTest("jsemver", RUN, new Runnable() {
+
+            @Override
+            public void run() {
+                com.github.zafarkhaja.semver.Version.valueOf(TEST_STRING);
+            }
+        });
+    }
+
+    @Test
+    public void testsemver4j() throws Exception {
+        performTest("semver4j", RUN, new Runnable() {
+
+            @Override
+            public void run() {
+                new Semver(TEST_STRING);
             }
         });
     }
