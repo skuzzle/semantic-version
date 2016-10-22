@@ -37,6 +37,7 @@ public class ParsingTest {
             "1.1.0-112",
             "1.1.0-0",
             "1.1.0-0123a",
+            "1.1.0-0123a+0012",
     };
 
     private static final String[] ILLEGAL_PRE_RELEASES = {

@@ -263,6 +263,13 @@ public class VersionTest {
     }
 
     @Test
+    public void testPreReleaseInvalidChar31() throws Exception {
+        for (final char c : ILLEGAL_CHAR_BOUNDS) {
+            shouldNotBeParseable("1.0.0-01a%c", c);
+        }
+    }
+
+    @Test
     public void testBuildMDInvalidChar1() throws Exception {
         for (final char c : ILLEGAL_CHAR_BOUNDS) {
             shouldNotBeParseable("1.0.0+%c", c);
@@ -542,6 +549,8 @@ public class VersionTest {
         final Version v2 = Version.parseVersion("1.0.0-rc1");
         Assert.assertTrue(v1.compareTo(v2) > 0);
         Assert.assertTrue(v2.compareTo(v1) < 0);
+        assertTrue(v2.isLowerThan(v1));
+        assertTrue(v1.isGreaterThan(v2));
     }
 
     @Test
@@ -582,6 +591,16 @@ public class VersionTest {
         final Version v2 = Version.parseVersion("1.0.0-1.some.id-with-hyphen.b");
         Assert.assertTrue(v1.compareTo(v2) < 0);
         Assert.assertTrue(v2.compareTo(v1) > 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testIsGreaterNull() throws Exception {
+        Version.create(1, 0, 0).isGreaterThan(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testIsLowerNull() throws Exception {
+        Version.create(1, 0, 0).isLowerThan(null);
     }
 
     @Test
@@ -1017,5 +1036,13 @@ public class VersionTest {
     @Test(expected = IllegalArgumentException.class)
     public void testWithBuildMdNull() throws Exception {
         Version.create(1, 2, 3).withBuildMetaData(null);
+    }
+
+    @Test
+    public void testParseBiggerNumbers() throws Exception {
+        final Version v = Version.parseVersion("1234.5678.9012");
+        assertEquals(1234, v.getMajor());
+        assertEquals(5678, v.getMinor());
+        assertEquals(9012, v.getPatch());
     }
 }

@@ -41,7 +41,7 @@ import java.util.List;
  * build meta data} field for comparison.
  *
  * <p>
- * Instances of this class are fully immutable.
+ * Instances of this class are immutable and thus thread safe.
  * </p>
  *
  * <p>
@@ -62,7 +62,7 @@ public final class Version implements Comparable<Version>, Serializable {
     private static final String[] EMPTY_ARRAY = new String[0];
 
     /**
-     * Semantic Version Specification to which this class complies
+     * Semantic Version Specification to which this class complies.
      *
      * @since 0.2.0
      */
@@ -201,7 +201,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 if (c == '0') {
                     state = STATE_MAJOR_LEADING_ZERO;
                 } else if (c >= '1' && c <= '9') {
-                    major = major * 10 + Character.digit(c, DECIMAL);
+                    major = major * DECIMAL + Character.digit(c, DECIMAL);
                     state = STATE_MAJOR_DEFAULT;
                 } else if (verifyOnly) {
                     return null;
@@ -226,7 +226,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 break;
             case STATE_MAJOR_DEFAULT:
                 if (c >= '0' && c <= '9') {
-                    major = major * 10 + Character.digit(c, DECIMAL);
+                    major = major * DECIMAL + Character.digit(c, DECIMAL);
                 } else if (c == '.') {
                     state = STATE_MINOR_INIT;
                 } else if (verifyOnly) {
@@ -241,7 +241,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 if (c == '0') {
                     state = STATE_MINOR_LEADING_ZERO;
                 } else if (c >= '1' && c <= '9') {
-                    minor = minor * 10 + Character.digit(c, DECIMAL);
+                    minor = minor * DECIMAL + Character.digit(c, DECIMAL);
                     state = STATE_MINOR_DEFAULT;
                 } else if (verifyOnly) {
                     return null;
@@ -266,7 +266,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 break;
             case STATE_MINOR_DEFAULT:
                 if (c >= '0' && c <= '9') {
-                    minor = minor * 10 + Character.digit(c, DECIMAL);
+                    minor = minor * DECIMAL + Character.digit(c, DECIMAL);
                 } else if (c == '.') {
                     state = STATE_PATCH_INIT;
                 } else if (verifyOnly) {
@@ -281,7 +281,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 if (c == '0') {
                     state = STATE_PATCH_LEADING_ZERO;
                 } else if (c >= '1' && c <= '9') {
-                    patch = patch * 10 + Character.digit(c, DECIMAL);
+                    patch = patch * DECIMAL + Character.digit(c, DECIMAL);
                     state = STATE_PATCH_DEFAULT;
                 } else if (verifyOnly) {
                     return null;
@@ -296,7 +296,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 } else if (c == '+') {
                     state = STATE_BUILDMD_INIT;
                 } else if (c == EOS) {
-                    state = EOS;
+                    break loop;
                 } else if (c >= '0' && c <= '9') {
                     if (verifyOnly) {
                         return null;
@@ -310,7 +310,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 break;
             case STATE_PATCH_DEFAULT:
                 if (c >= '0' && c <= '9') {
-                    patch = patch * 10 + Character.digit(c, DECIMAL);
+                    patch = patch * DECIMAL + Character.digit(c, DECIMAL);
                 } else if (c == '-') {
                     state = STATE_PRERELEASE_INIT;
                 } else if (c == '+') {
@@ -346,7 +346,6 @@ public final class Version implements Comparable<Version>, Serializable {
 
             case STATE_BUILDMD_INIT:
                 buildMd = verifyOnly ? null : new ArrayList<String>();
-                step = 0; // do not increment i in loop header
                 i = parseID(stream, i, verifyOnly, true, false, buildMd,
                         "build-meta-data");
                 if (i == FAILURE) {
@@ -360,7 +359,6 @@ public final class Version implements Comparable<Version>, Serializable {
                 throw new IllegalStateException("Illegal state: " + state);
             }
         }
-        checkParams(major, minor, patch);
         final String[] prerelease = preRelease == null ? EMPTY_ARRAY
                 : preRelease.toArray(new String[preRelease.size()]);
         final String[] buildmetadata = buildMd == null ? EMPTY_ARRAY
@@ -875,12 +873,16 @@ public final class Version implements Comparable<Version>, Serializable {
      * @return The positive number (incl. 0) if s a number, or -1 if it is not.
      */
     private static int isNumeric(String s) {
-        final char chars[] = s.toCharArray();
+        final char[] chars = s.toCharArray();
         int num = 0;
+
+        // note: this method does not account for leading zeroes as could occur in build
+        // meta data parts. Leading zeroes are thus simply ignored when parsing the
+        // number.
         for (int i = 0; i < chars.length; ++i) {
             final char c = chars[i];
             if (c >= '0' && c <= '9') {
-                num = Character.digit(c, 10) + num * 10;
+                num = num * DECIMAL + Character.digit(c, DECIMAL);
             } else {
                 return -1;
             }
@@ -1088,8 +1090,8 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     /**
-     * Gets the pre release parts of this version as array by splitting the pre result
-     * version string at the dots.
+     * Gets the pre release identifier parts of this version as array. Modifying the
+     * resulting array will have no influence on the internal state of this object.
      *
      * @return Pre release version as array. Array is empty if this version has no pre
      *         release part.
@@ -1102,6 +1104,11 @@ public final class Version implements Comparable<Version>, Serializable {
      * Gets the pre release identifier of this version. If this version has no such
      * identifier, an empty string is returned.
      *
+     * <p>
+     * Note: This method will always reconstruct a new String by joining the single
+     * identifier parts.
+     * </p>
+     *
      * @return This version's pre release identifier or an empty String if this version
      *         has no such identifier.
      */
@@ -1112,6 +1119,11 @@ public final class Version implements Comparable<Version>, Serializable {
     /**
      * Gets this version's build meta data. If this version has no build meta data, the
      * returned string is empty.
+     *
+     * <p>
+     * Note: This method will always reconstruct a new String by joining the single
+     * identifier parts.
+     * </p>
      *
      * @return The build meta data or an empty String if this version has no build meta
      *         data.
@@ -1133,10 +1145,11 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     /**
-     * Gets this version's build meta data as array by splitting the meta data at dots. If
-     * this version has no build meta data, the result is an empty array.
+     * Gets the build meta data identifier parts of this version as array. Modifying the
+     * resulting array will have no influence on the internal state of this object.
      *
-     * @return The build meta data as array.
+     * @return Build meta data as array. Array is empty if this version has no build meta
+     *         data part.
      */
     public String[] getBuildMetaDataParts() {
         return Arrays.copyOf(this.buildMetaDataParts, this.buildMetaDataParts.length);
@@ -1354,12 +1367,13 @@ public final class Version implements Comparable<Version>, Serializable {
      * Handles proper deserialization of objects serialized with a version prior to 1.1.0
      *
      * @return the deserialized object.
-     * @throws ObjectStreamException
+     * @throws ObjectStreamException If deserialization fails.
      * @since 1.1.0
      */
     private Object readResolve() throws ObjectStreamException {
         if (this.preRelease != null || this.buildMetaData != null) {
-            return createInternal(this.major, this.minor, this.patch, this.preRelease,
+            return createInternal(this.major, this.minor, this.patch,
+                    this.preRelease,
                     this.buildMetaData);
         }
         return this;

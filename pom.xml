@@ -136,6 +136,14 @@
 			</activation>
 			<build>
 				<plugins>
+					<!-- Skip mutation tests. -->
+					<plugin>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-maven</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
 					<!-- package java doc into jar file -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
