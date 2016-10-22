@@ -1133,6 +1133,9 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static String join(String[] parts) {
+        if (parts.length == 0) {
+            return "";
+        }
         final StringBuilder b = new StringBuilder();
         for (int i = 0; i < parts.length; i++) {
             final String part = parts[i];
