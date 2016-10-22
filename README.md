@@ -9,10 +9,16 @@ semantic-version
 
 This is a single-class [semantic version 2.0.0](http://semver.org/)
 implementation for java 6+. It requires no further dependencies and is thereby
-easy to use within your own projects. You may simply copy the single class to
-your source folder and apply any modifications which suit your needs (as long
-as you preserve the license header).
+easy to use within your own projects. Key features:
 
+* Lightweight: consists of only a single file, no dependencies
+* Immutable: strict immutability ensures easy handling and thread safety
+* Serializable: Objects can be serialized using Java's `ObjectOutputStream`.
+* Fast: Many performance improvements make this the fastest semver implementation in java
+  around (according to parsing and sorting performance)
+* Compatible: Supports Java 6 but also provides many methods that are suitable to be used 
+  as method references in Java 8
+* Stable: Ready for production since release 1.0.0 
 
 ## Maven Dependency
 semantic-version is available through the Maven Central Repository. Just add
@@ -50,6 +56,18 @@ Versions can be compared as they implement `Comparable`:
 
 ```java
 if (v1.compareTo(v2) < 0) { ... }
+if (v1.isGreaterThan(v2)) { ... }
+if (v1.isLowerThan(v2)) { ... }
+```
+
+You can derive new versions from existing ones by modifying a single field:
+
+```java
+Version v1 = Version.create(1, 0, 0)
+        .withMinor(2)
+        .withPatch(3)
+        .withPreRelease("alpha-1")
+        .withBuildMetaData("build-20161022");
 ```
 
 `equals`, `hashCode` and `toString` are implemented appropriately. In rare cases
