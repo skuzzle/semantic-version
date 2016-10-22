@@ -28,7 +28,7 @@ the following dependency to your pom:
 <dependency>
     <groupId>de.skuzzle</groupId>
     <artifactId>semantic-version</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
