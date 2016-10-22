@@ -1097,6 +1097,9 @@ public final class Version implements Comparable<Version>, Serializable {
      *         release part.
      */
     public String[] getPreReleaseParts() {
+        if (this.preReleaseParts.length == 0) {
+            return EMPTY_ARRAY;
+        }
         return Arrays.copyOf(this.preReleaseParts, this.preReleaseParts.length);
     }
 
@@ -1155,6 +1158,9 @@ public final class Version implements Comparable<Version>, Serializable {
      *         data part.
      */
     public String[] getBuildMetaDataParts() {
+        if (this.buildMetaDataParts.length == 0) {
+            return EMPTY_ARRAY;
+        }
         return Arrays.copyOf(this.buildMetaDataParts, this.buildMetaDataParts.length);
     }
 
