@@ -190,8 +190,7 @@ public final class Version implements Comparable<Version>, Serializable {
 
         List<String> preRelease = null;
         List<String> buildMd = null;
-        int step = 1;
-        loop: for (int i = 0; i <= stream.length; i = i + step) {
+        loop: for (int i = 0; i <= stream.length; ++i) {
             final int c = i < stream.length ? stream[i] : EOS;
 
             switch (state) {
@@ -326,7 +325,6 @@ public final class Version implements Comparable<Version>, Serializable {
             case STATE_PRERELEASE_INIT:
 
                 preRelease = verifyOnly ? null : new ArrayList<String>();
-                step = 0; // do not increment i in loop header
                 i = parseID(stream, i, verifyOnly, false, true, preRelease,
                         "pre-release");
                 if (i == FAILURE) {
@@ -337,7 +335,6 @@ public final class Version implements Comparable<Version>, Serializable {
                 final int c1 = i < stream.length ? stream[i] : EOS;
 
                 if (c1 == '+') {
-                    ++i;
                     state = STATE_BUILDMD_INIT;
                 } else {
                     break loop;
