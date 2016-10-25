@@ -1016,9 +1016,45 @@ public class VersionTest {
         assertEquals(Version.create(1, 2, 3), v.withPreRelease(""));
     }
 
+    @Test
+    public void testWithPreReleaseEmptyArray() throws Exception {
+        final Version v = Version.create(1, 2, 3, "foo");
+        assertEquals(Version.create(1, 2, 3), v.withPreRelease(new String[0]));
+    }
+
+    @Test
+    public void testWithPreReleaseModifyArray() throws Exception {
+        final String[] newPreRelease = new String[] { "bar" };
+        final Version v = Version.create(1, 2, 3, "foo");
+        final Version v2 = v.withPreRelease(newPreRelease);
+        newPreRelease[0] = "foo";
+        assertEquals(Version.create(1, 2, 3, "bar"), v2);
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testWithPreReleaseIllegalPart() throws Exception {
+        final String[] newPreRelease = new String[] { "01" };
+        Version.create(1, 0, 0).withPreRelease(newPreRelease);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testWithPreReleaseNull() throws Exception {
-        Version.create(1, 2, 3).withPreRelease(null);
+        Version.create(1, 2, 3).withPreRelease((String) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithPreReleaseNull2() throws Exception {
+        Version.create(1, 2, 3).withPreRelease((String[]) null);
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testWitPreReleaseIllegalPartDot() throws Exception {
+        Version.create(1, 0, 0).withPreRelease(new String[] { "12.a" });
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testWithPreReleaseIllegalPartPlus() throws Exception {
+        Version.create(1, 0, 0).withPreRelease(new String[] { "12+a" });
     }
 
     @Test
@@ -1033,9 +1069,39 @@ public class VersionTest {
         assertEquals(Version.create(1, 2, 3), v.withBuildMetaData(""));
     }
 
+    @Test
+    public void testWithBuildMDEmptyArray() throws Exception {
+        final Version v = Version.create(1, 2, 3, "", "foo");
+        assertEquals(Version.create(1, 2, 3), v.withBuildMetaData(new String[0]));
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testWithBuildMDIllegalPartDot() throws Exception {
+        Version.create(1, 0, 0).withBuildMetaData(new String[] { "12.a" });
+    }
+
+    @Test(expected = VersionFormatException.class)
+    public void testWithBuildMDIllegalPartPlus() throws Exception {
+        Version.create(1, 0, 0).withBuildMetaData(new String[] { "12+a" });
+    }
+
+    @Test
+    public void testWithBuildMDModifyArray() throws Exception {
+        final String[] newBuildMd = new String[] { "bar" };
+        final Version v = Version.create(1, 2, 3, "", "foo");
+        final Version v2 = v.withBuildMetaData(newBuildMd);
+        newBuildMd[0] = "foo";
+        assertEquals(Version.create(1, 2, 3, "", "bar"), v2);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testWithBuildMdNull() throws Exception {
-        Version.create(1, 2, 3).withBuildMetaData(null);
+        Version.create(1, 2, 3).withBuildMetaData((String) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testWithBuildMdNull2() throws Exception {
+        Version.create(1, 2, 3).withBuildMetaData((String[]) null);
     }
 
     @Test
@@ -1044,5 +1110,62 @@ public class VersionTest {
         assertEquals(1234, v.getMajor());
         assertEquals(5678, v.getMinor());
         assertEquals(9012, v.getPatch());
+    }
+
+    @Test
+    public void testIncrementMajor() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertEquals(Version.create(2, 0, 0), v.nextMajor());
+    }
+
+    @Test
+    public void testIncrementMinor() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertEquals(Version.create(1, 3, 0), v.nextMinor());
+    }
+
+    @Test
+    public void testIncrementPatch() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertEquals(Version.create(1, 2, 4), v.nextPatch());
+    }
+
+    @Test
+    public void testIncrementPreReleaseEmpty() throws Exception {
+        final Version v = Version.create(1, 2, 3, "", "build");
+        assertEquals(Version.create(1, 2, 3, "1"), v.nextPreRelease());
+    }
+
+    @Test
+    public void testIncrementPreReleaseNumeric() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release.1", "build");
+        assertEquals(Version.create(1, 2, 3, "pre-release.2"), v.nextPreRelease());
+    }
+
+    @Test
+    public void testIncrementPreReleaseNonNumeric() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertEquals(Version.create(1, 2, 3, "pre-release.1"), v.nextPreRelease());
+    }
+
+    @Test
+    public void testIncrementBuildMDEmpty() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "");
+        assertEquals(Version.create(1, 2, 3, "pre-release", "1"),
+                v.nextBuildMetaData());
+    }
+
+    @Test
+    public void testIncrementBuildMDNumeric() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build.1");
+        assertEquals(Version.create(1, 2, 3, "pre-release", "build.2"),
+                v.nextBuildMetaData());
+    }
+
+    @Test
+    public void testIncrementBuildMDNonNumeric() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertEquals(Version.create(1, 2, 3, "pre-release", "build.1"),
+                v.nextBuildMetaData());
     }
 }

@@ -41,7 +41,9 @@ import java.util.List;
  * build meta data} field for comparison.
  *
  * <p>
- * Instances of this class are immutable and thus thread safe.
+ * Instances of this class are immutable and thus thread safe. This also means that all
+ * methods taking an array or other kind of modifiable objects as input, will first make a
+ * copy before using it as internal state.
  * </p>
  *
  * <p>
@@ -182,6 +184,7 @@ public final class Version implements Comparable<Version>, Serializable {
          * extremely high to ensure correctness.
          */
 
+        // note: getting the char array once is faster than calling charAt multiple times
         final char[] stream = s.toCharArray();
         int major = 0;
         int minor = 0;
@@ -373,7 +376,7 @@ public final class Version implements Comparable<Version>, Serializable {
         int i = start;
         while (i <= stream.length) {
 
-            i = parseIDPart(stream, i, verifyOnly, allowLeading0, preRelease, b,
+            i = parseIDPart(stream, i, verifyOnly, allowLeading0, preRelease, true, b,
                     partName);
             if (i == FAILURE) {
                 // implies verifyOnly == true, otherwise exception would have been thrown
@@ -395,9 +398,8 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static int parseIDPart(char[] stream, int start, boolean verifyOnly,
-            boolean allowLeading0, boolean preRelease, StringBuilder b, String partName) {
-
-        assert verifyOnly || b != null;
+            boolean allowLeading0, boolean preRelease, boolean allowDot,
+            StringBuilder b, String partName) {
 
         if (!verifyOnly) {
             b.setLength(0);
@@ -411,12 +413,12 @@ public final class Version implements Comparable<Version>, Serializable {
             case STATE_PART_INIT:
                 if (c == '0' && !allowLeading0) {
                     state = STATE_PART_LEADING_ZERO;
-                    if (!verifyOnly) {
+                    if (b != null) {
                         b.append('0');
                     }
                 } else if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
                         || c >= '0' && c <= '9') {
-                    if (!verifyOnly) {
+                    if (b != null) {
                         b.appendCodePoint(c);
                     }
                     state = STATE_PART_DEFAULT;
@@ -430,16 +432,16 @@ public final class Version implements Comparable<Version>, Serializable {
             case STATE_PART_LEADING_ZERO:
                 // when in this state we consumed a single '0'
                 if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-                    if (!verifyOnly) {
+                    if (b != null) {
                         b.appendCodePoint(c);
                     }
                     state = STATE_PART_DEFAULT;
                 } else if (c >= '0' && c <= '9') {
-                    if (!verifyOnly) {
+                    if (b != null) {
                         b.appendCodePoint(c);
                     }
                     state = STATE_PART_NUMERIC;
-                } else if (c == '.' || c == EOS || c == '+' && preRelease) {
+                } else if (c == '.' && allowDot || c == EOS || c == '+' && preRelease) {
                     // if we are parsing a pre release part it can be terminated by a
                     // '+' in case a build meta data follows
 
@@ -455,12 +457,12 @@ public final class Version implements Comparable<Version>, Serializable {
                 // when in this state, the part began with a '0' and we only consumed
                 // numeric chars so far
                 if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-                    if (!verifyOnly) {
+                    if (b != null) {
                         b.appendCodePoint(c);
                     }
                     state = STATE_PART_DEFAULT;
                 } else if (c >= '0' && c <= '9') {
-                    if (!verifyOnly) {
+                    if (b != null) {
                         b.appendCodePoint(c);
                     }
                 } else if (c == '.' || c == EOS || c == '+' && preRelease) {
@@ -480,10 +482,10 @@ public final class Version implements Comparable<Version>, Serializable {
             case STATE_PART_DEFAULT:
                 if (c == '-' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
                         || c >= '0' && c <= '9') {
-                    if (!verifyOnly) {
+                    if (b != null) {
                         b.appendCodePoint(c);
                     }
-                } else if (c == '.' || c == EOS || c == '+' && preRelease) {
+                } else if (c == '.' && allowDot || c == EOS || c == '+' && preRelease) {
                     // if we are parsing a pre release part it can be terminated by a
                     // '+' in case a build meta data follows
                     return i;
@@ -577,6 +579,29 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     /**
+     * Creates a new Version from this one, replacing only the pre-release part with the
+     * given array. All other parts will remain the same as in this Version. You can
+     * remove the pre-release part by passing an empty array.
+     * <p>
+     * The passed array will be copied to not allow external modification to the new
+     * Version's inner state.
+     * </p>
+     *
+     * @param newPreRelease the new pre release parts.
+     * @return A new Version.
+     * @throws VersionFormatException If the any element of the given array is not a valid
+     *             pre release identifier part.
+     * @throws IllegalArgumentException If newPreRelease is null.
+     * @since 1.2.0
+     */
+    public Version withPreRelease(String[] newPreRelease) {
+        require(newPreRelease != null, "newPreRelease is null");
+        final String[] newPreReleaseParts = verifyAndCopyArray(newPreRelease, false);
+        return new Version(this.major, this.minor, this.patch, newPreReleaseParts,
+                this.buildMetaDataParts);
+    }
+
+    /**
      * Creates a new Version from this one, replacing only the build-meta-data part with
      * the given String. All other parts will remain the same as in this Version. You can
      * remove the build-meta-data part by passing an empty String.
@@ -593,6 +618,246 @@ public final class Version implements Comparable<Version>, Serializable {
         final String[] newBuildMdParts = parseBuildMd(newBuildMetaData);
         return new Version(this.major, this.minor, this.patch, this.preReleaseParts,
                 newBuildMdParts);
+    }
+
+    /**
+     * Creates a new Version from this one, replacing only the build-meta-data part with
+     * the given array. All other parts will remain the same as in this Version. You can
+     * remove the build-meta-data part by passing an empty array.
+     * <p>
+     * The passed array will be copied to not allow external modification to the new
+     * Version's inner state.
+     * </p>
+     *
+     * @param newBuildMetaData the new build meta data parts.
+     * @return A new Version.
+     * @throws VersionFormatException If the any element of the given array is not a valid
+     *             build meta data identifier part.
+     * @throws IllegalArgumentException If newBuildMetaData is null.
+     * @since 1.2.0
+     */
+    public Version withBuildMetaData(String[] newBuildMetaData) {
+        require(newBuildMetaData != null, "newBuildMetaData is null");
+        final String[] newParts = verifyAndCopyArray(newBuildMetaData, true);
+        return new Version(this.major, this.minor, this.patch, this.preReleaseParts,
+                newParts);
+    }
+
+    private String[] verifyAndCopyArray(String parts[], boolean allowLeading0) {
+        final String[] result = new String[parts.length];
+        final StringBuilder b = new StringBuilder();
+        for (int i = 0; i < parts.length; ++i) {
+            final String part = parts[i];
+            result[i] = part;
+            parseIDPart(part.toCharArray(), 0, false, allowLeading0, false, false, b, "");
+        }
+        return result;
+    }
+
+    /**
+     * Given this Version, returns the next major Version. That is, the major part is
+     * incremented by 1 and the remaining parts are set to 0. This also drops the
+     * pre-release and build-meta-data.
+     *
+     * @return The incremented version.
+     * @see #nextMajor(String)
+     * @see #nextMajor(String[])
+     * @since 1.2.0
+     */
+    public Version nextMajor() {
+        return new Version(this.major + 1, 0, 0, EMPTY_ARRAY, EMPTY_ARRAY);
+    }
+
+    /**
+     * Given this Version, returns the next major Version. That is, the major part is
+     * incremented by 1 and the remaining parts are set to 0. The pre-release part will be
+     * set to the given identifier and the build-meta-data is dropped.
+     *
+     * @param newPrelease The pre-release part for the resulting Version.
+     * @return The incremented version.
+     * @throws VersionFormatException If the given String is not a valid pre-release
+     *             identifier.
+     * @throws IllegalArgumentException If newPreRelease is null.
+     * @see #nextMajor()
+     * @see #nextMajor(String[])
+     * @since 1.2.0
+     */
+    public Version nextMajor(String newPrelease) {
+        require(newPrelease != null, "newPreRelease is null");
+        final String[] preReleaseParts = parsePreRelease(newPrelease);
+        return new Version(this.major + 1, 0, 0, preReleaseParts, EMPTY_ARRAY);
+    }
+
+    /**
+     * Given this Version, returns the next major Version. That is, the major part is
+     * incremented by 1 and the remaining parts are set to 0. The pre-release part will be
+     * set to the given identifier and the build-meta-data is dropped.
+     *
+     * @param newPrelease The pre-release part for the resulting Version.
+     * @return The incremented version.
+     * @throws VersionFormatException If the any element of the given array is not a valid
+     *             pre release identifier part.
+     * @throws IllegalArgumentException If newPreRelease is null.
+     * @see #nextMajor()
+     * @see #nextMajor(String)
+     * @since 1.2.0
+     */
+    public Version nextMajor(String[] newPrelease) {
+        require(newPrelease != null, "newPreRelease is null");
+        final String[] newPreReleaseParts = verifyAndCopyArray(newPrelease, false);
+        return new Version(this.major + 1, 0, 0, newPreReleaseParts, EMPTY_ARRAY);
+    }
+
+    public Version nextMinor() {
+        return new Version(this.major, this.minor + 1, 0, EMPTY_ARRAY, EMPTY_ARRAY);
+    }
+
+    public Version nextMinor(String newPrelease) {
+        require(newPrelease != null, "newPreRelease is null");
+        final String[] preReleaseParts = parsePreRelease(newPrelease);
+        return new Version(this.major, this.minor + 1, 0, preReleaseParts, EMPTY_ARRAY);
+    }
+
+    public Version nextMinor(String[] newPrelease) {
+        require(newPrelease != null, "newPreRelease is null");
+        final String[] newPreReleaseParts = verifyAndCopyArray(newPrelease, false);
+        return new Version(this.major, this.minor + 1, 0, newPreReleaseParts,
+                EMPTY_ARRAY);
+    }
+
+    public Version nextPatch() {
+        return new Version(this.major, this.minor, this.patch + 1, EMPTY_ARRAY,
+                EMPTY_ARRAY);
+    }
+
+    public Version nextPatch(String newPrelease) {
+        require(newPrelease != null, "newPreRelease is null");
+        final String[] preReleaseParts = parsePreRelease(newPrelease);
+        return new Version(this.major, this.minor, this.patch + 1, preReleaseParts,
+                EMPTY_ARRAY);
+    }
+
+    public Version nextPatch(String[] newPrelease) {
+        require(newPrelease != null, "newPreRelease is null");
+        final String[] newPreReleaseParts = verifyAndCopyArray(newPrelease, false);
+        return new Version(this.major, this.minor, this.patch + 1, newPreReleaseParts,
+                EMPTY_ARRAY);
+    }
+
+    /**
+     * Derives a new Version instance from this one by only incrementing the pre-release
+     * identifier. The build-meta-data will be dropped, all other fields remain the same.
+     *
+     * <p>
+     * The incrementation of the pre-release identifier behaves as follows:
+     * <ul>
+     * <li>In case the identifier is currently empty, it becomes "1" in the result.</li>
+     * <li>If the identifier's last part is numeric, that last part will be incremented in
+     * the result.</li>
+     * <li>If the last part is not numeric, the identifier is interpreted as
+     * {@code identifier.0} which becomes {@code identifier.1} after increment.
+     * </ul>
+     * Examples:
+     *
+     * <table>
+     * <tr>
+     * <th>Version</th>
+     * <th>After increment</th>
+     * </tr>
+     * <tr>
+     * <td>1.2.3</td>
+     * <td>1.2.3-1</td>
+     * </tr>
+     * <tr>
+     * <td>1.2.3+build.meta.data</td>
+     * <td>1.2.3-1</td>
+     * </tr>
+     * <tr>
+     * <td>1.2.3-foo</td>
+     * <td>1.2.3-foo.1</td>
+     * </tr>
+     * <tr>
+     * <td>1.2.3-foo.1</td>
+     * <td>1.2.3-foo.2</td>
+     * </tr>
+     * </table>
+     * </p>
+     *
+     * @return The incremented Version.
+     * @since 1.2.0
+     */
+    public Version nextPreRelease() {
+        final String[] newPreReleaseParts = incrementIdentifier(this.preReleaseParts);
+        return new Version(this.major, this.minor, this.patch, newPreReleaseParts,
+                EMPTY_ARRAY);
+    }
+
+    /**
+     * Derives a new Version instance from this one by only incrementing the
+     * build-meta-data identifier. All other fields remain the same.
+     *
+     * <p>
+     * The incrementation of the build-meta-data identifier behaves as follows:
+     * <ul>
+     * <li>In case the identifier is currently empty, it becomes "1" in the result.</li>
+     * <li>If the identifier's last part is numeric, that last part will be incremented in
+     * the result. <b>Leading 0's will be removed</b>.</li>
+     * <li>If the last part is not numeric, the identifier is interpreted as
+     * {@code identifier.0} which becomes {@code identifier.1} after increment.
+     * </ul>
+     * Examples:
+     *
+     * <table>
+     * <tr>
+     * <th>Version</th>
+     * <th>After increment</th>
+     * </tr>
+     * <tr>
+     * <td>1.2.3</td>
+     * <td>1.2.3+1</td>
+     * </tr>
+     * <tr>
+     * <td>1.2.3-pre.release</td>
+     * <td>1.2.3-pre.release+1</td>
+     * </tr>
+     * <tr>
+     * <td>1.2.3+foo</td>
+     * <td>1.2.3+foo.1</td>
+     * </tr>
+     * <tr>
+     * <td>1.2.3+foo.1</td>
+     * <td>1.2.3+foo.2</td>
+     * </tr>
+     * </table>
+     * </p>
+     *
+     * @return The incremented Version.
+     * @since 1.2.0
+     */
+    public Version nextBuildMetaData() {
+        final String[] newBuildMetaData = incrementIdentifier(this.buildMetaDataParts);
+        return new Version(this.major, this.minor, this.patch, this.preReleaseParts,
+                newBuildMetaData);
+    }
+
+    private String[] incrementIdentifier(String[] parts) {
+        if (parts.length == 0) {
+            return new String[] { "1" };
+        }
+        final int lastIdx = parts.length - 1;
+        final String lastPart = parts[lastIdx];
+
+        int num = isNumeric(lastPart);
+        int newLength = parts.length;
+        if (num >= 0) {
+            num += 1;
+        } else {
+            newLength += 1;
+            num = 1;
+        }
+        final String[] result = Arrays.copyOf(parts, newLength);
+        result[newLength - 1] = String.valueOf(num);
+        return result;
     }
 
     /**
