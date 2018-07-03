@@ -2,7 +2,7 @@ package de.skuzzle.semantic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.expectThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 import java.util.ArrayList;
@@ -40,14 +40,13 @@ public class ParsingTest {
             "1.1.0-0123a+0012",
     };
 
-    private static final String[] ILLEGAL_PRE_RELEASES = {
-            "pre.foo.",
-            "01.1",
-            "1.01",
-            "pre.001",
-            "pre.01",
-            "pre..foo",
-            "$"
+    private static final String[][] ILLEGAL_PRE_RELEASES = {
+            { "01.1", "Illegal leading char '0' in pre-release part of %s" },
+            { "1.01", "Illegal leading char '0' in pre-release part of %s" },
+            { "pre.001", "Illegal leading char '0' in pre-release part of %s" },
+            { "pre.01", "Illegal leading char '0' in pre-release part of %s" },
+            { "pre..foo", INCOMPLETE_VERSION_PART },
+            { "$", unexpectedChar('$') }
     };
 
     private static final String[][] ILLEGAL_VERSIONS = {
@@ -74,8 +73,8 @@ public class ParsingTest {
             { "1.2.3-pre.001", "Illegal leading char '0' in pre-release part of %s" },
             { "1.2.3-pre.01", "Illegal leading char '0' in pre-release part of %s" },
             { "1.2.3-pre.01+a.b", "Illegal leading char '0' in pre-release part of %s" },
-            { "1.2.3-pre..foo", unexpectedChar('.') },
-            { "1.2.3+pre..foo", unexpectedChar('.') },
+            { "1.2.3-pre..foo", INCOMPLETE_VERSION_PART },
+            { "1.2.3+pre..foo", INCOMPLETE_VERSION_PART },
             { "1.2.3+pre.foo.", INCOMPLETE_VERSION_PART },
             { "1.2.3-$+foo", unexpectedChar('$') },
             { "1.2.3+$", unexpectedChar('$') },
@@ -99,7 +98,7 @@ public class ParsingTest {
         for (final String[] input : ILLEGAL_VERSIONS) {
             results.add(dynamicTest("Parse " + input[0],
                     () -> {
-                        final VersionFormatException e = expectThrows(
+                        final VersionFormatException e = assertThrows(
                                 VersionFormatException.class,
                                 () -> Version.parseVersion(input[0]));
 
@@ -116,12 +115,36 @@ public class ParsingTest {
         final List<DynamicTest> results = new ArrayList<>(
                 ILLEGAL_PRE_RELEASES.length);
 
-        for (final String input : ILLEGAL_PRE_RELEASES) {
-            results.add(dynamicTest("Pre release " + input,
+        for (final String input[] : ILLEGAL_PRE_RELEASES) {
+            results.add(dynamicTest("Pre release " + input[0],
                     () -> {
-                        expectThrows(VersionFormatException.class,
-                                () -> Version.create(1, 2, 3).withPreRelease(input));
+                        final VersionFormatException e = assertThrows(
+                                VersionFormatException.class,
+                                () -> Version.create(1, 2, 3).withPreRelease(input[0]));
 
+                        final String expectedMessage = String.format(input[1], input[0]);
+                        assertEquals(expectedMessage, e.getMessage());
+                    }));
+        }
+
+        return results;
+    }
+
+    @TestFactory
+    Collection<DynamicTest> testWithPreReleaseArrayException() {
+        final List<DynamicTest> results = new ArrayList<>(
+                ILLEGAL_PRE_RELEASES.length);
+
+        for (final String input[] : ILLEGAL_PRE_RELEASES) {
+            results.add(dynamicTest("Pre release as array: " + input[0],
+                    () -> {
+                        final VersionFormatException e = assertThrows(
+                                VersionFormatException.class,
+                                () -> Version.create(1, 2, 3).withPreRelease(
+                                        input[0].split("\\.")));
+
+                        final String expectedMessage = String.format(input[1], input[0]);
+                        assertEquals(expectedMessage, e.getMessage());
                     }));
         }
 

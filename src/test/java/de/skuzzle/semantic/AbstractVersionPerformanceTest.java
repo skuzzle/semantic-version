@@ -1,5 +1,8 @@
 package de.skuzzle.semantic;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -29,20 +32,25 @@ public class AbstractVersionPerformanceTest {
         long min = Long.MAX_VALUE;
         long max = 0;
         long sum = 0;
+        final List<Long> times = new ArrayList<>(iterations);
         for (int i = 0; i < iterations; ++i) {
             final T t = beforeEach.get();
 
             final long start = System.nanoTime();
             subject.accept(t);
             final long time = System.nanoTime() - start;
+            times.add(time);
             min = Math.min(min, time);
             max = Math.max(max, time);
             sum += time;
         }
+        Collections.sort(times);
         final long avg = sum / iterations;
+        final long median = times.get(times.size() / 2);
         System.out.println("Min " + min);
         System.out.println("Max " + max);
         System.out.println("Avg " + avg);
+        System.out.println("Med " + median);
         System.out.println();
     }
 
@@ -53,18 +61,25 @@ public class AbstractVersionPerformanceTest {
         long min = Long.MAX_VALUE;
         long max = 0;
         long sum = 0;
+        final List<Long> times = new ArrayList<>(iterations);
+
         for (int i = 0; i < iterations; ++i) {
             final long start = System.nanoTime();
             subject.run();
             final long time = System.nanoTime() - start;
+            times.add(time);
+
             min = Math.min(min, time);
             max = Math.max(max, time);
             sum += time;
         }
+        Collections.sort(times);
         final long avg = sum / iterations;
+        final long median = times.get(times.size() / 2);
         System.out.println("Min " + min);
         System.out.println("Max " + max);
         System.out.println("Avg " + avg);
+        System.out.println("Med " + median);
         System.out.println();
     }
 

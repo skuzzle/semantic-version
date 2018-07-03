@@ -1,6 +1,6 @@
 package de.skuzzle.semantic;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vdurmont.semver4j.Semver;
 

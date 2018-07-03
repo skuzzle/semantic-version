@@ -16,7 +16,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import de.skuzzle.semantic.Version.VersionFormatException;
 
@@ -97,34 +98,40 @@ public class VersionTest {
         assertEquals("", v.getBuildMetaData());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPreReleaseNull() {
-        Version.create(1, 1, 1, null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 1, 1, null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBuildMDNull() {
-        Version.create(1, 1, 1, "", null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 1, 1, "", null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNegativePatch() {
-        Version.create(1, 1, -1);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 1, -1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNegativeMinor() {
-        Version.create(1, -1, 1);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, -1, 1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNegativeMajor() {
-        Version.create(-1, 1, 1);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(-1, 1, 1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void parseVersionNull() {
-        Version.parseVersion(null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.parseVersion(null));
     }
 
     @Test
@@ -184,14 +191,16 @@ public class VersionTest {
         assertEquals(0, version.getMajor());
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testVersionWithBuildMDEmptyLastPart() {
-        Version.create(1, 2, 3, "", "some.id.");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 2, 3, "", "some.id."));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testVersionWithBuildMDEmptyMiddlePart() {
-        Version.create(1, 2, 3, "", "some..id");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 2, 3, "", "some..id"));
     }
 
     @Test
@@ -295,19 +304,22 @@ public class VersionTest {
         assertEquals("-", v.getPreRelease());
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseMajorUnexpectedChar() throws Exception {
-        Version.parseVersion("1$.0.0");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1$.0.0"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParsePatchUnexpectedChar() throws Exception {
-        Version.parseVersion("1.0.1$");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.0.1$"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseLeadingZeroMinor() throws Exception {
-        Version.parseVersion("1.01.1");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.01.1"));
     }
 
     @Test
@@ -315,9 +327,10 @@ public class VersionTest {
         assertFalse(Version.isValidVersion("1.1.01"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseLeadingZeroPatch() throws Exception {
-        Version.parseVersion("1.1.01");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.1.01"));
     }
 
     @Test
@@ -325,9 +338,10 @@ public class VersionTest {
         assertFalse(Version.isValidVersion("01.1.1"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseMissingPart() throws Exception {
-        Version.parseVersion("1.0");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.0"));
     }
 
     @Test
@@ -335,9 +349,10 @@ public class VersionTest {
         assertFalse(Version.isValidVersion("1.1"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParsePrematureStop() throws Exception {
-        Version.parseVersion("1.");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1."));
     }
 
     @Test
@@ -345,99 +360,118 @@ public class VersionTest {
         assertFalse(Version.isValidVersion("1."));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseMajorLeadingZero() throws Exception {
-        Version.parseVersion("01.0.0");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("01.0.0"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseWithLeadingZeroes() {
-        Version.parseVersion("1.2.3-pre.001");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-pre.001"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseWithLeadingZeroes2() {
-        Version.create(1, 2, 3, "pre.001");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 2, 3, "pre.001"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseWithLeadingZeroEOS() {
-        Version.parseVersion("1.2.3-pre.01");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-pre.01"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseWithLeadingZeroEOS2() {
-        Version.create(1, 2, 3, "pre.01");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 2, 3, "pre.01"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseWithLeadingZeroAndBuildMD() {
-        Version.parseVersion("1.2.3-pre.01+a.b");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-pre.01+a.b"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseMiddleEmptyIdentifier() {
-        Version.parseVersion("1.2.3-pre..foo");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-pre..foo"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseLastEmptyIdentifier() {
-        Version.parseVersion("1.2.3-pre.foo.");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-pre.foo."));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testBuildMDMiddleEmptyIdentifier() {
-        Version.parseVersion("1.2.3+pre..foo");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3+pre..foo"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testBuildMDLastEmptyIdentifier() {
-        Version.parseVersion("1.2.3+pre.foo.");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3+pre.foo."));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseExpectNoPrelease() {
-        Version.parseVersion("1.2.3-foo", false);
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-foo", false));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseExpectNoBuildMetaData() {
-        Version.parseVersion("1.2.3+foo", false);
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3+foo", false));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseExpectNoPreReleaseAndBuildMetaData() {
-        Version.parseVersion("1.2.3-foo+foo", false);
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-foo+foo", false));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseVersionIllegalCharInPreReleaseOnly() throws Exception {
-        Version.parseVersion("1.2.3-$+foo");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-$+foo"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseVersionIllegalCharBuildMDOnly() throws Exception {
-        Version.parseVersion("1.2.3+$");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3+$"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseVersionIllegalCharInPreRelease() throws Exception {
-        Version.parseVersion("1.2.3-foo$+foo");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-foo$+foo"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseVersionIllegalCharInPreReleaseNumericPart() throws Exception {
-        Version.parseVersion("1.2.3-1$+foo");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-1$+foo"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseVersionIllegalCharInBuildMDNumericPart() throws Exception {
-        Version.parseVersion("1.2.3-1+1$");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-1+1$"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParseVersionIllegalCharInBuildMD() throws Exception {
-        Version.parseVersion("1.2.3-foo+foo$");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-foo+foo$"));
     }
 
     @Test
@@ -450,19 +484,22 @@ public class VersionTest {
         Version.parseVersion("1.2.3-0.1.0+0.0.0.1");
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParsePreReleaseIllegalLeadingZero() throws Exception {
-        Version.parseVersion("1.2.3-01.1");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-01.1"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParsePreReleaseIllegalLeadingZeroBeforeBuildMD() throws Exception {
-        Version.parseVersion("1.2.3-1.01+abc");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-1.01+abc"));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testParsePreReleaseIllegalLeadingZeroInLastPart() throws Exception {
-        Version.parseVersion("1.2.3-1.01");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.parseVersion("1.2.3-1.01"));
     }
 
     @Test
@@ -477,29 +514,34 @@ public class VersionTest {
         Assert.assertEquals("bar", version.getBuildMetaData());
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseLastEmptyIdentifier2() {
-        Version.create(1, 2, 3, "pre.foo.");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 2, 3, "pre.foo."));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testVersionAll0() {
-        Version.parseVersion("0.0.0");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.parseVersion("0.0.0"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testVersionAll02() {
-        Version.create(0, 0, 0);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(0, 0, 0));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testPreReleaseInvalid() {
-        Version.create(1, 2, 3, "pre.", "build");
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 2, 3, "pre.", "build"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testPreReleaseNullAndBuildMDGiven() {
-        Version.create(1, 2, 3, null, "build");
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 2, 3, null, "build"));
     }
 
     @Test
@@ -593,14 +635,16 @@ public class VersionTest {
         Assert.assertTrue(v2.compareTo(v1) > 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testIsGreaterNull() throws Exception {
-        Version.create(1, 0, 0).isGreaterThan(null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 0, 0).isGreaterThan(null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testIsLowerNull() throws Exception {
-        Version.create(1, 0, 0).isLowerThan(null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 0, 0).isLowerThan(null));
     }
 
     @Test
@@ -696,24 +740,28 @@ public class VersionTest {
         }
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testCompareWithBuildMDNull1() throws Exception {
-        Version.compareWithBuildMetaData(null, Version.create(1, 0, 0));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> Version.compareWithBuildMetaData(null, Version.create(1, 0, 0)));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testCompareWithBuildMDNull2() throws Exception {
-        Version.compareWithBuildMetaData(Version.create(1, 0, 0), null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> Version.compareWithBuildMetaData(Version.create(1, 0, 0), null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testCompareNull1() {
-        Version.compare(null, Version.create(1, 1, 1));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> Version.compare(null, Version.create(1, 1, 1)));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testCompareNull2() {
-        Version.compare(Version.create(1, 1, 1), null);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> Version.compare(Version.create(1, 1, 1), null));
     }
 
     @Test
@@ -794,14 +842,17 @@ public class VersionTest {
         assertSame(v1, v1.min(v2));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMinNullV1() throws Exception {
-        Version.min(null, Version.create(1, 0, 0));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.min(null, Version.create(1, 0, 0)));
+        ;
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMinNullV2() throws Exception {
-        Version.min(Version.create(1, 0, 0), null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.min(Version.create(1, 0, 0), null));
     }
 
     @Test
@@ -824,14 +875,16 @@ public class VersionTest {
         assertSame(v1, v1.max(v2));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMaxNullV1() throws Exception {
-        Version.max(null, Version.create(1, 0, 0));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.max(null, Version.create(1, 0, 0)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testMaxNullV2() throws Exception {
-        Version.max(Version.create(1, 0, 0), null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.max(Version.create(1, 0, 0), null));
     }
 
     @Test
@@ -968,22 +1021,28 @@ public class VersionTest {
                 v.getBuildMetaDataParts());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithMajorAllWillbe0() throws Exception {
         final Version v = Version.create(1, 0, 0);
-        v.withMajor(0);
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> v.withMajor(0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithMinorAllWillbe0() throws Exception {
         final Version v = Version.create(0, 1, 0);
-        v.withMinor(0);
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> v.withMinor(0));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithPatchAllWillbe0() throws Exception {
         final Version v = Version.create(0, 0, 1);
-        v.withPatch(0);
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> v.withPatch(0));
     }
 
     @Test
@@ -1031,30 +1090,38 @@ public class VersionTest {
         assertEquals(Version.create(1, 2, 3, "bar"), v2);
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testWithPreReleaseIllegalPart() throws Exception {
         final String[] newPreRelease = new String[] { "01" };
-        Version.create(1, 0, 0).withPreRelease(newPreRelease);
+
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 0, 0).withPreRelease(newPreRelease));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithPreReleaseNull() throws Exception {
-        Version.create(1, 2, 3).withPreRelease((String) null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 2, 3).withPreRelease((String) null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithPreReleaseNull2() throws Exception {
-        Version.create(1, 2, 3).withPreRelease((String[]) null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 2, 3).withPreRelease((String[]) null));
     }
 
-    @Test(expected = VersionFormatException.class)
-    public void testWitPreReleaseIllegalPartDot() throws Exception {
-        Version.create(1, 0, 0).withPreRelease(new String[] { "12.a" });
+    @Test
+    public void testPreReleaseArrayWithDotPart() throws Exception {
+        final Version v = Version.create(1, 0, 0);
+        Assertions.assertEquals(
+                v.withPreRelease(new String[] { "12.a" }),
+                v.withPreRelease(new String[] { "12", "a" }));
     }
 
-    @Test(expected = VersionFormatException.class)
-    public void testWithPreReleaseIllegalPartPlus() throws Exception {
-        Version.create(1, 0, 0).withPreRelease(new String[] { "12+a" });
+    @Test
+    public void testBuildMdArrayWithDotPart() throws Exception {
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 0, 0).withPreRelease(new String[] { "12+a" }));
     }
 
     @Test
@@ -1075,14 +1142,18 @@ public class VersionTest {
         assertEquals(Version.create(1, 2, 3), v.withBuildMetaData(new String[0]));
     }
 
-    @Test(expected = VersionFormatException.class)
-    public void testWithBuildMDIllegalPartDot() throws Exception {
-        Version.create(1, 0, 0).withBuildMetaData(new String[] { "12.a" });
+    @Test
+    public void testBuildMDArrayWithDotPart() throws Exception {
+        final Version v = Version.create(1, 0, 0);
+        Assertions.assertEquals(
+                v.withBuildMetaData(new String[] { "12.a" }),
+                v.withBuildMetaData(new String[] { "12", "a" }));
     }
 
-    @Test(expected = VersionFormatException.class)
+    @Test
     public void testWithBuildMDIllegalPartPlus() throws Exception {
-        Version.create(1, 0, 0).withBuildMetaData(new String[] { "12+a" });
+        Assertions.assertThrows(VersionFormatException.class,
+                () -> Version.create(1, 0, 0).withBuildMetaData(new String[] { "12+a" }));
     }
 
     @Test
@@ -1094,14 +1165,16 @@ public class VersionTest {
         assertEquals(Version.create(1, 2, 3, "", "bar"), v2);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithBuildMdNull() throws Exception {
-        Version.create(1, 2, 3).withBuildMetaData((String) null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 2, 3).withBuildMetaData((String) null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWithBuildMdNull2() throws Exception {
-        Version.create(1, 2, 3).withBuildMetaData((String[]) null);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 2, 3).withBuildMetaData((String[]) null));
     }
 
     @Test

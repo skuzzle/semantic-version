@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Simon Taddiken
+ * Copyright (c) 2017 Simon Taddiken
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -328,7 +328,7 @@ public final class Version implements Comparable<Version>, Serializable {
             case STATE_PRERELEASE_INIT:
 
                 preRelease = verifyOnly ? null : new ArrayList<String>();
-                i = parseID(stream, i, verifyOnly, false, true, preRelease,
+                i = parseID(stream, s, i, verifyOnly, false, true, preRelease,
                         "pre-release");
                 if (i == FAILURE) {
                     // implies verifyOnly == true, otherwise exception would have been
@@ -346,7 +346,7 @@ public final class Version implements Comparable<Version>, Serializable {
 
             case STATE_BUILDMD_INIT:
                 buildMd = verifyOnly ? null : new ArrayList<String>();
-                i = parseID(stream, i, verifyOnly, true, false, buildMd,
+                i = parseID(stream, s, i, verifyOnly, true, false, buildMd,
                         "build-meta-data");
                 if (i == FAILURE) {
                     // implies verifyOnly == true, otherwise exception would have been
@@ -366,18 +366,21 @@ public final class Version implements Comparable<Version>, Serializable {
         return new Version(major, minor, patch, prerelease, buildmetadata);
     }
 
-    private static int parseID(char[] stream, int start, boolean verifyOnly,
+    private static int parseID(char[] stream, String full, int start, boolean verifyOnly,
             boolean allowLeading0, boolean preRelease, List<String> parts,
             String partName) {
 
         assert verifyOnly || parts != null;
 
-        final StringBuilder b = verifyOnly ? null : new StringBuilder();
+        final StringBuilder b = verifyOnly
+                ? null
+                : new StringBuilder(stream.length - start);
+
         int i = start;
         while (i <= stream.length) {
 
-            i = parseIDPart(stream, i, verifyOnly, allowLeading0, preRelease, true, b,
-                    partName);
+            i = parseIDPart(stream, full, i, verifyOnly, allowLeading0, preRelease, true,
+                    b, partName);
             if (i == FAILURE) {
                 // implies verifyOnly == true, otherwise exception would have been thrown
                 return FAILURE;
@@ -397,11 +400,12 @@ public final class Version implements Comparable<Version>, Serializable {
         throw new IllegalStateException();
     }
 
-    private static int parseIDPart(char[] stream, int start, boolean verifyOnly,
+    private static int parseIDPart(char[] stream, String full, int start,
+            boolean verifyOnly,
             boolean allowLeading0, boolean preRelease, boolean allowDot,
             StringBuilder b, String partName) {
 
-        if (!verifyOnly) {
+        if (b != null) {
             b.setLength(0);
         }
 
@@ -422,11 +426,16 @@ public final class Version implements Comparable<Version>, Serializable {
                         b.appendCodePoint(c);
                     }
                     state = STATE_PART_DEFAULT;
+                } else if (c == '.') {
+                    if (verifyOnly) {
+                        return FAILURE;
+                    }
+                    throw unexpectedChar(full, -1);
                 } else {
                     if (verifyOnly) {
                         return FAILURE;
                     }
-                    throw unexpectedChar(new String(stream), c);
+                    throw unexpectedChar(full, c);
                 }
                 break;
             case STATE_PART_LEADING_ZERO:
@@ -450,7 +459,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 } else if (verifyOnly) {
                     return FAILURE;
                 } else {
-                    throw unexpectedChar(new String(stream), c);
+                    throw unexpectedChar(full, c);
                 }
                 break;
             case STATE_PART_NUMERIC:
@@ -472,11 +481,11 @@ public final class Version implements Comparable<Version>, Serializable {
                     if (verifyOnly) {
                         return FAILURE;
                     }
-                    throw illegalLeadingChar(new String(stream), '0', partName);
+                    throw illegalLeadingChar(full, '0', partName);
                 } else if (verifyOnly) {
                     return FAILURE;
                 } else {
-                    throw unexpectedChar(new String(stream), c);
+                    throw unexpectedChar(full, c);
                 }
                 break;
             case STATE_PART_DEFAULT:
@@ -492,7 +501,7 @@ public final class Version implements Comparable<Version>, Serializable {
                 } else if (verifyOnly) {
                     return FAILURE;
                 } else {
-                    throw unexpectedChar(new String(stream), c);
+                    throw unexpectedChar(full, c);
                 }
                 break;
 
@@ -586,6 +595,16 @@ public final class Version implements Comparable<Version>, Serializable {
      * The passed array will be copied to not allow external modification to the new
      * Version's inner state.
      * </p>
+     * <p>
+     * A single part within the array is allowed to contain a dot ('.'). Such parts will
+     * be treated as if the array contained those parts as single elements.
+     *
+     * <pre>
+     * v.withPreRelease(new String[] { "a.b" })
+     * <=>
+     * v.withPreRelease(new String[] { "a", "b" })
+     * </pre>
+     * </p>
      *
      * @param newPreRelease the new pre release parts.
      * @return A new Version.
@@ -596,7 +615,8 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public Version withPreRelease(String[] newPreRelease) {
         require(newPreRelease != null, "newPreRelease is null");
-        final String[] newPreReleaseParts = verifyAndCopyArray(newPreRelease, false);
+        final String joined = join(newPreRelease);
+        final String[] newPreReleaseParts = parsePreRelease(joined);
         return new Version(this.major, this.minor, this.patch, newPreReleaseParts,
                 this.buildMetaDataParts);
     }
@@ -628,7 +648,16 @@ public final class Version implements Comparable<Version>, Serializable {
      * The passed array will be copied to not allow external modification to the new
      * Version's inner state.
      * </p>
+     * A single part within the array is allowed to contain a dot ('.'). Such parts will
+     * be treated as if the array contained those parts as single elements.
      *
+     * <pre>
+     * v.withBuildMetaData(new String[] { "a.b" })
+     * <=>
+     * v.withBuildMetaData(new String[] { "a", "b" })
+     * </pre>
+     * </p>
+     * 
      * @param newBuildMetaData the new build meta data parts.
      * @return A new Version.
      * @throws VersionFormatException If the any element of the given array is not a valid
@@ -638,18 +667,27 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     public Version withBuildMetaData(String[] newBuildMetaData) {
         require(newBuildMetaData != null, "newBuildMetaData is null");
-        final String[] newParts = verifyAndCopyArray(newBuildMetaData, true);
+        final String joined = join(newBuildMetaData);
+        final String[] newBuildMdParts = parseBuildMd(joined);
         return new Version(this.major, this.minor, this.patch, this.preReleaseParts,
-                newParts);
+                newBuildMdParts);
     }
 
     private String[] verifyAndCopyArray(String parts[], boolean allowLeading0) {
         final String[] result = new String[parts.length];
-        final StringBuilder b = new StringBuilder();
         for (int i = 0; i < parts.length; ++i) {
             final String part = parts[i];
+            require(part != null, "version part is null");
+            if (part.isEmpty()) {
+                throw new VersionFormatException(
+                        "Incomplete version part in " + join(parts));
+            }
             result[i] = part;
-            parseIDPart(part.toCharArray(), 0, false, allowLeading0, false, false, b, "");
+
+            // note: pass "pre-release" because this string will not be used when parsing
+            // build-meta-data
+            parseIDPart(part.toCharArray(), part, 0, false, allowLeading0, false, false,
+                    null, "pre-release");
         }
         return result;
     }
@@ -708,16 +746,47 @@ public final class Version implements Comparable<Version>, Serializable {
         return new Version(this.major + 1, 0, 0, newPreReleaseParts, EMPTY_ARRAY);
     }
 
+    /**
+     * Given this version, returns the next minor version. That is, the major part remains
+     * the same, the minor version is incremented and all other parts are reset/dropped.
+     *
+     * @return The incremented version.
+     * @see #nextMinor(String)
+     * @see #nextMinor(String[])
+     * @since 1.2.0
+     */
     public Version nextMinor() {
         return new Version(this.major, this.minor + 1, 0, EMPTY_ARRAY, EMPTY_ARRAY);
     }
 
+    /**
+     * Given this version, returns the next minor version. That is, the major part remains
+     * the same and the minor version is incremented. The pre-release part will be set to
+     * the given identifier and the build-meta-data is dropped.
+     *
+     * @return The incremented version.
+     * @throws IllegalArgumentException If newPreRelease is null.
+     * @see #nextMinor()
+     * @see #nextMinor(String[])
+     * @since 1.2.0
+     */
     public Version nextMinor(String newPrelease) {
         require(newPrelease != null, "newPreRelease is null");
         final String[] preReleaseParts = parsePreRelease(newPrelease);
         return new Version(this.major, this.minor + 1, 0, preReleaseParts, EMPTY_ARRAY);
     }
 
+    /**
+     * Given this version, returns the next minor version. That is, the major part remains
+     * the same and the minor version is incremented. The pre-release part will be set to
+     * the given identifier and the build-meta-data is dropped.
+     *
+     * @return The incremented version.
+     * @throws IllegalArgumentException If newPreRelease is null.
+     * @see #nextMinor()
+     * @see #nextMinor(String)
+     * @since 1.2.0
+     */
     public Version nextMinor(String[] newPrelease) {
         require(newPrelease != null, "newPreRelease is null");
         final String[] newPreReleaseParts = verifyAndCopyArray(newPrelease, false);
@@ -899,7 +968,7 @@ public final class Version implements Comparable<Version>, Serializable {
             return true;
         }
 
-        return parseID(preRelease.toCharArray(), 0, true, false, false, null,
+        return parseID(preRelease.toCharArray(), preRelease, 0, true, false, false, null,
                 "") != FAILURE;
     }
 
@@ -925,8 +994,8 @@ public final class Version implements Comparable<Version>, Serializable {
             return true;
         }
 
-        return parseID(buildMetaData.toCharArray(), 0, true, true, false, null,
-                "") != FAILURE;
+        return parseID(buildMetaData.toCharArray(), buildMetaData, 0, true, true, false,
+                null, "") != FAILURE;
     }
 
     /**
@@ -1078,7 +1147,7 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static int compareLiterals(String[] v1Literal, String[] v2Literal) {
-        int result = 0;
+        final int result;
         if (v1Literal.length > 0 && v2Literal.length > 0) {
             // compare pre release parts
             result = compareIdentifiers(v1Literal, v2Literal);
@@ -1088,6 +1157,8 @@ public final class Version implements Comparable<Version>, Serializable {
         } else if (v2Literal.length > 0) {
             // this is greater because other is no pre release
             result = 1;
+        } else {
+            result = 0;
         }
         return result;
     }
@@ -1155,7 +1226,7 @@ public final class Version implements Comparable<Version>, Serializable {
     private static String[] parsePreRelease(String preRelease) {
         if (preRelease != null && !preRelease.isEmpty()) {
             final List<String> parts = new ArrayList<String>();
-            parseID(preRelease.toCharArray(), 0, false, false, false, parts,
+            parseID(preRelease.toCharArray(), preRelease, 0, false, false, false, parts,
                     "pre-release");
             return parts.toArray(new String[parts.size()]);
         }
@@ -1165,8 +1236,8 @@ public final class Version implements Comparable<Version>, Serializable {
     private static String[] parseBuildMd(String buildMetaData) {
         if (buildMetaData != null && !buildMetaData.isEmpty()) {
             final List<String> parts = new ArrayList<String>();
-            parseID(buildMetaData.toCharArray(), 0, false, true, false, parts,
-                    "build-meta-data");
+            parseID(buildMetaData.toCharArray(), buildMetaData, 0, false, true, false,
+                    parts, "build-meta-data");
             return parts.toArray(new String[parts.size()]);
         }
         return EMPTY_ARRAY;

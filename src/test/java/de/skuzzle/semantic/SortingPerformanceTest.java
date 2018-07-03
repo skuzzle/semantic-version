@@ -2,8 +2,8 @@ package de.skuzzle.semantic;
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.vdurmont.semver4j.Semver;
 
@@ -11,7 +11,7 @@ public class SortingPerformanceTest extends AbstractVersionPerformanceTest {
 
     private String[] sortMe;
 
-    @Before
+    @BeforeEach
     public void setup() {
         this.sortMe = new String[] {
                 "1.0.0-alpha.beta",
