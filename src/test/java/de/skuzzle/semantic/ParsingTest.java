@@ -11,12 +11,9 @@ import java.util.List;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import de.skuzzle.semantic.Version.VersionFormatException;
 
-@RunWith(JUnitPlatform.class)
 public class ParsingTest {
 
     private static final String INCOMPLETE_VERSION_PART = "Incomplete version part in %s";
@@ -91,7 +88,7 @@ public class ParsingTest {
     };
 
     @TestFactory
-    Collection<DynamicTest> testParseWithException() {
+    public Collection<DynamicTest> testParseWithException() {
         final List<DynamicTest> results = new ArrayList<>(
                 ILLEGAL_VERSIONS.length);
 
@@ -111,7 +108,7 @@ public class ParsingTest {
     }
 
     @TestFactory
-    Collection<DynamicTest> testWithPreReleaseException() {
+    public Collection<DynamicTest> testWithPreReleaseException() {
         final List<DynamicTest> results = new ArrayList<>(
                 ILLEGAL_PRE_RELEASES.length);
 
@@ -131,7 +128,7 @@ public class ParsingTest {
     }
 
     @TestFactory
-    Collection<DynamicTest> testWithPreReleaseArrayException() {
+    public Collection<DynamicTest> testWithPreReleaseArrayException() {
         final List<DynamicTest> results = new ArrayList<>(
                 ILLEGAL_PRE_RELEASES.length);
 
@@ -152,7 +149,7 @@ public class ParsingTest {
     }
 
     @TestFactory
-    Collection<DynamicTest> testParseVerifyOnly() {
+    public Collection<DynamicTest> testParseVerifyOnly() {
         final List<DynamicTest> results = new ArrayList<>();
 
         for (final String[] input : ILLEGAL_VERSIONS) {
@@ -163,7 +160,7 @@ public class ParsingTest {
     }
 
     @TestFactory
-    Collection<DynamicTest> testParseLegalVersions() {
+    public Collection<DynamicTest> testParseLegalVersions() {
         final List<DynamicTest> results = new ArrayList<>();
 
         for (final String input : LEGAL_VERSIONS) {

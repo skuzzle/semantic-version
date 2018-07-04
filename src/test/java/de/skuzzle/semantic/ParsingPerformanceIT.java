@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vdurmont.semver4j.Semver;
 
-public class ParsingPerformanceTest extends AbstractVersionPerformanceTest {
+public class ParsingPerformanceIT extends AbstractVersionPerformanceTest {
 
     private static final String TEST_STRING = "10.153.132-123a.sdfasd.asd.asdhd.124545f.very.long-prelease.012aid.1234+with.build.md.000112";
 

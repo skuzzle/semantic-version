@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vdurmont.semver4j.Semver;
 
-public class SortingPerformanceTest extends AbstractVersionPerformanceTest {
+public class SortingPerformanceIT extends AbstractVersionPerformanceTest {
 
     private String[] sortMe;
 

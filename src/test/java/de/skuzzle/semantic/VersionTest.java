@@ -1,11 +1,11 @@
 package de.skuzzle.semantic;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -85,8 +84,8 @@ public class VersionTest {
                 Version.parseVersion(input[0]);
                 fail("String '" + input[0] + "' should not be parsable");
             } catch (final VersionFormatException e) {
-                assertEquals("Expected different exception message", e.getMessage(),
-                        input[1]);
+                assertEquals(e.getMessage(), input[1],
+                        "Expected different exception message");
             }
         }
     }
@@ -137,52 +136,52 @@ public class VersionTest {
     @Test
     public void testSimpleVersion() {
         final Version v = Version.parseVersion("1.2.3");
-        Assert.assertEquals(1, v.getMajor());
-        Assert.assertEquals(2, v.getMinor());
-        Assert.assertEquals(3, v.getPatch());
-        Assert.assertEquals("", v.getPreRelease());
-        Assert.assertEquals("", v.getBuildMetaData());
+        assertEquals(1, v.getMajor());
+        assertEquals(2, v.getMinor());
+        assertEquals(3, v.getPatch());
+        assertEquals("", v.getPreRelease());
+        assertEquals("", v.getBuildMetaData());
     }
 
     @Test
     public void testSemVerOrgPreReleaseSamples() {
         final Version v1 = Version.parseVersion("1.0.0-alpha");
-        Assert.assertEquals("alpha", v1.getPreRelease());
+        assertEquals("alpha", v1.getPreRelease());
 
         final Version v2 = Version.parseVersion("1.0.0-alpha.1");
-        Assert.assertEquals("alpha.1", v2.getPreRelease());
+        assertEquals("alpha.1", v2.getPreRelease());
 
         final Version v3 = Version.parseVersion("1.0.0-0.3.7");
-        Assert.assertEquals("0.3.7", v3.getPreRelease());
+        assertEquals("0.3.7", v3.getPreRelease());
 
         final Version v4 = Version.parseVersion("1.0.0-x.7.z.92");
-        Assert.assertEquals("x.7.z.92", v4.getPreRelease());
+        assertEquals("x.7.z.92", v4.getPreRelease());
     }
 
     @Test
     public void testSemVerOrgBuildMDSamples() {
         final Version v1 = Version.parseVersion("1.0.0-alpha+001");
-        Assert.assertEquals("alpha", v1.getPreRelease());
-        Assert.assertEquals("001", v1.getBuildMetaData());
+        assertEquals("alpha", v1.getPreRelease());
+        assertEquals("001", v1.getBuildMetaData());
 
         final Version v2 = Version.parseVersion("1.0.0+20130313144700");
-        Assert.assertEquals("20130313144700", v2.getBuildMetaData());
+        assertEquals("20130313144700", v2.getBuildMetaData());
 
         final Version v3 = Version.parseVersion("1.0.0-beta+exp.sha.5114f85");
-        Assert.assertEquals("beta", v3.getPreRelease());
-        Assert.assertEquals("exp.sha.5114f85", v3.getBuildMetaData());
+        assertEquals("beta", v3.getPreRelease());
+        assertEquals("exp.sha.5114f85", v3.getBuildMetaData());
     }
 
     @Test
     public void testVersionWithBuildMD() {
         final Version v = Version.parseVersion("1.2.3+some.id.foo");
-        Assert.assertEquals("some.id.foo", v.getBuildMetaData());
+        assertEquals("some.id.foo", v.getBuildMetaData());
     }
 
     @Test
     public void testVersionWithBuildMD2() {
         final Version v = Version.create(1, 2, 3, "", "some.id-1.foo");
-        Assert.assertEquals("some.id-1.foo", v.getBuildMetaData());
+        assertEquals("some.id-1.foo", v.getBuildMetaData());
     }
 
     @Test
@@ -219,17 +218,17 @@ public class VersionTest {
     @Test
     public void testVersionWithPreRelease() {
         final Version v = Version.parseVersion("1.2.3-pre.release-foo.1");
-        Assert.assertEquals("pre.release-foo.1", v.getPreRelease());
+        assertEquals("pre.release-foo.1", v.getPreRelease());
         final String[] expected = { "pre", "release-foo", "1" };
-        Assert.assertArrayEquals(expected, v.getPreReleaseParts());
+        assertArrayEquals(expected, v.getPreReleaseParts());
     }
 
     @Test
     public void testVersionWithPreReleaseAndBuildMD() {
         final Version v = Version
                 .parseVersion("1.2.3-pre.release-foo.1+some.id-with-hyphen");
-        Assert.assertEquals("pre.release-foo.1", v.getPreRelease());
-        Assert.assertEquals("some.id-with-hyphen", v.getBuildMetaData());
+        assertEquals("pre.release-foo.1", v.getPreRelease());
+        assertEquals("some.id-with-hyphen", v.getBuildMetaData());
     }
 
     @Test
@@ -510,8 +509,8 @@ public class VersionTest {
     @Test
     public void testParseVersionSuccess() {
         final Version version = Version.parseVersion("1.2.3-foo+bar", true);
-        Assert.assertEquals("foo", version.getPreRelease());
-        Assert.assertEquals("bar", version.getBuildMetaData());
+        assertEquals("foo", version.getPreRelease());
+        assertEquals("bar", version.getBuildMetaData());
     }
 
     @Test
@@ -553,21 +552,21 @@ public class VersionTest {
     public void testPreReleaseWithLeadingZeroesIdentifier() {
         // leading zeroes allowed in string identifiers
         final Version v = Version.parseVersion("1.2.3-001abc");
-        Assert.assertEquals("001abc", v.getPreRelease());
+        assertEquals("001abc", v.getPreRelease());
     }
 
     @Test
     public void testPreReleaseWithLeadingZeroesIdentifier2() {
         // leading zeroes allowed in string identifiers
         final Version v = Version.create(1, 2, 3, "001abc");
-        Assert.assertEquals("001abc", v.getPreRelease());
+        assertEquals("001abc", v.getPreRelease());
     }
 
     @Test
     public void testNoPrecedenceChangeByBuildMD() {
         final Version v1 = Version.parseVersion("1.2.3+1.0");
         final Version v2 = Version.parseVersion("1.2.3+2.0");
-        Assert.assertEquals(0, v1.compareTo(v2));
+        assertEquals(0, v1.compareTo(v2));
     }
 
     @Test
@@ -577,20 +576,20 @@ public class VersionTest {
         final Version v3 = Version.parseVersion("1.1.0");
         final Version v4 = Version.parseVersion("2.0.0");
 
-        Assert.assertTrue(v1.compareTo(v2) < 0);
-        Assert.assertTrue(v2.compareTo(v3) < 0);
-        Assert.assertTrue(v3.compareTo(v4) < 0);
-        Assert.assertTrue(v2.compareTo(v1) > 0);
-        Assert.assertTrue(v3.compareTo(v2) > 0);
-        Assert.assertTrue(v4.compareTo(v3) > 0);
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v3) < 0);
+        assertTrue(v3.compareTo(v4) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
+        assertTrue(v3.compareTo(v2) > 0);
+        assertTrue(v4.compareTo(v3) > 0);
     }
 
     @Test
     public void testPrecedencePreRelease() {
         final Version v1 = Version.parseVersion("1.0.0");
         final Version v2 = Version.parseVersion("1.0.0-rc1");
-        Assert.assertTrue(v1.compareTo(v2) > 0);
-        Assert.assertTrue(v2.compareTo(v1) < 0);
+        assertTrue(v1.compareTo(v2) > 0);
+        assertTrue(v2.compareTo(v1) < 0);
         assertTrue(v2.isLowerThan(v1));
         assertTrue(v1.isGreaterThan(v2));
     }
@@ -599,7 +598,7 @@ public class VersionTest {
     public void testPrecedencePreRelease2() {
         final Version v1 = Version.parseVersion("1.0.0-rc1");
         final Version v2 = Version.parseVersion("1.0.0-rc1");
-        Assert.assertTrue(v1.compareTo(v2) == 0);
+        assertTrue(v1.compareTo(v2) == 0);
     }
 
     @Test
@@ -607,32 +606,32 @@ public class VersionTest {
         final Version v1 = Version.parseVersion("1.0.0-rc1");
         final Version v2 = Version.parseVersion("1.0.0-rc1.5");
         // the one with longer list is greater
-        Assert.assertTrue(v1.compareTo(v2) < 0);
-        Assert.assertTrue(v2.compareTo(v1) > 0);
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
     }
 
     @Test
     public void testPrecedencePreRelease4() {
         final Version v1 = Version.parseVersion("1.0.0-a");
         final Version v2 = Version.parseVersion("1.0.0-b");
-        Assert.assertTrue(v1.compareTo(v2) < 0);
-        Assert.assertTrue(v2.compareTo(v1) > 0);
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
     }
 
     @Test
     public void testPrecedencePreRelease5() {
         final Version v1 = Version.parseVersion("1.0.0-1");
         final Version v2 = Version.parseVersion("1.0.0-2");
-        Assert.assertTrue(v1.compareTo(v2) < 0);
-        Assert.assertTrue(v2.compareTo(v1) > 0);
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
     }
 
     @Test
     public void testPrecedencePreRelease6() {
         final Version v1 = Version.parseVersion("1.0.0-1.some.id-with-hyphen.a");
         final Version v2 = Version.parseVersion("1.0.0-1.some.id-with-hyphen.b");
-        Assert.assertTrue(v1.compareTo(v2) < 0);
-        Assert.assertTrue(v2.compareTo(v1) > 0);
+        assertTrue(v1.compareTo(v2) < 0);
+        assertTrue(v2.compareTo(v1) > 0);
     }
 
     @Test
@@ -651,8 +650,8 @@ public class VersionTest {
     public void testInitialDevelopment() {
         final Version v1 = Version.create(0, 1, 0);
         final Version v2 = Version.create(1, 1, 0);
-        Assert.assertTrue(v1.isInitialDevelopment());
-        Assert.assertFalse(v2.isInitialDevelopment());
+        assertTrue(v1.isInitialDevelopment());
+        assertFalse(v2.isInitialDevelopment());
     }
 
     @Test
@@ -661,7 +660,7 @@ public class VersionTest {
             final Version v1 = SEMVER_ORG_VERSIONS[i - 1];
             final Version v2 = SEMVER_ORG_VERSIONS[i];
             final int c = v1.compareTo(v2);
-            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+            assertTrue(c < 0, v1 + " is not lower than " + v2);
         }
     }
 
@@ -671,7 +670,7 @@ public class VersionTest {
             final Version v1 = SEMVER_ORG_VERSIONS[i - 1];
             final Version v2 = SEMVER_ORG_VERSIONS[i];
             final int c = Version.NATURAL_ORDER.compare(v1, v2);
-            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+            assertTrue(c < 0, v1 + " is not lower than " + v2);
         }
     }
 
@@ -679,7 +678,7 @@ public class VersionTest {
     public void testBuildMetaDataEquality() {
         final Version v1 = Version.create(0, 0, 1, "", "some.build-meta.data");
         final Version v2 = Version.create(0, 0, 1, "", "some.different.build-meta.data");
-        Assert.assertFalse(v1.equalsWithBuildMetaData(v2));
+        assertFalse(v1.equalsWithBuildMetaData(v2));
     }
 
     @Test
@@ -688,7 +687,7 @@ public class VersionTest {
             final Version v1 = SEMVER_ORG_BMD_VERSIONS[i - 1];
             final Version v2 = SEMVER_ORG_BMD_VERSIONS[i];
             final int c = v1.compareToWithBuildMetaData(v2);
-            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+            assertTrue(c < 0, v1 + " is not lower than " + v2);
         }
     }
 
@@ -698,7 +697,7 @@ public class VersionTest {
             final Version v1 = SEMVER_ORG_BMD_VERSIONS[i - 1];
             final Version v2 = SEMVER_ORG_BMD_VERSIONS[i];
             final int c = Version.WITH_BUILD_META_DATA_ORDER.compare(v1, v2);
-            Assert.assertTrue(v1 + " is not lower than " + v2, c < 0);
+            assertTrue(c < 0, v1 + " is not lower than " + v2);
         }
     }
 
@@ -708,7 +707,7 @@ public class VersionTest {
             final Version v1 = SEMVER_ORG_BMD_VERSIONS[i - 1];
             final Version v2 = SEMVER_ORG_BMD_VERSIONS[i];
             final int c = v2.compareToWithBuildMetaData(v1);
-            Assert.assertTrue(v2 + " is not greater than " + v1, c > 0);
+            assertTrue(c > 0, v2 + " is not greater than " + v1);
         }
     }
 
@@ -767,40 +766,40 @@ public class VersionTest {
     @Test
     public void testCompareIdentical() {
         final Version v = Version.create(1, 1, 1);
-        Assert.assertEquals(0, Version.compare(v, v));
+        assertEquals(0, Version.compare(v, v));
     }
 
     @Test
     public void testNotEqualsNull() {
         final Version v = Version.create(1, 1, 1);
-        Assert.assertFalse(v.equals(null));
+        assertFalse(v.equals(null));
     }
 
     @Test
     public void testNotEqualsForeign() {
         final Version v = Version.create(1, 1, 1);
-        Assert.assertFalse(v.equals(new Object()));
+        assertFalse(v.equals(new Object()));
     }
 
     @Test
     public void testEqualsIdentity() {
         final Version v = Version.create(1, 2, 3);
-        Assert.assertEquals(v, v);
+        assertEquals(v, v);
     }
 
     @Test
     public void testNotEqualsTrivial() {
         final Version v1 = Version.create(1, 1, 1);
         final Version v2 = Version.create(1, 1, 2);
-        Assert.assertFalse(v1.equals(v2));
+        assertFalse(v1.equals(v2));
     }
 
     @Test
     public void testParseToString() {
         for (final Version v1 : SEMVER_ORG_VERSIONS) {
             final Version v2 = Version.parseVersion(v1.toString());
-            Assert.assertEquals(v1, v2);
-            Assert.assertEquals(v1.hashCode(), v2.hashCode());
+            assertEquals(v1, v2);
+            assertEquals(v1.hashCode(), v2.hashCode());
         }
     }
 
@@ -808,8 +807,8 @@ public class VersionTest {
     public void testParseToStringUpperCase() {
         for (final Version v1 : SEMVER_ORG_VERSIONS) {
             final Version v2 = Version.parseVersion(v1.toString().toUpperCase());
-            Assert.assertEquals(v1.toUpperCase(), v2);
-            Assert.assertEquals(v1.toUpperCase().hashCode(), v2.hashCode());
+            assertEquals(v1.toUpperCase(), v2);
+            assertEquals(v1.toUpperCase().hashCode(), v2.hashCode());
         }
     }
 
@@ -817,8 +816,8 @@ public class VersionTest {
     public void testParseToStringLowerCase() {
         for (final Version v1 : SEMVER_ORG_VERSIONS) {
             final Version v2 = Version.parseVersion(v1.toString().toLowerCase());
-            Assert.assertEquals(v1.toLowerCase(), v2);
-            Assert.assertEquals(v1.toLowerCase().hashCode(), v2.hashCode());
+            assertEquals(v1.toLowerCase(), v2);
+            assertEquals(v1.toLowerCase().hashCode(), v2.hashCode());
         }
     }
 
@@ -908,8 +907,8 @@ public class VersionTest {
     @Test
     public void testIsValidPreReleaseIdentifier() throws Exception {
         for (final Version v : SEMVER_ORG_VERSIONS) {
-            assertTrue(v.getPreRelease() + " should be a valid identifier",
-                    Version.isValidPreRelease(v.getPreRelease()));
+            assertTrue(Version.isValidPreRelease(v.getPreRelease()),
+                    v.getPreRelease() + " should be a valid identifier");
         }
         assertTrue(Version.isValidPreRelease("-"));
     }
@@ -947,8 +946,8 @@ public class VersionTest {
     @Test
     public void testIsValidBuildMDIdentifier() throws Exception {
         for (final Version v : SEMVER_ORG_BMD_VERSIONS) {
-            assertTrue(v.toString(), Version.isValidBuildMetaData(v.getBuildMetaData()));
-            assertTrue(v.toString(), Version.isValidBuildMetaData(v.getPreRelease()));
+            assertTrue(Version.isValidBuildMetaData(v.getBuildMetaData()), v.toString());
+            assertTrue(Version.isValidBuildMetaData(v.getPreRelease()), v.toString());
         }
         assertTrue(Version.isValidBuildMetaData("-"));
     }
