@@ -1,6 +1,7 @@
 package de.skuzzle.semantic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,18 @@ public class IncrementationTest {
     }
 
     @Test
+    public void testIncrementMajorWithPreReleaseStringNull() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertThrows(IllegalArgumentException.class, () -> v.nextMajor((String) null));
+    }
+
+    @Test
+    public void testIncrementMajorWithPreReleaseArrayNull() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertThrows(IllegalArgumentException.class, () -> v.nextMajor((String[]) null));
+    }
+
+    @Test
     public void testIncrementMinor() throws Exception {
         final Version v = Version.create(1, 2, 3, "pre-release", "build");
         assertEquals(Version.create(1, 3, 0), v.nextMinor());
@@ -47,6 +60,18 @@ public class IncrementationTest {
     }
 
     @Test
+    public void testIncrementMinorWithPreReleaseStringNull() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertThrows(IllegalArgumentException.class, () -> v.nextMinor((String) null));
+    }
+
+    @Test
+    public void testIncrementMinorWithPreReleaseArrayNull() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertThrows(IllegalArgumentException.class, () -> v.nextMinor((String[]) null));
+    }
+
+    @Test
     public void testIncrementPatch() throws Exception {
         final Version v = Version.create(1, 2, 3, "pre-release", "build");
         assertEquals(Version.create(1, 2, 4), v.nextPatch());
@@ -64,6 +89,18 @@ public class IncrementationTest {
         final Version v = Version.create(1, 2, 3, "pre-release", "build");
         assertEquals(Version.create(1, 2, 4, "new.pre.release"),
                 v.nextPatch(new String[] { "new", "pre", "release" }));
+    }
+
+    @Test
+    public void testIncrementPatchWithPreReleaseStringNull() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertThrows(IllegalArgumentException.class, () -> v.nextPatch((String) null));
+    }
+
+    @Test
+    public void testIncrementPatchWithPreReleaseArrayNull() throws Exception {
+        final Version v = Version.create(1, 2, 3, "pre-release", "build");
+        assertThrows(IllegalArgumentException.class, () -> v.nextPatch((String[]) null));
     }
 
     @Test
