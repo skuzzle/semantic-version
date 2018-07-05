@@ -2,7 +2,7 @@ package de.skuzzle.semantic;
 
 import org.junit.jupiter.api.Test;
 
-public class IsPreReleasePerformanceIT extends AbstractVersionPerformanceTest {
+public class IsPreReleasePerformanceIT extends VersionPerformanceTestBase {
 
     private static final String INVALID_PRE_RELEASE = "very.long-prelease.id.1234.01";
 

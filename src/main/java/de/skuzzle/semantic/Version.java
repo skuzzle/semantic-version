@@ -657,7 +657,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * v.withBuildMetaData(new String[] { "a", "b" })
      * </pre>
      * </p>
-     * 
+     *
      * @param newBuildMetaData the new build meta data parts.
      * @return A new Version.
      * @throws VersionFormatException If the any element of the given array is not a valid
@@ -764,7 +764,10 @@ public final class Version implements Comparable<Version>, Serializable {
      * the same and the minor version is incremented. The pre-release part will be set to
      * the given identifier and the build-meta-data is dropped.
      *
+     * @param newPrelease The pre-release part for the resulting Version.
      * @return The incremented version.
+     * @throws VersionFormatException If the given String is not a valid pre-release
+     *             identifier.
      * @throws IllegalArgumentException If newPreRelease is null.
      * @see #nextMinor()
      * @see #nextMinor(String[])
@@ -781,7 +784,10 @@ public final class Version implements Comparable<Version>, Serializable {
      * the same and the minor version is incremented. The pre-release part will be set to
      * the given identifier and the build-meta-data is dropped.
      *
+     * @param newPrelease The pre-release part for the resulting Version.
      * @return The incremented version.
+     * @throws VersionFormatException If the any element of the given array is not a valid
+     *             pre release identifier part.
      * @throws IllegalArgumentException If newPreRelease is null.
      * @see #nextMinor()
      * @see #nextMinor(String)
@@ -794,11 +800,35 @@ public final class Version implements Comparable<Version>, Serializable {
                 EMPTY_ARRAY);
     }
 
+    /**
+     * Given this version, returns the next patch version. That is, the major and minor
+     * parts remain the same, the patch version is incremented and all other parts are
+     * reset/dropped.
+     *
+     * @return The incremented version.
+     * @see #nextPatch(String)
+     * @see #nextPatch(String[])
+     * @since 1.2.0
+     */
     public Version nextPatch() {
         return new Version(this.major, this.minor, this.patch + 1, EMPTY_ARRAY,
                 EMPTY_ARRAY);
     }
 
+    /**
+     * Given this version, returns the next patch version. That is, the major and minor
+     * parts remain the same and the patch version is incremented. The pre-release part
+     * will be set to the given identifier and the build-meta-data is dropped.
+     *
+     * @param newPrelease The pre-release part for the resulting Version.
+     * @return The incremented version.
+     * @throws VersionFormatException If the given String is not a valid pre-release
+     *             identifier.
+     * @throws IllegalArgumentException If newPreRelease is null.
+     * @see #nextPatch()
+     * @see #nextPatch(String[])
+     * @since 1.2.0
+     */
     public Version nextPatch(String newPrelease) {
         require(newPrelease != null, "newPreRelease is null");
         final String[] preReleaseParts = parsePreRelease(newPrelease);
@@ -806,6 +836,20 @@ public final class Version implements Comparable<Version>, Serializable {
                 EMPTY_ARRAY);
     }
 
+    /**
+     * Given this version, returns the next patch version. That is, the major and minor
+     * parts remain the same and the patch version is incremented. The pre-release part
+     * will be set to the given identifier and the build-meta-data is dropped.
+     *
+     * @param newPrelease The pre-release part for the resulting Version.
+     * @return The incremented version.
+     * @throws VersionFormatException If the any element of the given array is not a valid
+     *             pre release identifier part.
+     * @throws IllegalArgumentException If newPreRelease is null.
+     * @see #nextPatch()
+     * @see #nextPatch(String)
+     * @since 1.2.0
+     */
     public Version nextPatch(String[] newPrelease) {
         require(newPrelease != null, "newPreRelease is null");
         final String[] newPreReleaseParts = verifyAndCopyArray(newPrelease, false);

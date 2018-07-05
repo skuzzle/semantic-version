@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class AbstractVersionPerformanceTest {
+class VersionPerformanceTestBase {
 
     private static final int WARM_UP = 11000;
     protected static final int RUN = 100000;
