@@ -26,9 +26,11 @@
 	</licenses>
 
 	<properties>
-		<maven.compiler.target>9</maven.compiler.target>
-		<maven.compiler.source>9</maven.compiler.source>
-		<maven.compiler.release>9</maven.compiler.release>
+		<maven.compiler.target>6</maven.compiler.target>
+		<maven.compiler.source>6</maven.compiler.source>
+
+		<testCompileSource>1.8</testCompileSource>
+
 		<skuzzle.runtime.version>0.9.6</skuzzle.runtime.version>
 
 		<site.name>semantic-version</site.name>
@@ -121,6 +123,38 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>${maven.compiler.source}</source>
+						<target>${maven.compiler.target}</target>
+					</configuration>
+					<executions>
+						<execution>
+							<id>test-compile</id>
+							<phase>process-test-sources</phase>
+							<goals>
+								<goal>testCompile</goal>
+							</goals>
+							<configuration>
+								<source>${testCompileSource}</source>
+								<target>${testCompileSource}</target>
+							</configuration>
+						</execution>
+						<execution>
+							<id>default-testCompile</id>
+							<phase>process-test-sources</phase>
+							<goals>
+								<goal>testCompile</goal>
+							</goals>
+							<configuration>
+								<source>${testCompileSource}</source>
+								<target>${testCompileSource}</target>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
 					<artifactId>coveralls-maven-plugin</artifactId>
