@@ -44,7 +44,7 @@ import java.util.List;
  * Instances of this class are immutable and thus thread safe. This also means that all
  * methods taking an array or other kind of modifiable objects as input, will first make a
  * copy before using it as internal state.
- * </p>
+ *
  *
  * <p>
  * Note that unless stated otherwise, none of the public methods of this class accept
@@ -52,7 +52,7 @@ import java.util.List;
  * when encountering a <code>null</code> argument. However, to comply with the
  * {@link Comparable} contract, the comparison methods will throw a
  * {@link NullPointerException} instead.
- * </p>
+ *
  *
  * @author Simon Taddiken
  */
@@ -109,7 +109,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * <p>
      * Note: this comparator imposes orderings that are inconsistent with equals.
-     * </p>
+     *
      *
      * @since 0.3.0
      */
@@ -594,17 +594,17 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * The passed array will be copied to not allow external modification to the new
      * Version's inner state.
-     * </p>
+     *
      * <p>
      * A single part within the array is allowed to contain a dot ('.'). Such parts will
      * be treated as if the array contained those parts as single elements.
      *
+     *
      * <pre>
      * v.withPreRelease(new String[] { "a.b" })
-     * <=>
+     * &lt;=&gt;
      * v.withPreRelease(new String[] { "a", "b" })
      * </pre>
-     * </p>
      *
      * @param newPreRelease the new pre release parts.
      * @return A new Version.
@@ -647,16 +647,16 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * The passed array will be copied to not allow external modification to the new
      * Version's inner state.
-     * </p>
+     *
      * A single part within the array is allowed to contain a dot ('.'). Such parts will
      * be treated as if the array contained those parts as single elements.
      *
+     *
      * <pre>
      * v.withBuildMetaData(new String[] { "a.b" })
-     * <=>
+     * &lt;=&gt;
      * v.withBuildMetaData(new String[] { "a", "b" })
      * </pre>
-     * </p>
      *
      * @param newBuildMetaData the new build meta data parts.
      * @return A new Version.
@@ -863,6 +863,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * <p>
      * The incrementation of the pre-release identifier behaves as follows:
+     *
      * <ul>
      * <li>In case the identifier is currently empty, it becomes "1" in the result.</li>
      * <li>If the identifier's last part is numeric, that last part will be incremented in
@@ -872,7 +873,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * </ul>
      * Examples:
      *
-     * <table>
+     * <table summary="Pre-release identifier incrementation behavior">
      * <tr>
      * <th>Version</th>
      * <th>After increment</th>
@@ -894,7 +895,6 @@ public final class Version implements Comparable<Version>, Serializable {
      * <td>1.2.3-foo.2</td>
      * </tr>
      * </table>
-     * </p>
      *
      * @return The incremented Version.
      * @since 1.2.0
@@ -911,6 +911,7 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * <p>
      * The incrementation of the build-meta-data identifier behaves as follows:
+     *
      * <ul>
      * <li>In case the identifier is currently empty, it becomes "1" in the result.</li>
      * <li>If the identifier's last part is numeric, that last part will be incremented in
@@ -920,7 +921,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * </ul>
      * Examples:
      *
-     * <table>
+     * <table summary="Build meta data incrementation behavior">
      * <tr>
      * <th>Version</th>
      * <th>After increment</th>
@@ -942,7 +943,6 @@ public final class Version implements Comparable<Version>, Serializable {
      * <td>1.2.3+foo.2</td>
      * </tr>
      * </table>
-     * </p>
      *
      * @return The incremented Version.
      * @since 1.2.0
@@ -980,7 +980,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * Note: this method does not throw an exception upon <code>null</code> input, but
      * returns <code>false</code> instead.
-     * </p>
+     *
      *
      * @param version The String to check.
      * @return Whether the given String is formatted as a semantic version.
@@ -999,7 +999,6 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * Note: this method does not throw an exception upon <code>null</code> input, but
      * returns <code>false</code> instead.
-     * </p>
      *
      * @param preRelease The String to check.
      * @return Whether the given String is a valid pre-release identifier.
@@ -1025,7 +1024,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * Note: this method does not throw an exception upon <code>null</code> input, but
      * returns <code>false</code> instead.
-     * </p>
+     *
      *
      * @param buildMetaData The String to check.
      * @return Whether the given String is a valid build meta data identifier.
@@ -1101,12 +1100,12 @@ public final class Version implements Comparable<Version>, Serializable {
      * smaller set, if all of the preceding identifiers are equal. Example: 1.0.0-alpha
      * &lt; 1.0.0-alpha.1 &lt; 1.0.0-alpha.beta &lt; 1.0.0-beta &lt; 1.0.0-beta.2 &lt;
      * 1.0.0-beta.11 &lt; 1.0.0-rc.1 &lt; 1.0.0. </em>
-     * </p>
+     *
      *
      * <p>
      * This method fulfills the general contract for Java's {@link Comparator Comparators}
      * and {@link Comparable Comparables}.
-     * </p>
+     *
      *
      * @param v1 The first version for comparison.
      * @param v2 The second version for comparison.
@@ -1134,12 +1133,12 @@ public final class Version implements Comparable<Version>, Serializable {
      * Comparison of the build meta data parts happens exactly as for pre release
      * identifiers. Considering of build meta data first kicks in if both versions are
      * equal when using their natural order.
-     * </p>
+     *
      *
      * <p>
      * This method fulfills the general contract for Java's {@link Comparator Comparators}
      * and {@link Comparable Comparables}.
-     * </p>
+     *
      *
      * @param v1 The first version for comparison.
      * @param v2 The second version for comparison.
@@ -1391,7 +1390,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * If {@code allowPreRelease} is <code>true</code>, the String is parsed according to
      * the normal semantic version specification.
-     * </p>
+     *
      *
      * @param versionString The String to parse.
      * @param allowPreRelease Whether pre-release and build meta data field are allowed.
@@ -1487,7 +1486,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * Note: This method will always reconstruct a new String by joining the single
      * identifier parts.
-     * </p>
+     *
      *
      * @return This version's pre release identifier or an empty String if this version
      *         has no such identifier.
@@ -1503,7 +1502,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * Note: This method will always reconstruct a new String by joining the single
      * identifier parts.
-     * </p>
+     *
      *
      * @return The build meta data or an empty String if this version has no build meta
      *         data.
@@ -1670,7 +1669,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * Comparison of the build meta data parts happens exactly as for pre release
      * identifiers. Considering of build meta data first kicks in if both versions are
      * equal when using their natural order.
-     * </p>
+     *
      *
      * @param other The version to compare to.
      * @return A value lower than 0 if this &lt; other, a value greater than 0 if this
@@ -1721,7 +1720,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * Convenience method for {@code this.compareTo(other) > 0} except that this method
      * throws an {@link IllegalArgumentException} if other is null.
-     * </p>
+     *
      *
      * @param other The version to compare to.
      * @return Whether this version is strictly greater.
@@ -1738,7 +1737,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * <p>
      * Convenience method for {@code this.compareTo(other) < 0} except that this method
      * throws an {@link IllegalArgumentException} if other is null.
-     * </p>
+     *
      *
      * @param other The version to compare to.
      * @return Whether this version is strictly lower.
