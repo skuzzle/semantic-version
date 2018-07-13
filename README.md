@@ -17,13 +17,23 @@ easy to use within your own projects. Key features:
 * Fast: Many performance improvements make this the fastest semver implementation in java
   around (according to parsing and sorting performance)
 * Compatible: Supports Java 6 but also provides many methods that are suitable to be used 
-  as method references in Java 8
+  as method references in Java 8. Latest release also features a Java 9 module-info!
 * Stable: Ready for production since release 1.0.0 
 
 ## Maven Dependency
 semantic-version is available through the Maven Central Repository. Just add
 the following dependency to your pom:
 
+Java 9 module release:
+```xml
+<dependency>
+    <groupId>de.skuzzle</groupId>
+    <artifactId>semantic-version</artifactId>
+    <version>2.0.0</version>
+</dependency>
+```
+
+Java 6 compatible release:
 ```xml
 <dependency>
     <groupId>de.skuzzle</groupId>
@@ -32,11 +42,21 @@ the following dependency to your pom:
 </dependency>
 ```
 
+## Java 9
+
+Release `2.0.0` is bundled as a JPMS module. If you are using it in your Java 9 project,
+add the following line to your `module-info.java`:
+
+```
+module com.your.module {
+    // ...
+    requires de.skuzzle.semantic;
+}
+```
+
 ## Usage
 
-Usage of the `Version` class is simple. You can obtain instances using the
-static factory methods:
-
+### Creation and parsing 
 ```java
 // Version with pre-release and build meta data field
 Version v1 = Version.parseVersion("1.0.2-rc1.2+build-20142402");
@@ -52,6 +72,7 @@ Version v6 = Version.create(1, 0, 2, "", "build-20142402");
 
 ```
 
+### Comparing
 Versions can be compared as they implement `Comparable`:
 
 ```java
@@ -59,7 +80,17 @@ if (v1.compareTo(v2) < 0) { ... }
 if (v1.isGreaterThan(v2)) { ... }
 if (v1.isLowerThan(v2)) { ... }
 ```
+In rare cases it might be useful to compare versions with including the build meta data 
+field. If you need to do so, you can use
 
+```java
+v1.compareToWithBuildMetaData(v2)
+v1.equalsWithBuildMetaData(v2)
+```
+
+There also exist static methods and comparators for comparing two versions.
+
+### Deriving
 You can derive new versions from existing ones by modifying a single field:
 
 ```java
@@ -70,13 +101,30 @@ Version v1 = Version.create(1, 0, 0)
         .withBuildMetaData("build-20161022");
 ```
 
-`equals`, `hashCode` and `toString` are implemented appropriately. In rare cases
-it might be useful to compare versions with including the build meta data field.
-If you need to do so, you can use
+### Incrementing
+Versions can also be incremented using any of the `next...` methods:
 
-```java
-v1.compareToWithBuildMetaData(v2)
-v1.equalsWithBuildMetaData(v2)
+```
+// Gives 2.0.0
+Version.create(1, 2, 3).nextMajor();
+
+// Gives 1.3.0
+Version.create(1, 2, 3).nextMinor();
+
+// Gives 1.2.4
+Version.create(1, 2, 3).nextPatch();
+
+// Gives 1.2.3-1
+Version.create(1, 2, 3).nextPreRelease();
+
+// Gives 1.2.3+1
+Version.create(1, 2, 3).nextBuildMetaData();
 ```
 
-There also exist static methods and comparators for comparing two versions.
+All `next...` methods will drop the pre-release and build meta data fields but provide an 
+overload to set a new pre-release:
+
+```
+// Gives 2.0.0-SNAPSHOT
+Version.create(1, 2, 3).nextMajor("SNAPSHOT");
+```
