@@ -24,7 +24,7 @@ easy to use within your own projects. Key features:
 semantic-version is available through the Maven Central Repository. Just add
 the following dependency to your pom:
 
-Java 9 module release:
+If you are using Java >=9 use this release:
 ```xml
 <dependency>
     <groupId>de.skuzzle</groupId>
@@ -33,7 +33,7 @@ Java 9 module release:
 </dependency>
 ```
 
-Java 6 compatible release:
+If you are using Java 6, 7 or 8 use this release:
 ```xml
 <dependency>
     <groupId>de.skuzzle</groupId>
