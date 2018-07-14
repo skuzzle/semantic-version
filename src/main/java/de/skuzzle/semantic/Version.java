@@ -1598,15 +1598,19 @@ public final class Version implements Comparable<Version>, Serializable {
      */
     @Override
     public int hashCode() {
-        int h = this.hash;
+        final int h = this.hash;
         if (h == 0) {
-            h = HASH_PRIME + this.major;
-            h = HASH_PRIME * h + this.minor;
-            h = HASH_PRIME * h + this.patch;
-            h = HASH_PRIME * h + Arrays.hashCode(this.preReleaseParts);
-            this.hash = h;
+            this.hash = calculateHashCode();
         }
         return this.hash;
+    }
+
+    private int calculateHashCode() {
+        int h = HASH_PRIME + this.major;
+        h = HASH_PRIME * h + this.minor;
+        h = HASH_PRIME * h + this.patch;
+        h = HASH_PRIME * h + Arrays.hashCode(this.preReleaseParts);
+        return h;
     }
 
     /**

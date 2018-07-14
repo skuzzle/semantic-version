@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import de.skuzzle.semantic.Version.VersionFormatException;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 public class VersionTest {
 
@@ -1182,6 +1184,15 @@ public class VersionTest {
         assertEquals(1234, v.getMajor());
         assertEquals(5678, v.getMinor());
         assertEquals(9012, v.getPatch());
+    }
+
+    @Test
+    public void testEquals() throws Exception {
+        EqualsVerifier.forClass(Version.class)
+                .withIgnoredFields("buildMetaDataParts", "preRelease", "buildMetaData")
+                .withCachedHashCode("hash", "calculateHashCode", Version.create(1, 2, 3))
+                .suppress(Warning.NULL_FIELDS)
+                .verify();
     }
 
 }
