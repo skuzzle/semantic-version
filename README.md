@@ -113,12 +113,6 @@ Version.create(1, 2, 3).nextMinor();
 
 // Gives 1.2.4
 Version.create(1, 2, 3).nextPatch();
-
-// Gives 1.2.3-1
-Version.create(1, 2, 3).nextPreRelease();
-
-// Gives 1.2.3+1
-Version.create(1, 2, 3).nextBuildMetaData();
 ```
 
 All `next...` methods will drop the pre-release and build meta data fields but provide an 
@@ -128,3 +122,25 @@ overload to set a new pre-release:
 // Gives 2.0.0-SNAPSHOT
 Version.create(1, 2, 3).nextMajor("SNAPSHOT");
 ```
+
+The identifier parts can be incremented as well:
+
+```
+// Gives 1.2.3-1
+Version.create(1, 2, 3).nextPreRelease();
+
+// Gives 1.2.3+1
+Version.create(1, 2, 3).nextBuildMetaData();
+```
+
+Incrementing the identifier behaves as follows:
+* In case the identifier is currently empty, it becomes `1` in the result.
+* If the identifier's last part is numeric, that last part will be incremented in the result.
+* If the last part is not numeric, the identifier is interpreted as `identifier.0` which becomes `identifier.1` after increment.
+
+Version | After increment
+--------| ---------------
+`1.2.3`| `1.2.3-1`
+`1.2.3+build.meta.data` | `1.2.3-1`
+`1.2.3-foo` | `1.2.3-foo.1`
+`1.2.3-foo.1` | `1.2.3-foo.2`
