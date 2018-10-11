@@ -15,8 +15,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import de.skuzzle.semantic.Version.VersionFormatException;
@@ -1188,7 +1188,7 @@ public class VersionTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testEquals() throws Exception {
         EqualsVerifier.forClass(Version.class)
                 .withIgnoredFields("buildMetaDataParts", "preRelease", "buildMetaData")
