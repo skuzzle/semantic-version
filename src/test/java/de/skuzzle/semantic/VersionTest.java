@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import de.skuzzle.semantic.Version.VersionFormatException;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 public class VersionTest {
 
