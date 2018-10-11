@@ -31,7 +31,7 @@
 		<maven.compiler.release>9</maven.compiler.release>
 
 		<skuzzle.runtime.version>0.9.6</skuzzle.runtime.version>
-
+        <jacoco.version>0.8.2</jacoco.version>
 		<site.name>semantic-version</site.name>
 		<github.name>semantic-version</github.name>
 
@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
-			<version>2.4.8</version>
+			<version>3.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
