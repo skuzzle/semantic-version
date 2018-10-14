@@ -31,7 +31,7 @@
 		<maven.compiler.release>9</maven.compiler.release>
 
 		<skuzzle.runtime.version>0.9.6</skuzzle.runtime.version>
-        <jacoco.version>0.8.2</jacoco.version>
+		<jacoco.version>0.8.2</jacoco.version>
 		<site.name>semantic-version</site.name>
 		<github.name>semantic-version</github.name>
 
@@ -58,6 +58,23 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.7</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.9.7</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.github.zafarkhaja</groupId>
 			<artifactId>java-semver</artifactId>
