@@ -144,3 +144,18 @@ Version | After increment
 `1.2.3+build.meta.data` | `1.2.3-1`
 `1.2.3-foo` | `1.2.3-foo.1`
 `1.2.3-foo.1` | `1.2.3-foo.2`
+
+### Serialization
+Versions can be written to/read from streams by Java's `ObjectOutputStream` and 
+`ObjectInputStream` classes out of the box:
+
+```java 
+new ObjectOutputStream(yourOutStream).writeObject(Version.parseVersion("1.2.3"));
+Version version = (Version) new ObjectInputStream`(yourInStream).readObject();
+```
+
+Serializing Versions from and to json is also possible but requires third party libraries
+like `jackson` or `gson`. Support for those is not built in (in order to not ship extra 
+dependencies) but examples can be found within the unit tests 
+[here (jackson)](https://github.com/skuzzle/semantic-version/blob/master/src/test/java/de/skuzzle/semantic/CustomJacksonSerialization.java) 
+and [here (gson)](https://github.com/skuzzle/semantic-version/blob/master/src/test/java/de/skuzzle/semantic/CustomGsonSerialization.java]
