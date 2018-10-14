@@ -158,4 +158,5 @@ Serializing Versions from and to json is also possible but requires third party 
 like `jackson` or `gson`. Support for those is not built in (in order to not ship extra 
 dependencies) but examples can be found within the unit tests 
 [here (jackson)](https://github.com/skuzzle/semantic-version/blob/master/src/test/java/de/skuzzle/semantic/CustomJacksonSerialization.java) 
-and [here (gson)](https://github.com/skuzzle/semantic-version/blob/master/src/test/java/de/skuzzle/semantic/CustomGsonSerialization.java)
+and [here (gson)](https://github.com/skuzzle/semantic-version/blob/master/src/test/java/de/skuzzle/semantic/CustomGsonSerialization.java). Both examples will serialize the Version as its String representation as 
+opposed to destructing it into its single fields.
