@@ -1,7 +1,6 @@
 package de.skuzzle.semantic;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -72,6 +71,6 @@ public class CustomJacksonSerialization {
                 "someString");
         final String json = objectMapper.writeValueAsString(object);
         final ObjectWithVersionField object2 = objectMapper.readValue(json, ObjectWithVersionField.class);
-        assertThat(object.getVersion(), is(object2.getVersion()));
+        assertEquals(object.getVersion(), object2.getVersion());
     }
 }

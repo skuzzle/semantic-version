@@ -1,7 +1,6 @@
 package de.skuzzle.semantic;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Type;
 
@@ -62,6 +61,6 @@ public class CustomGsonSerialization {
                 "someString");
         final String json = gson.toJson(object);
         final ObjectWithVersionField object2 = gson.fromJson(json, ObjectWithVersionField.class);
-        assertThat(object.getVersion(), is(object2.getVersion()));
+        assertEquals(object.getVersion(), object2.getVersion());
     }
 }
