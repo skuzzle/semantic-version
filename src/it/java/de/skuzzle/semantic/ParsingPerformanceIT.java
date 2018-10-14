@@ -10,45 +10,21 @@ public class ParsingPerformanceIT extends VersionPerformanceTestBase {
 
     @Test
     public void testNoRegex() throws Exception {
-        performTest("Without regex", RUN, new Runnable() {
-
-            @Override
-            public void run() {
-                Version.parseVersion(TEST_STRING);
-            }
-        });
+        performTest("Without regex", RUN, () -> Version.parseVersion(TEST_STRING));
     }
 
     @Test
     public void testWithRegex() throws Exception {
-        performTest("With regex", RUN, new Runnable() {
-
-            @Override
-            public void run() {
-                VersionRegEx.parseVersion(TEST_STRING);
-            }
-        });
+        performTest("With regex", RUN, () -> VersionRegEx.parseVersion(TEST_STRING));
     }
 
     @Test
     public void testJSemver() throws Exception {
-        performTest("jsemver", RUN, new Runnable() {
-
-            @Override
-            public void run() {
-                com.github.zafarkhaja.semver.Version.valueOf(TEST_STRING);
-            }
-        });
+        performTest("jsemver", RUN, () -> com.github.zafarkhaja.semver.Version.valueOf(TEST_STRING));
     }
 
     @Test
     public void testsemver4j() throws Exception {
-        performTest("semver4j", RUN, new Runnable() {
-
-            @Override
-            public void run() {
-                new Semver(TEST_STRING);
-            }
-        });
+        performTest("semver4j", RUN, () -> new Semver(TEST_STRING));
     }
 }

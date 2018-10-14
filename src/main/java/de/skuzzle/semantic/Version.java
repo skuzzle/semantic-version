@@ -93,36 +93,28 @@ public final class Version implements Comparable<Version>, Serializable {
     /**
      * Comparator for natural version ordering. See {@link #compare(Version, Version)} for
      * more information.
+     * <p>
+     * Instead of using this field, consider using a method reference like in
+     * <code>Version::compare</code>.
      *
      * @since 0.2.0
      */
-    public static final Comparator<Version> NATURAL_ORDER = new Comparator<Version>() {
-        @Override
-        public int compare(Version o1, Version o2) {
-            return Version.compare(o1, o2);
-        }
-    };
+    public static final Comparator<Version> NATURAL_ORDER = Version::compare;
 
     /**
      * Comparator for ordering versions with additionally considering the build meta data
      * field when comparing versions.
-     *
+     * <p>
+     * Instead of using this field, consider using a method reference like in
+     * <code>Version::compareWithBuildMetaData</code>.
      * <p>
      * Note: this comparator imposes orderings that are inconsistent with equals.
      *
-     *
      * @since 0.3.0
      */
-    public static final Comparator<Version> WITH_BUILD_META_DATA_ORDER = new Comparator<Version>() {
-
-        @Override
-        public int compare(Version o1, Version o2) {
-            return compareWithBuildMetaData(o1, o2);
-        }
-    };
+    public static final Comparator<Version> WITH_BUILD_META_DATA_ORDER = Version::compareWithBuildMetaData;
 
     private static final int TO_STRING_ESTIMATE = 16;
-    private static final int HASH_PRIME = 31;
 
     // state machine states for parsing a version string
     private static final int STATE_MAJOR_INIT = 0;
@@ -162,7 +154,9 @@ public final class Version implements Comparable<Version>, Serializable {
     private String buildMetaData;
 
     // store hash code once it has been calculated
-    private volatile int hash;
+    private static final int NOT_YET_CALCULATED = 2;
+    private static final int HASH_PRIME = 31;
+    private volatile int hash = NOT_YET_CALCULATED;
 
     private Version(int major, int minor, int patch, String[] preRelease,
             String[] buildMd) {
@@ -1599,7 +1593,7 @@ public final class Version implements Comparable<Version>, Serializable {
     @Override
     public int hashCode() {
         final int h = this.hash;
-        if (h == 0) {
+        if (h == NOT_YET_CALCULATED) {
             this.hash = calculateHashCode();
         }
         return this.hash;
