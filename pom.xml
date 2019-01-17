@@ -26,8 +26,6 @@
 	</licenses>
 
 	<properties>
-		<maven.compiler.target>13</maven.compiler.target>
-		<maven.compiler.source>13</maven.compiler.source>
 		<maven.compiler.release>13</maven.compiler.release>
 
 		<skuzzle.runtime.version>0.9.6</skuzzle.runtime.version>
