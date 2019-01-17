@@ -13,7 +13,7 @@ pipeline {
           try {
             sh 'mvn clean verify -Dmaven.compiler.release=10'
           } catch (err) {
-            echo err
+            currentBuild.result = 'FAILURE'
           }
         }
       }
@@ -30,7 +30,7 @@ pipeline {
           try {
             sh 'mvn clean verify -Dmaven.compiler.release=11'
           } catch (err) {
-            echo err
+            currentBuild.result = 'FAILURE'
           }
         }
       }
@@ -47,7 +47,7 @@ pipeline {
           try {
             sh 'mvn clean verify -Dmaven.compiler.release=12'
           } catch (err) {
-            echo err
+            currentBuild.result = 'FAILURE'
           }
         }
       }
@@ -64,7 +64,7 @@ pipeline {
           try {
             sh 'mvn clean verify -Dmaven.compiler.release=13'
           } catch (err) {
-            echo err
+            currentBuild.result = 'FAILURE'
           }
         }
       }
