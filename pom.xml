@@ -26,9 +26,9 @@
 	</licenses>
 
 	<properties>
-		<maven.compiler.target>9</maven.compiler.target>
-		<maven.compiler.source>9</maven.compiler.source>
-		<maven.compiler.release>9</maven.compiler.release>
+		<maven.compiler.target>12</maven.compiler.target>
+		<maven.compiler.source>12</maven.compiler.source>
+		<maven.compiler.release>12</maven.compiler.release>
 
 		<skuzzle.runtime.version>0.9.6</skuzzle.runtime.version>
 		<jacoco.version>0.8.2</jacoco.version>
