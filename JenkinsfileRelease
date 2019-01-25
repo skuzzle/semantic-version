@@ -23,7 +23,7 @@ pipeline {
     }
     stage('Perform') {
       steps {
-        sh 'mvn -B -X release:perform -Darguments="-Dgpg.passphrase=${GPG_SECRET} -Dpassword=${GITHUB_PSW} -Dusername=${GITHUB_USR}"'
+        sh 'mvn -B release:perform -Darguments="-Dgpg.passphrase=${GPG_SECRET} -Dpassword=${GITHUB_PSW} -Dusername=${GITHUB_USR}"'
       }
     }
   }
