@@ -31,7 +31,6 @@
 		<maven.compiler.release>9</maven.compiler.release>
 
 		<skuzzle.runtime.version>0.9.6</skuzzle.runtime.version>
-		<jacoco.version>0.8.2</jacoco.version>
 		<site.name>semantic-version</site.name>
 		<github.name>semantic-version</github.name>
 
