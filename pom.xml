@@ -30,7 +30,6 @@
 		<maven.compiler.source>9</maven.compiler.source>
 		<maven.compiler.release>9</maven.compiler.release>
 
-		<skuzzle.runtime.version>0.9.6</skuzzle.runtime.version>
 		<junit.version>5.3.2</junit.version>
 		<junit.platform.version>1.3.2</junit.platform.version>
 		
