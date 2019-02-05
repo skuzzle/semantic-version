@@ -11,7 +11,7 @@ pipeline {
       steps {
         script {
           try {
-            sh 'mvn clean verify -Dmaven.compiler.release=10'
+            sh 'mvn clean integration-test -Dmaven.compiler.release=10'
           } catch (err) {
             currentBuild.result = 'FAILURE'
           }
@@ -28,7 +28,7 @@ pipeline {
       steps {
         script {
           try {
-            sh 'mvn clean verify -Dmaven.compiler.release=11'
+            sh 'mvn clean integration-test -Dmaven.compiler.release=11'
           } catch (err) {
             currentBuild.result = 'FAILURE'
           }
@@ -45,7 +45,7 @@ pipeline {
       steps {
         script {
           try {
-            sh 'mvn clean verify -Dmaven.compiler.release=12'
+            sh 'mvn clean integration-test -Dmaven.compiler.release=12'
           } catch (err) {
             currentBuild.result = 'FAILURE'
           }
@@ -62,7 +62,7 @@ pipeline {
       steps {
         script {
           try {
-            sh 'mvn clean verify -Dmaven.compiler.release=13'
+            sh 'mvn clean integration-test -Dmaven.compiler.release=13'
           } catch (err) {
             currentBuild.result = 'FAILURE'
           }
