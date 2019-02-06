@@ -26,10 +26,6 @@
 	</licenses>
 
 	<properties>
-		<maven.compiler.target>9</maven.compiler.target>
-		<maven.compiler.source>9</maven.compiler.source>
-		<maven.compiler.release>9</maven.compiler.release>
-		
 		<junit.version>5.4.0-RC2</junit.version>
 		<junit.platform.version>1.4.0-RC2</junit.platform.version>
 		
@@ -37,8 +33,8 @@
 		<github.name>semantic-version</github.name>
 
 		<jackson.version>2.9.8</jackson.version>
-
-		<skipIT>true</skipIT>
+        <version.under.test>2.0.0</version.under.test>
+		<skipIT>false</skipIT>
 	</properties>
 
 	<scm>
@@ -47,6 +43,12 @@
 	</scm>
 
 	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>semantic-version</artifactId>
+			<version>${version.under.test}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>

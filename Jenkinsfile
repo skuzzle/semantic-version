@@ -9,16 +9,7 @@ pipeline {
         }
       }
       steps {
-        script {
-          try {
-            sh 'mvn -version'
-            sh 'java -version'
-            sh 'javac -version'
-            sh 'mvn clean integration-test -Dmaven.compiler.release=10'
-          } catch (err) {
-            currentBuild.result = 'FAILURE'
-          }
-        }
+        buildWithJdk("10")
       }
     }
     stage('JDK-11') {
@@ -29,16 +20,7 @@ pipeline {
         }
       }
       steps {
-        script {
-          try {
-            sh 'mvn -version'
-            sh 'java -version'
-            sh 'javac -version'
-            sh 'mvn clean integration-test -Dmaven.compiler.release=11'
-          } catch (err) {
-            currentBuild.result = 'FAILURE'
-          }
-        }
+        buildWithJdk("11")
       }
     }
     stage('JDK-12') {
@@ -49,16 +31,7 @@ pipeline {
         }
       }
       steps {
-        script {
-          try {
-            sh 'mvn -version'
-            sh 'java -version'
-            sh 'javac -version'
-            sh 'mvn clean integration-test -Dmaven.compiler.release=12'
-          } catch (err) {
-            currentBuild.result = 'FAILURE'
-          }
-        }
+        buildWithJdk("12")
       }
     }
     stage('JDK-13') {
@@ -69,16 +42,33 @@ pipeline {
         }
       }
       steps {
-        script {
-          try {
-            sh 'mvn -version'
-            sh 'java -version'
-            sh 'javac -version'
-            sh 'mvn clean integration-test -Dmaven.compiler.release=13'
-          } catch (err) {
-            currentBuild.result = 'FAILURE'
-          }
-        }
+        buildWithJdk("13")
+      }
+    }
+  }
+}
+
+void buildWithJdk(version) {
+  stage("Show Versions") {
+    script {
+        sh 'mvn -version'
+        sh 'java -version'
+        sh 'javac -version'
+    }
+  }
+  
+  stage("Clean Maven Project") {
+    script {
+      sh 'mvn clean -Dmaven.clean.failOnError=false -Dmaven.clean.retryOnError=true'
+    }
+  }
+  
+  stage("Build with JDK $version") {
+    script {
+      try {
+        sh "mvn integration-test -Dmaven.compiler.release=$version"
+      } catch (err) {
+        currentBuild.result = 'FAILURE'
       }
     }
   }
