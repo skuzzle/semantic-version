@@ -53,27 +53,28 @@ pipeline {
 }
 
 void testAgainstJdk(version) {
-    ws("${env.JOB_NAME}-$version")
-    stage("Show Versions") {
-        script {
-            sh 'mvn -version'
-            sh 'java -version'
-            sh 'javac -version'
+    ws("${env.JOB_NAME}-$version") {
+        stage("Show Versions") {
+            script {
+                sh 'mvn -version'
+                sh 'java -version'
+                sh 'javac -version'
+            }
         }
-    }
 
-    stage("Clean Maven Project") {
-        script {
-            sh 'mvn clean -Dmaven.clean.failOnError=false -Dmaven.clean.retryOnError=true'
+        stage("Clean Maven Project") {
+            script {
+                sh 'mvn clean -Dmaven.clean.failOnError=false -Dmaven.clean.retryOnError=true'
+            }
         }
-    }
 
-    stage("Test against JDK $version") {
-        script {
-            try {
-                sh "mvn integration-test -Dmaven.compiler.release=$version"
-            } catch (err) {
-                currentBuild.result = 'FAILURE'
+        stage("Test against JDK $version") {
+            script {
+                try {
+                    sh "mvn integration-test -Dmaven.compiler.release=$version"
+                } catch (err) {
+                    currentBuild.result = 'FAILURE'
+                }
             }
         }
     }
