@@ -9,7 +9,7 @@ pipeline {
         }
       }
       steps {
-        buildWithJdk("10")
+        testAgainstJdk("10")
       }
     }
     stage('JDK-11') {
@@ -20,7 +20,7 @@ pipeline {
         }
       }
       steps {
-        buildWithJdk("11")
+        testAgainstJdk("11")
       }
     }
     stage('JDK-12') {
@@ -31,7 +31,7 @@ pipeline {
         }
       }
       steps {
-        buildWithJdk("12")
+        testAgainstJdk("12")
       }
     }
     stage('JDK-13') {
@@ -42,13 +42,13 @@ pipeline {
         }
       }
       steps {
-        buildWithJdk("13")
+        testAgainstJdk("13")
       }
     }
   }
 }
 
-void buildWithJdk(version) {
+void testAgainstJdk(version) {
   stage("Show Versions") {
     script {
         sh 'mvn -version'
@@ -63,7 +63,7 @@ void buildWithJdk(version) {
     }
   }
   
-  stage("Build with JDK $version") {
+  stage("Test against JDK $version") {
     script {
       try {
         sh "mvn integration-test -Dmaven.compiler.release=$version"

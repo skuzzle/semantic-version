@@ -34,7 +34,7 @@
 
 		<jackson.version>2.9.8</jackson.version>
         <version.under.test>2.0.0</version.under.test>
-		<skipIT>false</skipIT>
+        <skipIT>false</skipIT>
 	</properties>
 
 	<scm>
@@ -116,4 +116,35 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>semantic-version</artifactId>
+                                    <version>${version.under.test}</version>
+                                    <classifier>tests</classifier>
+                                    <type>test-jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
