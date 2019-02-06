@@ -16,11 +16,6 @@ pipeline {
             sh 'git config --global user.name "Simon Taddiken"'
         }
     }
-    stage('Site canary') {
-      steps {
-        sh 'mvn -B site:site'
-      }
-    }
     stage('Prepare') {
       steps {
         sh 'mvn -B release:prepare -Dpassword=${GITHUB_PSW} -Dusername=${GITHUB_USR}'
