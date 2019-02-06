@@ -11,5 +11,10 @@ pipeline {
         sh 'mvn clean verify'
       }
     }
+    stage('javadoc') {
+      steps {
+        sh 'mvn javadoc:javadoc'
+      }
+    }
   }
 }
