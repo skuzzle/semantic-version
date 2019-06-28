@@ -2,6 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/skuzzle/semantic-version/badge.svg?branch=master)](https://coveralls.io/github/skuzzle/semantic-version?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version)
 [![JavaDoc](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version.svg?label=JavaDoc)](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version)
+![Twitter Follow](https://img.shields.io/twitter/follow/skuzzleOSS.svg?style=social)
 
 
 semantic-version
