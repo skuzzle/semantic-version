@@ -152,7 +152,7 @@ Versions can be written to/read from streams by Java's `ObjectOutputStream` and
 
 ```java 
 new ObjectOutputStream(yourOutStream).writeObject(Version.parseVersion("1.2.3"));
-Version version = (Version) new ObjectInputStream`(yourInStream).readObject();
+Version version = (Version) new ObjectInputStream(yourInStream).readObject();
 ```
 
 Serializing Versions from and to json is also possible but requires third party libraries
