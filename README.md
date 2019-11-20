@@ -2,6 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/skuzzle/semantic-version/badge.svg?branch=master)](https://coveralls.io/github/skuzzle/semantic-version?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.skuzzle/semantic-version)
 [![JavaDoc](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version.svg?label=JavaDoc)](http://javadoc-badge.appspot.com/de.skuzzle/semantic-version)
+[![Twitter Follow](https://img.shields.io/twitter/follow/skuzzleOSS.svg?style=social)](https://twitter.com/skuzzleOSS)
 
 
 semantic-version
@@ -151,7 +152,7 @@ Versions can be written to/read from streams by Java's `ObjectOutputStream` and
 
 ```java 
 new ObjectOutputStream(yourOutStream).writeObject(Version.parseVersion("1.2.3"));
-Version version = (Version) new ObjectInputStream`(yourInStream).readObject();
+Version version = (Version) new ObjectInputStream(yourInStream).readObject();
 ```
 
 Serializing Versions from and to json is also possible but requires third party libraries
