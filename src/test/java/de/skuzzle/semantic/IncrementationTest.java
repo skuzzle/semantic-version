@@ -1,11 +1,29 @@
 package de.skuzzle.semantic;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 public class IncrementationTest {
+    
+    @Test
+    void testToStableIsAlreadyStable() throws Exception {
+        final Version v = Version.create(1, 2, 3).withBuildMetaData("build");
+        final Version stable = v.toStable();
+        assertEquals(v, stable);
+        assertFalse(stable.hasBuildMetaData());
+    }
+    
+    @Test
+    void testToStableDropIdentifiers() throws Exception {
+        final Version v = Version.create(1, 2, 3).withPreRelease("SNAPSHOT").withBuildMetaData("build");
+        final Version stable = v.toStable();
+        final Version expected = Version.create(1, 2, 3);
+        assertEquals(expected, stable);
+        assertFalse(stable.hasBuildMetaData());
+    }
 
     @Test
     public void testIncrementMajor() throws Exception {

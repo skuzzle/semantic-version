@@ -687,6 +687,16 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     /**
+     * Drops both the pre-release and the build meta data from this version.
+     * 
+     * @return The nearest stable version.
+     * @since 2.1.0
+     */
+    public Version toStable() {
+        return new Version(this.major, this.minor, this.patch, EMPTY_ARRAY, EMPTY_ARRAY);
+    }
+
+    /**
      * Given this Version, returns the next major Version. That is, the major part is
      * incremented by 1 and the remaining parts are set to 0. This also drops the
      * pre-release and build-meta-data.
@@ -1542,11 +1552,23 @@ public final class Version implements Comparable<Version>, Serializable {
     public boolean isInitialDevelopment() {
         return this.major == 0;
     }
-
+    
+    /**
+     * Whether this is a 'stable' version. That is, it has no pre-release identifier.
+     * 
+     * @return <code>true</code> iff {@link #getPreRelease()} is empty.
+     * @see #isPreRelease()
+     * @since 2.1.0
+     */
+    public boolean isStable() {
+        return this.preReleaseParts.length == 0;
+    }
+    
     /**
      * Determines whether this is a pre release version.
      *
      * @return <code>true</code> iff {@link #getPreRelease()} is not empty.
+     * @see #isStable()
      */
     public boolean isPreRelease() {
         return this.preReleaseParts.length > 0;
@@ -1736,7 +1758,6 @@ public final class Version implements Comparable<Version>, Serializable {
      * Convenience method for {@code this.compareTo(other) < 0} except that this method
      * throws an {@link IllegalArgumentException} if other is null.
      *
-     *
      * @param other The version to compare to.
      * @return Whether this version is strictly lower.
      * @since 1.1.0
@@ -1744,6 +1765,22 @@ public final class Version implements Comparable<Version>, Serializable {
     public boolean isLowerThan(Version other) {
         require(other != null, "other must no be null");
         return compareTo(other) < 0;
+    }
+    
+    /**
+     * Tests whether this version is equal or greater than the given other version in terms 
+     * of precedence. Does not consider the build meta data part.
+     * <p>
+     * Convenience method for {@code this.compareTo(other) >= 0} except that this method
+     * throws an {@link IllegalArgumentException} if other is null.
+     * 
+     * @param other The version to compare to.
+     * @return Whether this version is greater or equal.
+     * @since 2.1.0
+     */
+    public boolean isAtLeast(Version other) {
+        require(other != null, "other must not be null");
+        return compareTo(other) >= 0;
     }
 
     /**
