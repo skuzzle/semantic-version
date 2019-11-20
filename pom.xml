@@ -1,117 +1,86 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>de.skuzzle</groupId>
-		<artifactId>skuzzle-parent</artifactId>
-		<version>2.0.11</version>
-		<relativePath>../skuzzle-parent/pom.xml</relativePath>
-	</parent>
+    <parent>
+        <groupId>de.skuzzle</groupId>
+        <artifactId>skuzzle-parent</artifactId>
+        <version>2.0.11</version>
+        <relativePath>../skuzzle-parent/pom.xml</relativePath>
+    </parent>
 
-	<artifactId>semantic-version</artifactId>
-	<version>2.1.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <artifactId>semantic-version</artifactId>
+    <version>2.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<name>semantic-version</name>
-	<description>Single-class semantic version implementation for java</description>
+    <name>semantic-version</name>
+    <description>Single-class semantic version implementation for java</description>
 
-	<licenses>
-		<license>
-			<name>The MIT License (MIT)</name>
-			<url>http://opensource.org/licenses/MIT</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>The MIT License (MIT)</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-	<properties>
-		<maven.compiler.target>9</maven.compiler.target>
-		<maven.compiler.source>9</maven.compiler.source>
-		<maven.compiler.release>9</maven.compiler.release>
-		
-		<junit.version>5.5.2</junit.version>
-		<junit.platform.version>1.5.2</junit.platform.version>
-		
-		<site.name>semantic-version</site.name>
-		<github.name>semantic-version</github.name>
+    <properties>
+        <maven.compiler.target>9</maven.compiler.target>
+        <maven.compiler.source>9</maven.compiler.source>
+        <maven.compiler.release>9</maven.compiler.release>
+        
+        <site.name>semantic-version</site.name>
+        <github.name>semantic-version</github.name>
+        
+        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <jackson.version>2.10.0.pr1</jackson.version>
 
-		<jackson.version>2.10.0.pr1</jackson.version>
+        <skipIT>true</skipIT>
+    </properties>
+    
 
-		<skipIT>true</skipIT>
-	</properties>
+    <scm>
+        <developerConnection>scm:git:https://github.com/skuzzle/${github.name}.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
-	<scm>
-		<developerConnection>scm:git:https://github.com/skuzzle/${github.name}.git</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.5</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.github.zafarkhaja</groupId>
-			<artifactId>java-semver</artifactId>
-			<version>0.9.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.vdurmont</groupId>
-			<artifactId>semver4j</artifactId>
-			<version>2.0.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-runner</artifactId>
-			<version>${junit.platform.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-launcher</artifactId>
-			<version>${junit.platform.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-commons</artifactId>
-			<version>${junit.platform.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>nl.jqno.equalsverifier</groupId>
-			<artifactId>equalsverifier</artifactId>
-			<version>3.0</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.zafarkhaja</groupId>
+            <artifactId>java-semver</artifactId>
+            <version>0.9.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>semver4j</artifactId>
+            <version>2.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>

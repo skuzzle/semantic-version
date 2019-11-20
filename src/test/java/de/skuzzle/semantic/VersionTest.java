@@ -17,13 +17,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import de.skuzzle.semantic.Version.VersionFormatException;
-
-import nl.jqno.equalsverifier.EqualsVerifier;
-import nl.jqno.equalsverifier.Warning;
 
 public class VersionTest {
 
@@ -652,7 +648,7 @@ public class VersionTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Version.create(1, 0, 0).isLowerThan(null));
     }
-    
+
     @Test
     public void testIsAtLeastNull() throws Exception {
         assertThrows(IllegalArgumentException.class,
@@ -1195,30 +1191,20 @@ public class VersionTest {
         assertEquals(5678, v.getMinor());
         assertEquals(9012, v.getPatch());
     }
-    
+
     @Test
     void testIsNotStableWIthPreRelease() throws Exception {
         assertFalse(Version.create(1, 2, 3).withPreRelease("foo").isStable());
     }
-    
+
     @Test
     void testIsStable() throws Exception {
         assertTrue(Version.create(1, 3, 4).isStable());
     }
-    
+
     @Test
     void testIsStableWithBuildMetaData() throws Exception {
         assertTrue(Version.create(1, 3, 4).withBuildMetaData("foo").isStable());
-    }
-    
-    @Test
-    @Disabled
-    public void testEquals() throws Exception {
-        EqualsVerifier.forClass(Version.class)
-                .withIgnoredFields("buildMetaDataParts", "preRelease", "buildMetaData")
-                .withCachedHashCode("hash", "calculateHashCode", Version.create(1, 2, 3))
-                .suppress(Warning.NULL_FIELDS)
-                .verify();
     }
 
 }

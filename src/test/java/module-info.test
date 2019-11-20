@@ -1,0 +1,8 @@
+open module de.skuzzle.semantic {
+    exports de.skuzzle.semantic;
+    
+    requires org.junit.jupiter.api;
+    requires semver4j;
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
+}
