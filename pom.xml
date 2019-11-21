@@ -36,8 +36,12 @@
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
         <junit.platform.version>1.5.2</junit.platform.version>
         <jackson.version>2.10.0.pr1</jackson.version>
-        <maven.surefire.version>2.22.2</maven.surefire.version>
-        <maven.failsafe.version>2.22.2</maven.failsafe.version>
+        <maven.surefire.version>3.0.0-M4</maven.surefire.version>
+        <maven.failsafe.version>3.0.0-M4</maven.failsafe.version>
+        
+        <surefire.useModulePath>false</surefire.useModulePath>
+        <failsafe.useModulePath>false</failsafe.useModulePath>
+        
         <skipIT>true</skipIT>
     </properties>
     
@@ -81,6 +85,12 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
