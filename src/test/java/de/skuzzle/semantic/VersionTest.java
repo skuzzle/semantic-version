@@ -533,6 +533,18 @@ public class VersionTest {
     }
 
     @Test
+    public void testVersionAll03() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Version.create(0, 0));
+    }
+
+    @Test
+    public void testVersionAll04() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Version.create(0));
+    }
+
+    @Test
     public void testPreReleaseInvalid() {
         assertThrows(VersionFormatException.class,
                 () -> Version.create(1, 2, 3, "pre.", "build"));
@@ -583,7 +595,8 @@ public class VersionTest {
         assertTrue(v2.compareTo(v1) > 0);
         assertTrue(v3.compareTo(v2) > 0);
         assertTrue(v4.compareTo(v3) > 0);
-        assertTrue(v4.isAtLeast(v3));
+        assertTrue(v4.isGreaterThanOrEqualTo(v3));
+        assertTrue(v3.isLowerThanOrEqualTo(v4));
     }
 
     @Test
@@ -594,7 +607,8 @@ public class VersionTest {
         assertTrue(v2.compareTo(v1) < 0);
         assertTrue(v2.isLowerThan(v1));
         assertTrue(v1.isGreaterThan(v2));
-        assertTrue(v1.isAtLeast(v2));
+        assertTrue(v1.isGreaterThanOrEqualTo(v2));
+        assertTrue(v2.isLowerThanOrEqualTo(v1));
     }
 
     @Test
@@ -650,9 +664,15 @@ public class VersionTest {
     }
 
     @Test
-    public void testIsAtLeastNull() throws Exception {
+    public void testIsGreaterThanOrEqualToNull() throws Exception {
         assertThrows(IllegalArgumentException.class,
-                () -> Version.create(1, 0, 0).isAtLeast(null));
+                () -> Version.create(1, 0, 0).isGreaterThanOrEqualTo(null));
+    }
+
+    @Test
+    public void testIsLowerThanOrEqualToNull() throws Exception {
+        assertThrows(IllegalArgumentException.class,
+                () -> Version.create(1, 0, 0).isLowerThanOrEqualTo(null));
     }
 
     @Test
@@ -670,6 +690,10 @@ public class VersionTest {
             final Version v2 = SEMVER_ORG_VERSIONS[i];
             final int c = v1.compareTo(v2);
             assertTrue(c < 0, v1 + " is not lower than " + v2);
+            assertTrue(v1.isLowerThan(v2));
+            assertTrue(v1.isLowerThanOrEqualTo(v2));
+            assertFalse(v1.isGreaterThan(v2));
+            assertFalse(v1.isGreaterThanOrEqualTo(v2));
         }
     }
 
