@@ -878,6 +878,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * Examples:
      *
      * <table>
+     * <caption>Pre-release identifier incrementation behavior</caption>
      * <tr>
      * <th>Version</th>
      * <th>After increment</th>
@@ -926,6 +927,7 @@ public final class Version implements Comparable<Version>, Serializable {
      * Examples:
      *
      * <table>
+     * <caption>Build meta data incrementation behavior</caption>
      * <tr>
      * <th>Version</th>
      * <th>After increment</th>
