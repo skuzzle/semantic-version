@@ -64,6 +64,13 @@ public final class Version implements Comparable<Version>, Serializable {
     private static final String[] EMPTY_ARRAY = new String[0];
 
     /**
+     * The minimum value '0.0.0' for valid versions where all parts are 0 or empty.
+     *
+     * @since 2.1.0
+     */
+    public static final Version ZERO = Version.create(0, 0, 0);
+
+    /**
      * Semantic Version Specification to which this class complies.
      *
      * @since 0.2.0
@@ -1390,7 +1397,6 @@ public final class Version implements Comparable<Version>, Serializable {
         require(major >= 0, "major < 0");
         require(minor >= 0, "minor < 0");
         require(patch >= 0, "patch < 0");
-        require(major != 0 || minor != 0 || patch != 0, "all parts are 0");
     }
 
     private static void require(boolean condition, String message) {

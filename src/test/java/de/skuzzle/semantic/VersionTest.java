@@ -1,6 +1,7 @@
 package de.skuzzle.semantic;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -522,26 +523,22 @@ public class VersionTest {
 
     @Test
     public void testVersionAll0() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Version.parseVersion("0.0.0"));
+        assertDoesNotThrow(() -> Version.parseVersion("0.0.0"));
     }
 
     @Test
     public void testVersionAll02() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Version.create(0, 0, 0));
+        assertDoesNotThrow(() -> Version.create(0, 0, 0));
     }
 
     @Test
     public void testVersionAll03() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Version.create(0, 0));
+        assertDoesNotThrow(() -> Version.create(0, 0));
     }
 
     @Test
     public void testVersionAll04() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Version.create(0));
+        assertDoesNotThrow(() -> Version.create(0));
     }
 
     @Test
@@ -1056,24 +1053,21 @@ public class VersionTest {
     public void testWithMajorAllWillbe0() throws Exception {
         final Version v = Version.create(1, 0, 0);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> v.withMajor(0));
+        assertDoesNotThrow(() -> v.withMajor(0));
     }
 
     @Test
     public void testWithMinorAllWillbe0() throws Exception {
         final Version v = Version.create(0, 1, 0);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> v.withMinor(0));
+        assertDoesNotThrow(() -> v.withMinor(0));
     }
 
     @Test
     public void testWithPatchAllWillbe0() throws Exception {
         final Version v = Version.create(0, 0, 1);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> v.withPatch(0));
+        assertDoesNotThrow(() -> v.withPatch(0));
     }
 
     @Test
