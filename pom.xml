@@ -133,6 +133,15 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>default-testCompile</id>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <release>9</release>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>base-compile</id>
                         <goals>
                             <goal>compile</goal>
@@ -148,7 +157,7 @@
                     <jdkToolchain>
                         <version>9</version>
                     </jdkToolchain>
-                    <release>8</release>
+                    <release>6</release>
                 </configuration>
             </plugin>
         </plugins>

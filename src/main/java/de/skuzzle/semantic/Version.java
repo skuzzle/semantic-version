@@ -106,7 +106,13 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * @since 0.2.0
      */
-    public static final Comparator<Version> NATURAL_ORDER = Version::compare;
+    public static final Comparator<Version> NATURAL_ORDER = new Comparator<Version>() {
+
+        @Override
+        public int compare(Version o1, Version o2) {
+            return o1.compareTo(o2);
+        }
+    };
 
     /**
      * Comparator for ordering versions with additionally considering the build meta data
@@ -119,7 +125,13 @@ public final class Version implements Comparable<Version>, Serializable {
      *
      * @since 0.3.0
      */
-    public static final Comparator<Version> WITH_BUILD_META_DATA_ORDER = Version::compareWithBuildMetaData;
+    public static final Comparator<Version> WITH_BUILD_META_DATA_ORDER = new Comparator<Version>() {
+
+        @Override
+        public int compare(Version o1, Version o2) {
+            return o1.compareToWithBuildMetaData(o2);
+        }
+    };
 
     private static final int TO_STRING_ESTIMATE = 16;
 
