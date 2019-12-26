@@ -25,27 +25,17 @@ easy to use within your own projects. Key features:
 semantic-version is available through the Maven Central Repository. Just add
 the following dependency to your pom:
 
-If you are using Java >=9 use this release:
 ```xml
 <dependency>
     <groupId>de.skuzzle</groupId>
     <artifactId>semantic-version</artifactId>
-    <version>2.0.0</version>
-</dependency>
-```
-
-If you are using Java 6, 7 or 8 use this release:
-```xml
-<dependency>
-    <groupId>de.skuzzle</groupId>
-    <artifactId>semantic-version</artifactId>
-    <version>1.2.0</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
 ## Java 9
 
-Release `2.0.0` is bundled as a JPMS module. If you are using it in your Java 9 project,
+Releases `>=2.0.0` are bundled as a JPMS module. If you are using it in your Java 9 project,
 add the following line to your `module-info.java`:
 
 ```
@@ -145,6 +135,9 @@ Version | After increment
 `1.2.3+build.meta.data` | `1.2.3-1`
 `1.2.3-foo` | `1.2.3-foo.1`
 `1.2.3-foo.1` | `1.2.3-foo.2`
+
+The special method `toStable` which has been introduced in version 2.1.0 will give give the next _stable_ version. 
+That is, it simply drops the pre-release and build meta data identifiers and leaves all other parts unmodified.
 
 ### Serialization
 Versions can be written to/read from streams by Java's `ObjectOutputStream` and 
