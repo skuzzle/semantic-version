@@ -12,8 +12,8 @@ pipeline {
   stages {
     stage ('Set Git Information') {
         steps {
-            sh 'git config --global user.email "simon.taddiken@gmail.com"'
-            sh 'git config --global user.name "Simon Taddiken"'
+            sh 'git config user.email "simon.taddiken@gmail.com"'
+            sh 'git config user.name "Simon Taddiken"'
         }
     }
     stage('Prepare') {
