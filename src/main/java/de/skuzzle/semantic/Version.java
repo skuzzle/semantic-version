@@ -25,10 +25,7 @@ package de.skuzzle.semantic;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class is an implementation of the full <em>semantic version 2.0.0</em>
@@ -1776,7 +1773,7 @@ public final class Version implements Comparable<Version>, Serializable {
         final String[] result = new String[source.length];
         for (int i = 0; i < source.length; i++) {
             final String string = source[i];
-            result[i] = toUpper ? string.toUpperCase() : string.toLowerCase();
+            result[i] = toUpper ? string.toUpperCase(Locale.ROOT) : string.toLowerCase(Locale.ROOT);
         }
         return result;
     }
