@@ -33,6 +33,9 @@
         <java-semver.version>0.9.0</java-semver.version>
         <semver4j.version>3.1.0</semver4j.version>
 
+        <surefire.useModulePath>false</surefire.useModulePath>
+        <failsafe.useModulePath>false</failsafe.useModulePath>
+        
         <skipIT>true</skipIT>
     </properties>
 
