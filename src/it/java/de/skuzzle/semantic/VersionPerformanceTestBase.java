@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 class VersionPerformanceTestBase {
 
     private static final int WARM_UP = 11000;
-    protected static final int RUN = 100000;
+    protected static final int RUNS = 100000;
 
     private void warmUp(Runnable subject) {
         for (int i = 0; i < WARM_UP; ++i) {
