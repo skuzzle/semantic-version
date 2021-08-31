@@ -19,6 +19,7 @@ import java.io.ObjectOutputStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.DefaultLocale;
 
 import de.skuzzle.semantic.Version.VersionFormatException;
 
@@ -1225,4 +1226,26 @@ public class VersionTest {
         assertTrue(Version.create(1, 3, 4).withBuildMetaData("foo").isStable());
     }
 
+    // This would have produced an illegal identifier when using toLowerCase with default
+    // locale
+    // https://github.com/skuzzle/semantic-version/pull/5
+    @Test
+    @DefaultLocale("tr-TR")
+    void testToLowerCaseWithTurkishLocale() throws Exception {
+        final Version lowerCase = Version.create(1, 3, 4).withPreRelease("I")
+                .toLowerCase();
+        Version.create(1, 3, 4, lowerCase.getPreRelease());
+    }
+
+    // This would have produced an illegal identifier when using toLowerCase with default
+    // locale
+    // https://github.com/skuzzle/semantic-version/pull/5
+    @Test
+    @DefaultLocale("tr-TR")
+    void testToUpperCaseWithTurkishLocale() throws Exception {
+        final Version lowerCase = Version.create(1, 3, 4)
+                .withPreRelease("i")
+                .toUpperCase();
+        Version.create(1, 3, 4, lowerCase.getPreRelease());
+    }
 }

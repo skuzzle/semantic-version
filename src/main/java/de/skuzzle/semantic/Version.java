@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class is an implementation of the full <em>semantic version 2.0.0</em>
@@ -45,14 +46,12 @@ import java.util.List;
  * methods taking an array or other kind of modifiable objects as input, will first make a
  * copy before using it as internal state.
  *
- *
  * <p>
  * Note that unless stated otherwise, none of the public methods of this class accept
  * <code>null</code> values. Most methods will throw an {@link IllegalArgumentException}
  * when encountering a <code>null</code> argument. However, to comply with the
  * {@link Comparable} contract, the comparison methods will throw a
  * {@link NullPointerException} instead.
- *
  *
  * @author Simon Taddiken
  */
@@ -517,7 +516,6 @@ public final class Version implements Comparable<Version>, Serializable {
                     throw unexpectedChar(full, c);
                 }
                 break;
-
             }
         }
 
@@ -531,7 +529,7 @@ public final class Version implements Comparable<Version>, Serializable {
     }
 
     private static VersionFormatException unexpectedChar(String v, int c) {
-        if (c == -1) {
+        if (c == EOS) {
             return new VersionFormatException(String.format(
                     "Incomplete version part in %s", v));
         }
@@ -1751,7 +1749,7 @@ public final class Version implements Comparable<Version>, Serializable {
     /**
      * Returns a new Version where all identifiers are converted to upper case letters.
      *
-     * @return A new version with upper case identifiers.
+     * @return A new version with lower case identifiers.
      * @since 1.1.0
      */
     public Version toUpperCase() {
@@ -1776,7 +1774,7 @@ public final class Version implements Comparable<Version>, Serializable {
         final String[] result = new String[source.length];
         for (int i = 0; i < source.length; i++) {
             final String string = source[i];
-            result[i] = toUpper ? string.toUpperCase() : string.toLowerCase();
+            result[i] = toUpper ? string.toUpperCase(Locale.ROOT) : string.toLowerCase(Locale.ROOT);
         }
         return result;
     }
