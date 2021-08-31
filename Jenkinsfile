@@ -2,18 +2,35 @@ pipeline {
   agent {
     docker {
       image 'maven:3.6-jdk-11'
-      args '-v $HOME/.m2:/root/.m2 -u 0:0'
+      args '-v /home/jenkins/.m2:/var/maven/.m2 -v /home/jenkins/.gnupg:/.gnupg -e MAVEN_CONFIG=/var/maven/.m2 -e MAVEN_OPTS=-Duser.home=/var/maven'
     }
+  }
+  environment {
+    COVERALLS_REPO_TOKEN = credentials('coveralls_repo_token_semantic_version')
+    GPG_SECRET = credentials('gpg_password')
   }
   stages {
     stage('Build') {
       steps {
-        sh 'mvn clean install'
+        sh 'mvn -B clean verify'
+      }
+    }
+    stage('Coverage') {
+      steps {
+        sh 'mvn -B jacoco:report jacoco:report-integration coveralls:report -DrepoToken=$COVERALLS_REPO_TOKEN'
       }
     }
     stage('javadoc') {
       steps {
-        sh 'mvn javadoc:javadoc'
+        sh 'mvn -B javadoc:javadoc'
+      }
+    }
+    stage('Deploy SNAPSHOT') {
+      when {
+        branch 'dev'
+      }
+      steps {
+        sh 'mvn -B -Prelease -DskipTests -Dgpg.passphrase=${GPG_SECRET} deploy'
       }
     }
   }

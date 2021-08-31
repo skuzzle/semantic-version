@@ -1,15 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>de.skuzzle</groupId>
         <artifactId>skuzzle-parent</artifactId>
-        <version>2.0.11</version>
-        <relativePath>../skuzzle-parent/pom.xml</relativePath>
+        <version>3.0.1</version>
     </parent>
 
     <artifactId>semantic-version</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.1</version>
     <packaging>jar</packaging>
 
     <name>semantic-version</name>
@@ -24,16 +24,14 @@
     </licenses>
 
     <properties>
-        <javadoc.version>3.1.1</javadoc.version>
-
         <site.name>semantic-version</site.name>
         <github.name>semantic-version</github.name>
 
-        <junit.jupiter.version>5.5.2</junit.jupiter.version>
-        <junit.platform.version>1.5.2</junit.platform.version>
+        <junit.version>5.7.2</junit.version>
         <jackson.version>2.10.0.pr1</jackson.version>
-        <maven.surefire.version>3.0.0-M4</maven.surefire.version>
-        <maven.failsafe.version>3.0.0-M4</maven.failsafe.version>
+        <gson.version>2.8.5</gson.version>
+        <java-semver.version>0.9.0</java-semver.version>
+        <semver4j.version>3.1.0</semver4j.version>
 
         <surefire.useModulePath>false</surefire.useModulePath>
         <failsafe.useModulePath>false</failsafe.useModulePath>
@@ -41,17 +39,28 @@
         <skipIT>true</skipIT>
     </properties>
 
-
     <scm>
         <developerConnection>scm:git:https://github.com/skuzzle/${github.name}.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.5</version>
+            <version>${gson.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -69,43 +78,29 @@
         <dependency>
             <groupId>com.github.zafarkhaja</groupId>
             <artifactId>java-semver</artifactId>
-            <version>0.9.0</version>
+            <version>${java-semver.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
             <artifactId>semver4j</artifactId>
-            <version>2.0.1</version>
+            <version>${semver4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-runner</artifactId>
-            <version>${junit.platform.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>${junit.platform.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-commons</artifactId>
-            <version>${junit.platform.version}</version>
+            <groupId>org.junit-pioneer</groupId>
+            <artifactId>junit-pioneer</artifactId>
+            <version>1.4.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -120,9 +115,36 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>com.amashchenko.maven.plugin</groupId>
+                <artifactId>gitflow-maven-plugin</artifactId>
+                <configuration>
+                    <postReleaseGoals>deploy</postReleaseGoals>
+                    <detail>true</detail>
+                    <verbose>true</verbose>
+                    <skipTestProject>true</skipTestProject>
+                    <gitFlowConfig>
+                        <productionBranch>master</productionBranch>
+                        <developmentBranch>dev</developmentBranch>
+                    </gitFlowConfig>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.ragedunicorn.tools.maven</groupId>
+                <artifactId>github-release-maven-plugin</artifactId>
+                <version>1.0.2</version>
+                <configuration>
+                    <owner>skuzzle</owner>
+                    <repository>${github.name}</repository>
+                    <authToken>${github.release-token}</authToken>
+                    <tagName>v${project.version}</tagName>
+                    <name>Semantic Version ${project.version}</name>
+                    <targetCommitish>master</targetCommitish>
+                    <releaseNotes>RELEASE_NOTES.md</releaseNotes>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
                 <executions>
                     <execution>
                         <id>default-compile</id>

@@ -8,7 +8,7 @@ public class IsPreReleasePerformanceIT extends VersionPerformanceTestBase {
 
     @Test
     public void testIsNoPreReleaseWithRegex() throws Exception {
-        performTest("Is no pre-release with regex", RUN, new Runnable() {
+        performTest("Is no pre-release with regex", RUNS, new Runnable() {
 
             @Override
             public void run() {
@@ -19,7 +19,7 @@ public class IsPreReleasePerformanceIT extends VersionPerformanceTestBase {
 
     @Test
     public void testIsNoPreRelease() throws Exception {
-        performTest("Is no pre-release without regex", RUN, new Runnable() {
+        performTest("Is no pre-release without regex", RUNS, new Runnable() {
 
             @Override
             public void run() {

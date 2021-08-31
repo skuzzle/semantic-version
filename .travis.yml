@@ -1,7 +1,0 @@
-language: java
-jdk:
-  - openjdk9
-  - openjdk11
-
-after_success:
-  - mvn clean verify jacoco:report coveralls:report
