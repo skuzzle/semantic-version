@@ -1,1 +1,1 @@
-* #5: System locale might lead to illegal identifiers during lower/upper casing
+* #5: System locale might lead to illegal identifiers during lower/upper casing (Thx @portlek)
