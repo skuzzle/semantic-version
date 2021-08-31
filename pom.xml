@@ -124,7 +124,7 @@
                     <skipTestProject>true</skipTestProject>
                     <gitFlowConfig>
                         <productionBranch>master</productionBranch>
-                        <developmentBranch>develop</developmentBranch>
+                        <developmentBranch>dev</developmentBranch>
                     </gitFlowConfig>
                 </configuration>
             </plugin>
